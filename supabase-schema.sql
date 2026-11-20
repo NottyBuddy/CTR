@@ -175,3 +175,34 @@ drop policy if exists "Users and admin can read personal notes" on public.ctr_pe
 create policy "Owners and CTR admin can read personal notes"
 on public.ctr_personal_notes for select to authenticated
 using(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
+
+
+-- Atomic reaction toggle: members can react to any group note without gaining
+-- permission to edit another member's note body.
+create or replace function public.ctr_toggle_group_reaction(p_note_id uuid,p_emoji text)
+returns void
+language plpgsql
+security definer
+set search_path=public
+as $$
+declare v_reactions jsonb; v_users jsonb;
+begin
+ if auth.uid() is null then raise exception 'Authentication required'; end if;
+ if p_emoji not in ('👍','✅','👀') then raise exception 'Unsupported reaction'; end if;
+ select coalesce(reactions,'{}'::jsonb) into v_reactions
+ from public.ctr_group_notes where id=p_note_id for update;
+ if not found then raise exception 'Message not found'; end if;
+ v_users:=coalesce(v_reactions->p_emoji,'[]'::jsonb);
+ if v_users ? auth.uid()::text then
+  select coalesce(jsonb_agg(value),'[]'::jsonb) into v_users
+  from jsonb_array_elements(v_users) where value #>> '{}' <> auth.uid()::text;
+ else
+  v_users:=v_users||jsonb_build_array(auth.uid()::text);
+ end if;
+ update public.ctr_group_notes
+ set reactions=jsonb_set(v_reactions,array[p_emoji],v_users,true)
+ where id=p_note_id;
+end;
+$$;
+revoke all on function public.ctr_toggle_group_reaction(uuid,text) from public;
+grant execute on function public.ctr_toggle_group_reaction(uuid,text) to authenticated;
