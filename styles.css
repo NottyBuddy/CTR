@@ -145,3 +145,62 @@ button:focus-visible{outline:2px solid #c4b2ff;outline-offset:3px}
  body:before,.ambient{animation:none!important}
  .room,.room-icon,.note,.primary,.send-btn{transition:none!important}
 }
+
+/* Borderless three-column workspace and right-side CRM composer */
+.workspace{grid-template-columns:230px minmax(0,1fr) 330px;align-items:stretch;gap:16px}
+.glass,.note,.composer,.ai-result,.ai-assistant,.room.active,.topbar,.side,.chat,.right-panel{
+ border:0!important;
+}
+.glass{box-shadow:0 22px 70px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.045)}
+.topbar,.side,.chat,.right-panel{border-radius:23px}
+.chat{min-width:0;padding:0 22px 20px}
+.notes{overflow-y:auto;overscroll-behavior:contain;scroll-behavior:smooth;max-height:calc(100vh - 310px)}
+.note{border-left:3px solid var(--user-chat,var(--accent))!important;background:linear-gradient(120deg,#ffffff0b,#ffffff04);box-shadow:0 8px 25px #0002}
+.note.mine{border-left-color:var(--user-chat,var(--accent))!important}
+.note-body{line-height:1.75}
+.right-panel{
+ align-self:start;position:sticky;top:18px;max-height:calc(100vh - 145px);overflow-y:auto;
+ padding:20px 17px 18px;border-radius:22px;
+ background:linear-gradient(155deg,rgba(39,34,59,.76),rgba(17,16,29,.78));
+ box-shadow:0 22px 70px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.05);
+}
+.right-panel-head{margin-bottom:16px}
+.right-panel-head h3{font:700 17px Manrope;margin:7px 0 5px}
+.right-panel-head p{font-size:11px;line-height:1.55;color:var(--muted);margin:0}
+.right-panel #aiInput{min-height:128px;resize:vertical;line-height:1.55;font-size:12px}
+.right-panel .ai-actions{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:12px 0 0}
+.right-panel .ai-actions span{line-height:1.5;min-height:28px}
+.right-panel .ai-actions .send-btn{width:100%}
+.ai-results{display:flex;flex-direction:column;gap:13px;margin-top:16px}
+.ai-result{padding:14px 12px;border-radius:15px;background:rgba(255,255,255,.045);box-shadow:inset 0 1px 0 #ffffff08,0 8px 24px #0002}
+.ai-result-head{margin-bottom:10px}
+.ai-result-head strong{font-size:12px;color:#eee9ff}
+.draft-preview{
+ font-size:11px;line-height:1.7;color:#e5e0f0;white-space:pre-wrap;overflow-wrap:anywhere;
+ max-height:260px;overflow:auto;padding:3px 1px 8px;
+}
+.draft-preview strong{color:#fff;font-weight:750}
+.copy-draft{
+ width:100%;margin-top:10px;padding:9px 12px;border:0;border-radius:10px;
+ color:#d9ceff;background:rgba(177,153,255,.13);font:600 10px "DM Sans";cursor:pointer;
+ transition:background .2s,transform .2s,box-shadow .2s
+}
+.copy-draft:hover{background:rgba(177,153,255,.23);transform:translateY(-1px);box-shadow:0 8px 20px #0002}
+input,textarea{border:0!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.055),inset 0 -1px 0 rgba(255,255,255,.025)}
+input:focus,textarea:focus{border:0!important;box-shadow:inset 0 0 0 1px rgba(185,164,255,.3),0 0 0 3px #a990ff18}
+.chat-head,.color-picker-wrap,.composer-foot{border-color:rgba(202,188,255,.08)}
+.composer{box-shadow:inset 0 1px 0 #ffffff0a,0 10px 30px #0002}
+@media(max-width:1120px) and (min-width:761px){
+ .workspace{grid-template-columns:205px minmax(0,1fr) 290px;gap:12px}
+ .right-panel{padding:17px 13px}
+ .chat{padding-left:16px;padding-right:16px}
+}
+@media(max-width:760px){
+ .workspace{display:flex;flex-direction:column;gap:11px}
+ .right-panel{position:static;max-height:none;order:3;width:100%;padding:17px 15px}
+ .chat{order:2}
+ .side{order:1}
+ .notes{max-height:58vh;min-height:240px}
+ .right-panel #aiInput{min-height:105px}
+ .draft-preview{max-height:220px}
+}
