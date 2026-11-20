@@ -231,3 +231,10 @@ body .shell button:hover {
 @keyframes ctrArcBreath{0%,100%{transform:scale(1) rotate(0);opacity:.92}50%{transform:scale(1.018) rotate(1deg);opacity:1}}
 @keyframes ctrWarriorSway{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-1.5px) rotate(-.45deg)}}
 @media(prefers-reduced-motion:reduce){.ctr-emblem-arc,.ctr-emblem-warrior{animation:none!important}}
+
+/* Static CTR samurai-crescent brand mark */
+.brand-mark{background:transparent!important;border:0!important;box-shadow:none!important;text-shadow:none!important;padding:0!important;overflow:visible}
+.ctr-emblem{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 3px rgba(213,31,61,.12))}
+.ctr-emblem-arc,.ctr-emblem-warrior{animation:none!important;transform:none!important}
+.brand-name{background:none!important;-webkit-text-fill-color:#f5f1f2!important;color:#f5f1f2!important}
+.brand-sub{color:#b9aeb2!important}
