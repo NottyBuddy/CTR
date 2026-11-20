@@ -431,3 +431,42 @@ button,.primary,.send-btn,.refresh-btn,.signout-btn,.top-nav-btn,
  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
 }
 @media(prefers-reduced-motion:reduce){.site-background-video{display:block!important}}
+
+
+/* CTR final readability + transparent surfaces + black chat avatars */
+html,body{scrollbar-width:none!important;-ms-overflow-style:none!important}
+html::-webkit-scrollbar,body::-webkit-scrollbar,.shell::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+body{overflow-x:hidden!important}
+*{scrollbar-width:none!important}
+*::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}
+.note-avatar{background:#050505!important;background-color:#050505!important;color:#fff!important;box-shadow:0 0 0 1px rgba(255,255,255,.16)!important}
+.note-author,.note-body,.chat-head h2,.right-panel-head h3,.followup-panel h3,
+.auth-card h1,.ai-result-head strong,.draft-preview,.followup-item,
+label,.composer-foot,.head-count,.note-time,.muted,.chat-head p,
+.right-panel-head p,.app-footer,.direct-toolbar,.direct-hint{
+ color:#fff!important;
+}
+.note-body,.draft-preview{font-size:14px!important;line-height:1.78!important;text-shadow:0 1px 3px rgba(0,0,0,.95)}
+.note-author{font-size:12px!important;font-weight:800!important}
+.note-time,.head-count,.composer-foot,.app-footer{color:#e0d5d9!important}
+.chat-head p,.right-panel-head p,.muted{color:#e8dfe2!important}
+input,textarea,select{color:#fff!important;font-size:15px!important;text-shadow:0 1px 2px #000}
+input::placeholder,textarea::placeholder{color:#d0c5c9!important;opacity:1!important}
+.eyebrow{color:#ff8da2!important;text-shadow:0 1px 3px #000}
+.top-nav-btn,.refresh-btn,.signout-btn,.message-action,.reaction-btn,
+.copy-draft,.primary,.send-btn,.text-btn{
+ background:transparent!important;background-color:transparent!important;
+ background-image:none!important;border:0!important;outline:0!important;
+ box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+.top-nav-btn.active{background:rgba(255,255,255,.09)!important;color:#fff!important}
+.primary,.send-btn{color:#fff!important;text-shadow:0 1px 3px #000}
+button{border:0!important;outline:0!important}
+.glass,.auth-card,.topbar,.chat,.right-panel,.note,.composer,.ai-result,
+.followup-panel,.followup-item,.modal,.modal-card,.panel,
+body .shell [class*="card"],body .shell [class*="panel"]{
+ background:transparent!important;background-color:transparent!important;background-image:none!important;
+ border:0!important;outline:0!important;box-shadow:none!important;
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+.note,.note.mine,.note.direct-note{border:0!important;outline:0!important}
