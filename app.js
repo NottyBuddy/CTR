@@ -161,19 +161,48 @@ async function chooseColor(color){
  if(error){status(error.code==="23505"?"That colour is already taken. Choose another.":"Could not save colour: "+error.message);return}
  renderColors(color);status("Your chat colour is saved and locked.");
 }
+function notificationPermission(){return ("Notification" in window)?Notification.permission:"unsupported"}
+function updateNotificationButton(){
+ const b=$("enableNotifications");if(!b)return;
+ const p=notificationPermission();
+ b.textContent=p==="granted"?"🔔 Alerts on":p==="denied"?"Alerts blocked":p==="unsupported"?"Alerts unavailable":"🔔 Enable alerts";
+ b.title=p==="granted"?"Browser notifications are enabled":p==="denied"?"Allow notifications for this site in browser settings":"Enable new-message browser notifications";
+ b.classList.toggle("notifications-on",p==="granted");
+}
+function sendMessageNotification(kind,row){
+ if(!row||!user||notificationPermission()!=="granted")return;
+ if(kind==="group"&&row.user_id===user.id)return;
+ if(kind==="direct"&&row.recipient_id!==user.id)return;
+ const activeView=kind==="group"?"groupView":"directView";
+ if(!document.hidden&&!$(activeView).classList.contains("hidden"))return;
+ const sender=kind==="group"?displayName(row.author_email):(team.find(x=>x.user_id===row.sender_id)?.display_name||"CTR Member");
+ const raw=String(row.body||"").replace(/\\s+/g," ").trim();
+ const body=raw.length>130?raw.slice(0,127)+"…":raw;
+ try{
+  const note=new Notification(kind==="group"?"CTR · Group Chat":"CTR · Direct Message",{body:sender+": "+body,tag:"ctr-"+kind+"-"+row.id,renotify:false});
+  note.onclick=()=>{window.focus();setView(kind==="group"?"group":"direct");note.close()};
+ }catch(e){console.warn("CTR notification unavailable",e)}
+}
+async function enableNotifications(){
+ if(!("Notification" in window)){status("This browser does not support notifications.");updateNotificationButton();return}
+ if(Notification.permission==="granted"){status("New-message notifications are already enabled.");updateNotificationButton();return}
+ if(Notification.permission==="denied"){status("Notifications are blocked. Allow them from this site's browser settings.");updateNotificationButton();return}
+ const p=await Notification.requestPermission();updateNotificationButton();
+ status(p==="granted"?"New-message notifications enabled.":"Notification permission was not granted.");
+}
 function realtime(){
  if(channel)db.removeChannel(channel);
  channel=db.channel("ctr-live-"+user.id)
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_group_notes"},async()=>{const [{data,error},{data:profiles}]=await Promise.all([db.from("ctr_group_notes").select("*").order("created_at").limit(500),db.from("ctr_profiles").select("user_id,chat_color")]);if(!error){const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=(data||[]).map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()}})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_group_notes"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("group",payload.new);const [{data,error},{data:profiles}]=await Promise.all([db.from("ctr_group_notes").select("*").order("created_at").limit(500),db.from("ctr_profiles").select("user_id,chat_color")]);if(!error){const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=(data||[]).map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()}})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_profiles"},async()=>{const [{data:mine},{data:profiles}]=await Promise.all([db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),db.from("ctr_profiles").select("user_id,chat_color")]);renderColors(mine?.chat_color||null);const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=group.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()})
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes",},async()=>{const {data}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500);personal=data||[];renderPersonal()})
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async()=>{if(!$("directView").classList.contains("hidden"))await loadDirect()})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes"},async()=>{const {data}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500);personal=data||[];renderPersonal()})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("direct",payload.new);await loadDirect()})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_followups"},loadFollowups)
  .subscribe(s=>{if(s==="SUBSCRIBED")status("Live sync connected · group updates appear automatically.");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")status("Live sync interrupted. Refresh to reconnect.")});
 }
 async function enter(u){
  user=u;$("authView").classList.add("hidden");$("appView").classList.remove("hidden");
- const name=displayName(u.email);$("userEmail").textContent=name;
+ const name=displayName(u.email);$("userEmail").textContent=name;updateNotificationButton();
  try{await loadAll();realtime();await loadDirect()}catch(e){status("Database error: "+(e.message||"Unable to load records."))}
 }
 async function boot(){
@@ -195,7 +224,7 @@ $("forgotPassword").onclick=async()=>{if(!db)return;const email=$("email").value
 document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>showView(b.dataset.view));
 $("colorChoices").onclick=e=>{const b=e.target.closest("[data-color]");if(b&&!b.disabled)chooseColor(b.dataset.color)};
 $("generateAI").onclick=generateNotes;
-$("refreshData").onclick=refreshMessages;
+$("refreshData").onclick=refreshMessages;$("enableNotifications").onclick=enableNotifications;
 $("directRecipient").onchange=renderDirect;
 $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value.toLowerCase().trim();renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
 $("directForm").onsubmit=async e=>{
