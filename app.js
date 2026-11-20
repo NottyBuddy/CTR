@@ -16,11 +16,11 @@ const initials=s=>(s||"U").trim()[0].toUpperCase();
 const time=s=>new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"short"}).format(new Date(s));
 function status(t,auth=false){$(auth?"authStatus":"connectionBanner").textContent=t}
 function formatNoteHtml(body){
- const lines=String(body||"").split(/\\r?\\n/);
+ const lines=String(body||"").split(/\r?\n/);
  return lines.map((line,i)=>{
   const safe=esc(line);
   if(i===0&&line.includes("|"))return "<strong>"+safe+"</strong>";
-  if(/^Assigned to\\s*:/i.test(line))return "<strong>Assigned to</strong>"+safe.replace(/^Assigned to\\s*:/i,":");
+  if(/^Assigned to\s*:/i.test(line))return "<strong>Assigned to</strong>"+safe.replace(/^Assigned to\s*:/i,":");
   return safe||"&nbsp;";
  }).join("<br>");
 }
@@ -41,14 +41,14 @@ function showView(v){
 }
 let generatedDrafts={group:"",crm:""};
 function smartDrafts(raw){
- const lines=raw.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
+ const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  const heading=lines.find(x=>x.includes("|"))||"Customer Name | Contact Number";
- const assignedLine=lines.find(x=>/^assigned\\s*to\\s*[:|-]/i.test(x));
- const assigned=assignedLine?assignedLine.replace(/^assigned\\s*to\\s*[:|-]\\s*/i,"").trim():"Not specified";
- const narrative=lines.filter(x=>x!==heading&&x!==assignedLine&&!/^customer\\s*name\\s*[:|-]/i.test(x)).join(" ");
+ const assignedLine=lines.find(x=>/^assigned\s*to\s*[:|-]/i.test(x));
+ const assigned=assignedLine?assignedLine.replace(/^assigned\s*to\s*[:|-]\s*/i,"").trim():"Not specified";
+ const narrative=lines.filter(x=>x!==heading&&x!==assignedLine&&!/^customer\s*name\s*[:|-]/i.test(x)).join(" ");
  const text=narrative||"Connected with the customer. Further discussion and requirement details are yet to be updated.";
- const groupNote=heading+"\\n\\n"+text+"\\n\\nAssigned to: "+assigned;
- const crmNote=text+"\\n\\nAssigned to: "+assigned;
+ const groupNote=heading+"\n\n"+text+"\n\nAssigned to: "+assigned;
+ const crmNote=text+"\n\nAssigned to: "+assigned;
  return {group:groupNote,crm:crmNote};
 }
 async function generateNotes(){
