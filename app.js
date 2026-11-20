@@ -68,7 +68,7 @@ async function refreshMessages(){
   const colors=Object.fromEntries((profiles.data||[]).map(x=>[x.user_id,x.chat_color]));
   group=(g.data||[]).map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));personal=p.data||[];
   renderGroup(true);renderPersonal();
-  if(!$("directView").classList.contains("hidden"))await loadDirect();
+  await loadDirect();
   status("Messages refreshed.");
  }catch(e){status("Refresh failed: "+e.message)}
  finally{btn.disabled=false;btn.textContent="↻ Refresh"}
