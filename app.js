@@ -222,7 +222,10 @@ async function ensureSupabaseLibrary(){
   }catch(err){console.warn("Supabase CDN attempt failed",err)}
  }
  try{
-  const mod=await import("https://esm.sh/@supabase/supabase-js@2");
+  const mod=await Promise.race([
+   import("https://esm.sh/@supabase/supabase-js@2"),
+   new Promise((_,reject)=>setTimeout(()=>reject(new Error("Supabase ESM request timed out")),8000))
+  ]);
   if(typeof mod.createClient==="function"){window.supabase={createClient:mod.createClient};return true}
  }catch(err){console.warn("Supabase ESM fallback failed",err)}
  return !!window.supabase?.createClient;
