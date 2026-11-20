@@ -114,3 +114,15 @@ do $$ begin
  alter publication supabase_realtime add table public.ctr_direct_messages;
 exception when duplicate_object then null; when undefined_object then null;
 end $$;
+
+
+-- CTR admin message deletion permissions (run this update in Supabase SQL Editor).
+drop policy if exists "CTR admin can delete any group note" on public.ctr_group_notes;
+create policy "CTR admin can delete any group note"
+on public.ctr_group_notes for delete to authenticated
+using (lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
+
+drop policy if exists "CTR admin can delete any direct message" on public.ctr_direct_messages;
+create policy "CTR admin can delete any direct message"
+on public.ctr_direct_messages for delete to authenticated
+using (lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
