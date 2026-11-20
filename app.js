@@ -213,7 +213,7 @@ async function boot(){
  db.auth.onAuthStateChange(async(_e,s)=>{if(s?.user){if(!user||user.id!==s.user.id)await enter(s.user)}else{user=null;$("appView").classList.add("hidden");$("authView").classList.remove("hidden")}});
 }
 $("authForm").onsubmit=async e=>{
- e.preventDefault();if(!db)return;
+ e.preventDefault();if(!db){status("App is still connecting to the sign-in service. Refresh the page and try again.",true);return;}
  const email=$("email").value.trim().toLowerCase(),password=$("password").value;
  $("authSubmit").disabled=true;status("Signing in…",true);
  try{const r=await db.auth.signInWithPassword({email,password});if(r.error)status("Sign-in failed: "+r.error.message,true);else if(r.data.user)await enter(r.data.user)}
@@ -268,7 +268,7 @@ if(pin&&isAdmin()){const n=group.find(x=>x.id===pin);if(n){target.disabled=true;
 if(rid&&emoji){target.disabled=true;const {error}=await db.rpc("ctr_toggle_group_reaction",{p_note_id:rid,p_emoji:emoji});target.disabled=false;if(error){status("Reaction failed: "+error.message)}else{const {data,error:readError}=await db.from("ctr_group_notes").select("*").order("created_at",{ascending:true}).limit(500);if(readError){status("Reaction saved, refresh failed: "+readError.message)}else{group=data||[];const {data:profiles}=await db.from("ctr_profiles").select("user_id,chat_color");const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=group.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup();status("Reaction updated.")}}}
 if(g&&isAdmin()){if(!confirm("Admin: permanently delete this group message?"))return;const {error}=await db.from("ctr_group_notes").delete().eq("id",g);if(error)status("Delete failed: "+error.message);else{group=group.filter(n=>n.id!==g);renderGroup();status("Group message deleted by admin.")}}if(p&&isAdmin()){if(!confirm("Admin: permanently delete this personal note?"))return;const {error}=await db.from("ctr_personal_notes").delete().eq("id",p);if(error)status("Delete failed: "+error.message);else{personal=personal.filter(n=>n.id!==p);renderPersonal();status("Personal note deleted by admin.")}}if(d&&isAdmin()){if(!confirm("Admin: permanently delete this direct message?"))return;const {error}=await db.from("ctr_direct_messages").delete().eq("id",d);if(error)status("Delete failed: "+error.message);else{direct=direct.filter(m=>m.id!==d);renderDirect();status("Direct message deleted by admin.")}}});
 $("signOut").onclick=async()=>{if(channel)await db.removeChannel(channel);await db.auth.signOut()};
-boot();
+boot().catch(err=>{console.error("CTR startup failed",err);status("App startup failed: "+(err?.message||"Please refresh the page."),true)});
 
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&user){if(!$("groupView").classList.contains("hidden"))markSeen("group");if(!$("directView").classList.contains("hidden"))markSeen("direct")}});
 let holdTimer;document.addEventListener("touchstart",e=>{const card=e.target.closest(".note[data-note-id]");if(!card)return;holdTimer=setTimeout(()=>{const n=group.find(x=>x.id===card.dataset.noteId);if(n&&confirm("Quote this message in Group Chat?")){$("noteInput").value="↪ "+displayName(n.author_email)+": "+n.body+"\n\n";$("noteInput").focus()}},650)},{passive:true});document.addEventListener("touchend",()=>clearTimeout(holdTimer),{passive:true});document.addEventListener("touchmove",()=>clearTimeout(holdTimer),{passive:true});
