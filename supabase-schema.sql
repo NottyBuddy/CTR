@@ -206,3 +206,29 @@ end;
 $$;
 revoke all on function public.ctr_toggle_group_reaction(uuid,text) from public;
 grant execute on function public.ctr_toggle_group_reaction(uuid,text) to authenticated;
+
+-- CTR callback reminders. Run this SQL update once in Supabase SQL Editor.
+create table if not exists public.ctr_followups (
+ id uuid primary key default gen_random_uuid(),
+ user_id uuid not null references auth.users(id) on delete cascade,
+ customer_name text not null check(char_length(customer_name) between 1 and 200),
+ phone text not null check(char_length(phone) between 5 and 30),
+ callback_at timestamptz not null,
+ details text not null default '',
+ status text not null default 'pending' check(status in ('pending','completed')),
+ completed_at timestamptz,
+ created_at timestamptz not null default now()
+);
+alter table public.ctr_followups enable row level security;
+drop policy if exists "CTR members can view followups" on public.ctr_followups;
+create policy "CTR members can view followups" on public.ctr_followups for select to authenticated using(true);
+drop policy if exists "CTR members can create own followups" on public.ctr_followups;
+create policy "CTR members can create own followups" on public.ctr_followups for insert to authenticated with check(auth.uid()=user_id);
+drop policy if exists "Owners and admin update followups" on public.ctr_followups;
+create policy "Owners and admin update followups" on public.ctr_followups for update to authenticated
+using(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com')
+with check(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
+do $$ begin
+ alter publication supabase_realtime add table public.ctr_followups;
+exception when duplicate_object then null; when undefined_object then null;
+end $$;
