@@ -90,7 +90,7 @@ function realtime(){
 }
 async function enter(u){
  user=u;$("authView").classList.add("hidden");$("appView").classList.remove("hidden");
- const name=displayName(u.email);$("userEmail").textContent=name;$("sideEmail").textContent=name;$("avatar").textContent=initials(name);
+ const name=displayName(u.email);$("userEmail").textContent=name;
  try{await loadAll();realtime()}catch(e){status("Database error: "+(e.message||"Unable to load records."))}
 }
 async function boot(){
