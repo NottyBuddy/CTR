@@ -1,6 +1,6 @@
 // CTR — Calling Team Records
-const SUPABASE_URL="YOUR_SUPABASE_PROJECT_URL";
-const SUPABASE_ANON_KEY="YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY";
+const SUPABASE_URL="https://icootmtssyergamuxlxb.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_qgEIXxXXBq2TaNxLMZPkwg_fcwKcdGW";
 const $=id=>document.getElementById(id);
 let db,user,group=[],personal=[],channel;
 const palette=["#8E7CFF","#36A6D9","#20B58A","#E59A3B","#E16C91","#A1A94B","#D477D1","#6E91C9"];
