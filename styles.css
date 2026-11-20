@@ -464,3 +464,9 @@ button,.top-nav-btn,.primary,.send-btn,.refresh-btn,.signout-btn,
  color:#eee5e8!important;
 }
 input::placeholder,textarea::placeholder{color:#e0d6da!important;opacity:1!important}
+
+
+/* New-message browser notification control */
+.notification-toggle{white-space:nowrap!important}
+.notification-toggle.notifications-on{color:#f5d48a!important}
+@media(max-width:760px){.notification-toggle{font-size:9px!important;padding:8px 9px!important}.top-meta{flex-wrap:wrap}}
