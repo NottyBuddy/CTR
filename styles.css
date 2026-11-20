@@ -326,3 +326,64 @@ input:focus,textarea:focus,select:focus{box-shadow:0 0 0 1px rgba(239,57,89,.45)
  .chat,.right-panel,.topbar{backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
 }
 @media(prefers-reduced-motion:reduce){body:before,body:after{animation:none!important}}
+
+
+/* 2026-11-20 refinement: transparent cards, larger brand header, stronger crimson backdrop */
+.color-picker-wrap{display:none!important}
+.shell{max-width:1760px;padding-left:14px;padding-right:14px}
+.topbar{
+ width:100%;min-height:94px;padding:15px 24px;
+ grid-template-columns:minmax(230px,1.15fr) minmax(0,2.2fr) auto;
+ gap:22px;
+ background:transparent!important;
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+ box-shadow:none!important;
+}
+.brand.compact{gap:15px}
+.brand.compact .brand-mark{width:70px;height:70px;flex-basis:70px}
+.brand.compact .brand-name{font-size:22px;letter-spacing:3.5px}
+.brand.compact .brand-sub{font-size:10px;letter-spacing:2.5px}
+.glass,.auth-card,.chat,.right-panel,.notes,.note,.composer,.ai-result,
+.followup-panel,.followup-item,.modal,.modal-card,.panel,
+body .shell .glass,body .shell .auth-card,body .shell .topbar,
+body .shell .chat,body .shell .right-panel,body .shell .note,
+body .shell .composer,body .shell .ai-result,
+body .shell .followup-panel,body .shell .followup-item,
+body .shell [class*="card"],body .shell [class*="panel"]{
+ background:transparent!important;
+ background-color:transparent!important;
+ background-image:none!important;
+ border:0!important;outline:0!important;
+ box-shadow:none!important;
+}
+.note,.note.mine,.note.direct-note{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body:before{
+ background:
+  radial-gradient(circle at 82% 16%,rgba(255,34,77,.22) 0 9%,transparent 9.4%),
+  radial-gradient(ellipse at 82% 16%,transparent 0 14%,rgba(255,42,83,.23) 14.2%,transparent 16%),
+  repeating-linear-gradient(122deg,transparent 0 95px,rgba(255,255,255,.016) 96px,transparent 97px 180px),
+  linear-gradient(115deg,transparent 25%,rgba(255,20,62,.10) 49%,transparent 68%)!important;
+}
+body:after{
+ opacity:1!important;filter:blur(10px) saturate(145%)!important;
+ transform:scale(1.14);
+ background:
+  radial-gradient(ellipse 52% 5% at 15% 78%,transparent 38%,rgba(255,25,67,.48) 48%,rgba(255,31,73,.14) 56%,transparent 66%),
+  radial-gradient(ellipse 48% 4.5% at 86% 35%,transparent 38%,rgba(255,25,67,.43) 48%,rgba(255,31,73,.13) 56%,transparent 67%),
+  radial-gradient(ellipse 44% 3.5% at 55% 108%,transparent 38%,rgba(255,255,255,.16) 48%,rgba(255,35,72,.30) 55%,transparent 66%)!important;
+}
+.ambient{opacity:.24!important;filter:blur(125px)!important}
+.a1{background:#ff174d!important}
+.a2{background:#e20d43!important}
+.ctr-emblem{filter:drop-shadow(0 0 11px rgba(255,25,65,.48))!important}
+@media(max-width:1180px){
+ .topbar{grid-template-columns:minmax(190px,1fr) auto;gap:12px;padding:13px 16px}
+ .brand.compact .brand-mark{width:60px;height:60px;flex-basis:60px}
+}
+@media(max-width:760px){
+ .shell{padding:10px}
+ .topbar{grid-template-columns:1fr auto;min-height:0;padding:11px 12px;gap:8px}
+ .brand.compact .brand-mark{width:48px;height:48px;flex-basis:48px}
+ .brand.compact .brand-name{font-size:18px}
+ .brand.compact .brand-sub{font-size:8px;letter-spacing:1.8px}
+}
