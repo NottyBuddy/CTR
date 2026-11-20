@@ -213,7 +213,7 @@ async function ensureSupabaseLibrary(){
    await new Promise((resolve,reject)=>{
     const script=document.createElement("script");script.src=src;script.async=true;
     let settled=false;const finish=(fn,value)=>{if(settled)return;settled=true;clearTimeout(timer);fn(value)};
-    const timer=setTimeout(()=>finish(reject,new Error("Supabase library request timed out")),12000);
+    const timer=setTimeout(()=>finish(reject,new Error("Supabase library request timed out")),10000);
     script.onload=()=>window.supabase?.createClient?finish(resolve):finish(reject,new Error("Supabase createClient is unavailable"));
     script.onerror=()=>finish(reject,new Error("Could not load "+src));
     document.head.appendChild(script);
@@ -221,6 +221,10 @@ async function ensureSupabaseLibrary(){
    if(window.supabase?.createClient)return true;
   }catch(err){console.warn("Supabase CDN attempt failed",err)}
  }
+ try{
+  const mod=await import("https://esm.sh/@supabase/supabase-js@2");
+  if(typeof mod.createClient==="function"){window.supabase={createClient:mod.createClient};return true}
+ }catch(err){console.warn("Supabase ESM fallback failed",err)}
  return !!window.supabase?.createClient;
 }
 async function boot(){
