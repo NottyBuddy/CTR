@@ -21,3 +21,24 @@ label{display:block;color:#d5c0c6;font-size:12px;margin:16px 0}input,textarea,se
 @media(max-width:760px){.shell{padding:10px}.topbar{grid-template-columns:1fr auto;padding:11px 12px;gap:9px;border-radius:17px}.brand.compact .brand-sub{font-size:8px}.top-meta{grid-column:2;grid-row:1;gap:6px;font-size:0}.top-meta #userEmail,.top-meta .divider,.top-meta>span:not(.live-dot){display:none}.refresh-btn,.signout-btn{font-size:10px;padding:9px}.top-nav{grid-column:1/-1;grid-row:2;justify-content:space-between;gap:3px;width:100%}.top-nav-btn{flex:1;justify-content:center;padding:10px 7px;font-size:10px;gap:5px}.nav-symbol{font-size:13px}.workspace{display:flex;flex-direction:column;gap:11px;margin:11px 0}.chat{order:1;width:100%;min-height:68vh;padding:0 13px 13px;border-radius:18px}.right-panel{order:2;position:static;max-height:none;width:100%;padding:17px 14px;border-radius:18px}.chat-head{padding:18px 0 13px}.chat-head h2{font-size:18px}.chat-head p{max-width:245px;font-size:11px}.head-count{font-size:10px}.notes{max-height:52vh;min-height:220px;padding:12px 1px}.note{max-width:92%;min-width:0;padding:12px}.note.direct-note{max-width:100%}.note-body{font-size:12px}.composer-foot{align-items:flex-end}.composer-foot span{max-width:55%;line-height:1.45}.color-picker-wrap{gap:9px}.color-picker-wrap small{width:100%}.right-panel #aiInput{min-height:105px}.app-footer{font-size:8px}.app-footer span{display:none}.auth-card{padding:29px 22px}.auth-card h1{font-size:30px}}
 @media(max-width:390px){.top-nav-btn{font-size:9px;padding:9px 4px}.top-nav-btn .nav-symbol{display:none}.top-meta{gap:4px}.refresh-btn,.signout-btn{padding:8px 9px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+
+/* Transparent liquid-glass refresh: no solid colour fills. */
+:root{--panel:rgba(255,255,255,.025);--panel2:rgba(255,255,255,.035)}
+body{background:radial-gradient(ellipse at 8% 0%,rgba(255,25,65,.13),transparent 42%),radial-gradient(ellipse at 96% 68%,rgba(255,25,65,.08),transparent 38%),linear-gradient(145deg,#050506,#09080a 55%,#0b080a)}
+.ambient{opacity:.11;filter:blur(135px)}
+.glass,.auth-card,.topbar,.chat,.right-panel{background:rgba(255,255,255,.025)!important;backdrop-filter:blur(32px) saturate(125%);-webkit-backdrop-filter:blur(32px) saturate(125%);box-shadow:0 18px 65px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.035)}
+input,textarea,select{background:rgba(255,255,255,.025)!important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important}
+input:focus,textarea:focus,select:focus{background:rgba(255,255,255,.045)!important;box-shadow:0 0 0 1px rgba(255,255,255,.07),0 0 22px rgba(255,35,79,.10)!important}
+.primary,.send-btn,.refresh-btn,.signout-btn,.copy-draft,.top-nav-btn,.composer,.ai-result,.note.direct-note{background:rgba(255,255,255,.035)!important;color:#f4edf0!important;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 8px 28px rgba(0,0,0,.16)!important}
+.primary:hover,.send-btn:hover,.refresh-btn:hover,.signout-btn:hover,.copy-draft:hover,.top-nav-btn:hover{background:rgba(255,255,255,.075)!important;box-shadow:0 0 24px rgba(255,35,79,.12)!important;color:#fff!important}
+.top-nav-btn.active{background:rgba(255,255,255,.085)!important;color:#fff!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.035),0 0 20px rgba(255,35,79,.10)!important}
+.note,.note.mine{background:rgba(255,255,255,.035)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 9px 28px rgba(0,0,0,.18)!important;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.note.mine{background:rgba(255,255,255,.055)!important}
+.note.direct-note{background:rgba(255,255,255,.025)!important}
+.composer{background:rgba(255,255,255,.025)!important}
+.online-pill,.connection-banner{background:rgba(255,255,255,.035)!important;color:#e8dfe2}
+.brand-mark{background:rgba(255,255,255,.075)!important;color:#fff!important;box-shadow:0 0 25px rgba(255,35,79,.12)!important}
+.delete-note{background:rgba(255,255,255,.035)!important;border-radius:8px;padding:5px 9px}
+.delete-note:hover{background:rgba(255,35,79,.12)!important}
+@media(prefers-reduced-transparency:reduce){.glass,.auth-card,.topbar,.chat,.right-panel,input,textarea,select,.note{backdrop-filter:none;-webkit-backdrop-filter:none}}
