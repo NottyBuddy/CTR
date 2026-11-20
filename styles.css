@@ -170,3 +170,52 @@ input:focus,textarea:focus,select:focus {
 .note,.note.mine,.note.direct-note {
  border:0!important;
 }
+
+
+/* FINAL OVERRIDE: truly borderless CTR interface surfaces */
+body .shell .glass,
+body .shell .auth-card,
+body .shell .topbar,
+body .shell .chat,
+body .shell .right-panel,
+body .shell .note,
+body .shell .composer,
+body .shell .ai-result,
+body .shell .followup-panel,
+body .shell .followup-item,
+body .shell [class*="card"],
+body .shell [class*="panel"],
+body .shell button,
+body .shell input,
+body .shell textarea,
+body .shell select,
+body .brand-mark {
+ border:0!important;
+ border-width:0!important;
+ border-style:none!important;
+ border-color:transparent!important;
+ outline:0!important;
+}
+body .shell .glass,
+body .shell .auth-card,
+body .shell .topbar,
+body .shell .chat,
+body .shell .right-panel,
+body .shell .note,
+body .shell .composer,
+body .shell .ai-result,
+body .shell .followup-panel,
+body .shell .followup-item,
+body .shell [class*="card"],
+body .shell [class*="panel"] {
+ box-shadow:0 18px 55px rgba(0,0,0,.20)!important;
+}
+body .shell button,
+body .shell input,
+body .shell textarea,
+body .shell select {
+ box-shadow:none!important;
+}
+body .shell button:hover {
+ box-shadow:0 0 22px rgba(255,42,82,.13)!important;
+}
