@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101018"><title>CTR — Calling Team Records</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="ambient a1"></div><div class="ambient a2"></div><div class="ambient a3"></div>
+<main class="shell">
+<section id="authView" class="auth-wrap">
+<div class="brand"><div class="brand-mark">C</div><div><div class="brand-name">CTR</div><div class="brand-sub">CALLING TEAM RECORDS</div></div></div>
+<div class="auth-card glass"><div class="eyebrow">TEAM WORKSPACE</div><h1>One team.<br><span>One shared record.</span></h1><p class="muted">Sign in to access your team's live CRM notes.</p>
+<form id="authForm">
+<label>Email address<input id="email" type="email" autocomplete="email" placeholder="name@company.com" required></label>
+<label>Password<input id="password" type="password" autocomplete="current-password" placeholder="Enter password" minlength="6" required></label>
+<button class="primary" id="authSubmit" type="submit">Sign in <span>↗</span></button>
+</form>
+<button class="text-btn" id="toggleAuth">New to CTR? Create an account</button><div class="status-line" id="authStatus" role="status"></div></div>
+<div class="auth-foot">PRIVATE TEAM SPACE <i></i> SECURE ACCESS</div>
+</section>
+<section id="appView" class="app-view hidden">
+<header class="topbar glass"><div class="brand compact"><div class="brand-mark">C</div><div><div class="brand-name">CTR</div><div class="brand-sub">CALLING TEAM RECORDS</div></div></div>
+<div class="top-meta"><span class="live-dot"></span><span>Shared workspace</span><span class="divider"></span><span id="userEmail">—</span><button id="signOut" class="icon-btn" title="Sign out">↗</button></div></header>
+<div class="workspace">
+<aside class="side glass"><div class="side-label">WORKSPACE</div>
+<button class="room active" data-view="group"><div class="room-icon">▤</div><div><strong>Group Notes</strong><small>Shared with the team</small></div></button>
+<button class="room" data-view="personal"><div class="room-icon">▧</div><div><strong>Personal Notes</strong><small>Private callbacks & follow-ups</small></div></button>
+<div class="side-bottom"><div class="avatar" id="avatar">U</div><div class="side-user"><strong id="sideEmail">User</strong><small>Team member</small></div></div></aside>
+<section class="chat glass">
+<section id="groupView" class="notes-view">
+<div class="chat-head"><div><div class="eyebrow">SHARED CHANNEL</div><h2>Group Notes <span class="online-pill">● LIVE</span></h2><p>Updates shared with every signed-in CTR member.</p></div><div class="head-count">◉ <span id="noteCount">0</span> records</div></div>
+<div id="connectionBanner" class="connection-banner">Connecting to shared records…</div>
+<div class="color-picker-wrap"><span>Your chat colour</span><div id="colorChoices" class="color-choices"></div><small id="colorLock">Choose one colour. It cannot be changed later.</small></div>
+<div id="notes" class="notes"></div>
+<form id="noteForm" class="composer"><textarea id="noteInput" rows="3" placeholder="Paste CRM notes here…" required></textarea><div class="composer-foot"><span>Only share information appropriate for the team.</span><button class="send-btn" type="submit">Send update <b>↗</b></button></div></form>
+</section>
+<section id="personalView" class="notes-view hidden">
+<div class="chat-head"><div><div class="eyebrow">PRIVATE SPACE</div><h2>Personal Notes</h2><p>Your own open-call, callback and follow-up reminders. Only you can read these.</p></div><div class="head-count">◉ <span id="personalCount">0</span> notes</div></div>
+<div id="personalNotes" class="notes"></div>
+<form id="personalForm" class="composer"><textarea id="personalInput" rows="3" placeholder="Add a private callback note…" required></textarea><div class="composer-foot"><span>Private to your signed-in account.</span><button class="send-btn" type="submit">Save note <b>↗</b></button></div></form>
+</section>
+</section></div>
+<footer class="app-footer">CTR · CALLING TEAM RECORDS <span>Updates sync across signed-in users</span></footer>
+</section></main><script src="app.js"></script></body></html>
