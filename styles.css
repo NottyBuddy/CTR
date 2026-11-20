@@ -135,3 +135,38 @@ body:after{
  100%{background-position:100% 55%,0% 70%,85% 55%,15% 30%,100% 60%;transform:translate3d(-.5%,-1.5%,0) scale(1.06)}
 }
 @media(prefers-reduced-motion:reduce){body:after{animation:none}}
+
+
+/* CTR: remove visible outlines from every card, panel, field and button */
+.glass,.auth-card,.topbar,.chat,.right-panel,.notes,.note,.composer,.ai-result,
+.followup-panel,.followup-item,.connection-banner,.color-picker-wrap,
+.search-row,.search-box,.filter-row,.toolbar,.modal,.modal-card,.panel,
+button,.primary,.send-btn,.text-btn,.refresh-btn,.signout-btn,.top-nav-btn,
+.message-action,.delete-note,.reaction-btn,.copy-draft,.color-choice,
+input,textarea,select,.followup-form input {
+ border:0!important;
+ outline:0!important;
+}
+.glass,.auth-card,.topbar,.chat,.right-panel,.notes,.note,.composer,.ai-result,
+.followup-panel,.followup-item,.connection-banner,.search-row,.search-box,
+.filter-row,.toolbar,.modal,.modal-card,.panel {
+ box-shadow:0 18px 55px rgba(0,0,0,.19)!important;
+}
+button,.primary,.send-btn,.text-btn,.refresh-btn,.signout-btn,.top-nav-btn,
+.message-action,.delete-note,.reaction-btn,.copy-draft {
+ box-shadow:none!important;
+}
+button:hover,.primary:hover,.send-btn:hover,.text-btn:hover,.refresh-btn:hover,
+.signout-btn:hover,.top-nav-btn:hover,.message-action:hover,.delete-note:hover,
+.reaction-btn:hover,.copy-draft:hover {
+ box-shadow:0 0 22px rgba(255,42,82,.13)!important;
+}
+input,textarea,select,.followup-form input {
+ box-shadow:none!important;
+}
+input:focus,textarea:focus,select:focus {
+ box-shadow:0 0 18px rgba(255,45,82,.12)!important;
+}
+.note,.note.mine,.note.direct-note {
+ border:0!important;
+}
