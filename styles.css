@@ -105,3 +105,11 @@ input:focus,textarea:focus,select:focus {
 .followup-info{display:grid;gap:3px;min-width:0}.followup-info strong{font-size:12px}.followup-info span,.followup-info time,.followup-info p{font-size:10px;color:var(--muted);margin:0}
 .followup-actions{display:flex;gap:5px;flex-wrap:wrap}.followup-actions a{text-decoration:none}
 @media(max-width:600px){.note{padding:10px 11px}.note-top{gap:5px;flex-wrap:wrap}.message-action,.delete-note{font-size:9px;padding:5px 7px}.composer{position:sticky;bottom:8px;z-index:5;padding:9px!important;margin-top:12px;background:rgba(16,13,16,.86)!important;backdrop-filter:blur(25px)}.composer textarea{min-height:66px;max-height:140px}.followup-form{grid-template-columns:1fr}.followup-form button{width:100%}.followup-item{align-items:flex-start;flex-direction:column}.followup-actions{width:100%}}
+
+
+/* CTR crown mark and metallic wordmark polish */
+.brand-mark{background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,35,79,.12))!important;color:#ffd27d!important;border:1px solid rgba(255,210,125,.28)!important;text-shadow:0 0 12px rgba(255,35,79,.55);font-size:23px!important;box-shadow:0 0 24px rgba(255,35,79,.18),inset 0 1px rgba(255,255,255,.16)!important}
+.brand-name{background:linear-gradient(110deg,#fff1f2 0%,#ff9cad 48%,#ffd27d 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;letter-spacing:2.4px}
+.brand-sub{letter-spacing:1.8px;color:#d8aab4!important}
+.pin-label{display:inline-flex;align-items:center;gap:4px;color:#ffd27d!important;background:rgba(255,210,125,.08);padding:3px 7px;border-radius:99px;font-size:9px}
+.followup-item time{color:#ff9caf!important}
