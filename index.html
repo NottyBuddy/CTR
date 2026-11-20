@@ -28,8 +28,9 @@
 <nav class="top-nav" aria-label="Workspace views">
 <button class="top-nav-btn active" data-view="group"><span class="nav-symbol">▤</span>Group Chat</button>
 <button class="top-nav-btn" data-view="personal"><span class="nav-symbol">▧</span>Personal Chat</button>
+<button class="top-nav-btn" data-view="direct"><span class="nav-symbol">✉</span>Direct Messages</button>
 </nav>
-<div class="top-meta"><span class="live-dot"></span><span>Live</span><span class="divider"></span><span id="userEmail">—</span><button id="signOut" class="signout-btn" title="Sign out">Sign out <span>↗</span></button></div></header>
+<div class="top-meta"><span class="live-dot"></span><span>Live</span><span class="divider"></span><span id="userEmail">—</span><button id="refreshData" class="refresh-btn" type="button" title="Refresh messages" aria-label="Refresh messages">↻ Refresh</button><button id="signOut" class="signout-btn" title="Sign out">Sign out <span>↗</span></button></div></header>
 <div class="workspace">
 <section class="chat glass">
 <section id="groupView" class="notes-view">
@@ -43,6 +44,12 @@
 <div class="chat-head"><div><div class="eyebrow">PRIVATE SPACE</div><h2>Personal Notes</h2><p>Your own open-call, callback and follow-up reminders. Only you can read these.</p></div><div class="head-count">◉ <span id="personalCount">0</span> notes</div></div>
 <div id="personalNotes" class="notes"></div>
 <form id="personalForm" class="composer"><textarea id="personalInput" rows="3" placeholder="Add a private callback note…" required></textarea><div class="composer-foot"><span>Private to your signed-in account.</span><button class="send-btn" type="submit">Save note <b>↗</b></button></div></form>
+</section>
+<section id="directView" class="notes-view hidden">
+<div class="chat-head"><div><div class="eyebrow">PRIVATE CONVERSATIONS</div><h2>Direct Messages</h2><p>Send a private message to a team member. Admin can review all conversations.</p></div><div class="head-count">◉ <span id="directCount">0</span> messages</div></div>
+<div class="direct-toolbar"><label for="directRecipient">Send to team member</label><select id="directRecipient"><option value="">Choose a team member…</option></select><span id="directAdminHint" class="direct-hint hidden">Admin view: all team conversations are visible.</span></div>
+<div id="directNotes" class="notes"></div>
+<form id="directForm" class="composer"><textarea id="directInput" rows="3" placeholder="Write a private message…" required></textarea><div class="composer-foot"><span>Visible to the recipient and CTR admin.</span><button class="send-btn" type="submit">Send message <b>↗</b></button></div></form>
 </section>
 </section>
 <aside class="right-panel glass" id="crmGenerator"><div class="right-panel-head"><div class="eyebrow">QUICK DRAFT</div><h3>CRM Note Generator</h3><p>Paste customer details to prepare both formats.</p></div><textarea id="aiInput" rows="5" placeholder="Customer Name | Contact Number&#10;Paste conversation, requirement and assigned person…"></textarea><div class="ai-actions"><span id="aiStatus">Drafts are prepared locally. Review before sharing.</span><button id="generateAI" class="send-btn" type="button">Generate ↗</button></div><div id="aiResults" class="ai-results hidden"><div class="ai-result"><div class="ai-result-head"><strong>Group Share</strong><button type="button" class="text-btn ai-use" data-ai-use="group">Send to group</button></div><div id="aiGroup" class="draft-preview"></div><button type="button" class="copy-draft" data-copy="group">Copy group note</button></div><div class="ai-result"><div class="ai-result-head"><strong>CRM Entry</strong><button type="button" class="text-btn ai-use" data-ai-use="crm">Copy for CRM</button></div><div id="aiCrm" class="draft-preview"></div><button type="button" class="copy-draft" data-copy="crm">Copy CRM note</button></div></div></aside></div>
