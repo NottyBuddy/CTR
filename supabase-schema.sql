@@ -138,6 +138,7 @@ create policy "Users and admin can read personal notes" on public.ctr_personal_n
 drop policy if exists "Users can delete own personal notes" on public.ctr_personal_notes;
 create policy "Users delete own and admin all personal notes" on public.ctr_personal_notes for delete to authenticated using(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
 drop policy if exists "Users can update own personal notes" on public.ctr_personal_notes;
+drop policy if exists "Users and admin update personal notes" on public.ctr_personal_notes;
 create policy "Users and admin update personal notes" on public.ctr_personal_notes for update to authenticated using(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com') with check(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
 drop policy if exists "Users can update own group notes" on public.ctr_group_notes;
 create policy "Users and admin update group notes" on public.ctr_group_notes for update to authenticated using(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com') with check(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
