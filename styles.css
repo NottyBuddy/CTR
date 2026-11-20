@@ -389,50 +389,6 @@ body:after{
 }
 
 
-/* CTR cinematic video background — replaces the old GIF background */
-html,body{min-height:100%;background-color:#050507!important}
-body{background-image:linear-gradient(90deg,rgba(3,3,5,.70),rgba(5,3,6,.28) 48%,rgba(3,3,5,.64)),linear-gradient(0deg,rgba(3,3,5,.55),rgba(3,3,5,.10) 50%,rgba(3,3,5,.38))!important;background-position:center!important;background-size:cover!important;background-repeat:no-repeat!important;background-attachment:fixed!important}
-.site-background-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;z-index:-3;pointer-events:none}
-body:before{opacity:.22!important}
-body:after{opacity:.18!important;filter:blur(14px)!important}
-.ambient{opacity:.08!important}
-@media(max-width:760px){body{background-attachment:scroll!important}.site-background-video{object-position:center center}}
-@media(prefers-reduced-motion:reduce){.site-background-video{display:none!important}}
-
-/* Video background visibility and autoplay fix */
-html,body{background-color:transparent!important}
-body{background-image:none!important;background:transparent!important;isolation:isolate}
-.site-background-video{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;object-fit:cover!important;object-position:center center!important;z-index:-1!important;display:block!important;opacity:1!important;visibility:visible!important;pointer-events:none!important}
-body:before{z-index:-2!important}
-body:after{z-index:-1!important;opacity:.12!important}
-@media(max-width:760px){.site-background-video{object-position:center center!important}}
-
-
-/* FINAL VIDEO LAYER + CLEAN GLASS RESET */
-html,body{background:transparent!important;background-color:transparent!important;isolation:isolate}
-body{position:relative}
-.site-background-video{
- position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;
- object-fit:cover!important;object-position:center center!important;
- z-index:0!important;display:block!important;visibility:visible!important;opacity:1!important;
- pointer-events:none!important;filter:none!important;transform:translateZ(0);
-}
-body:before,body:after{display:none!important;content:none!important}
-.ambient{display:none!important}
-body>.shell{position:relative!important;z-index:2!important}
-.glass,.auth-card,.topbar,.chat,.right-panel,.note,.composer,.ai-result,
-.followup-panel,.followup-item,.modal,.modal-card,.panel{
- background:transparent!important;background-color:transparent!important;
- background-image:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
- box-shadow:none!important;border:0!important;
-}
-button,.primary,.send-btn,.refresh-btn,.signout-btn,.top-nav-btn,
-.message-action,.delete-note,.reaction-btn,.copy-draft{
- backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
-}
-@media(prefers-reduced-motion:reduce){.site-background-video{display:block!important}}
-
-
 /* CTR final readability + transparent surfaces + black chat avatars */
 html,body{scrollbar-width:none!important;-ms-overflow-style:none!important}
 html::-webkit-scrollbar,body::-webkit-scrollbar,.shell::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
@@ -476,10 +432,9 @@ body .shell [class*="card"],body .shell [class*="panel"]{
 html,body{scrollbar-width:none!important;-ms-overflow-style:none!important}
 html::-webkit-scrollbar,body::-webkit-scrollbar,*::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
 body{overflow-x:hidden!important}
-.site-background-video{display:none!important}
 body::before{
  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
- background:linear-gradient(180deg,rgba(3,3,5,.48),rgba(3,3,5,.68)),url("samurai-bg.png") center center/cover no-repeat;
+ background:linear-gradient(180deg,rgba(3,3,5,.48),rgba(3,3,5,.68)),url("file_000000005f188208adc8f107a4f7bc8b.png") center center/cover no-repeat;
 }
 .shell{position:relative;z-index:2}
 .note-avatar,.avatar,.profile-avatar,.user-avatar,.message-avatar{
