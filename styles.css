@@ -398,3 +398,11 @@ body:after{opacity:.18!important;filter:blur(14px)!important}
 .ambient{opacity:.08!important}
 @media(max-width:760px){body{background-attachment:scroll!important}.site-background-video{object-position:center center}}
 @media(prefers-reduced-motion:reduce){.site-background-video{display:none!important}}
+
+/* Video background visibility and autoplay fix */
+html,body{background-color:transparent!important}
+body{background-image:none!important;background:transparent!important;isolation:isolate}
+.site-background-video{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;object-fit:cover!important;object-position:center center!important;z-index:-1!important;display:block!important;opacity:1!important;visibility:visible!important;pointer-events:none!important}
+body:before{z-index:-2!important}
+body:after{z-index:-1!important;opacity:.12!important}
+@media(max-width:760px){.site-background-video{object-position:center center!important}}
