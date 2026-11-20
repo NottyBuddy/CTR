@@ -435,6 +435,7 @@ body{overflow-x:hidden!important}
 body::before{
  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
  background:linear-gradient(180deg,rgba(3,3,5,.16),rgba(3,3,5,.30)),url("/CTR/file_000000005f188208adc8f107a4f7bc8b.png") center center/cover no-repeat!important;
+  transform:scaleX(-1);
 }
 .shell{position:relative;z-index:2}
 .note-avatar,.avatar,.profile-avatar,.user-avatar,.message-avatar{
