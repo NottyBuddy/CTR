@@ -480,3 +480,6 @@ input::placeholder,textarea::placeholder{color:#e0d6da!important;opacity:1!impor
 
 /* Mirror only the login-page emblem */
 #authView > .brand .ctr-emblem{transform:scaleX(-1)}
+
+/* Mirror only the login logo, not the page background */
+#authView > .brand .ctr-emblem{transform:scaleX(-1)!important}
