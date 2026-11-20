@@ -406,3 +406,28 @@ body{background-image:none!important;background:transparent!important;isolation:
 body:before{z-index:-2!important}
 body:after{z-index:-1!important;opacity:.12!important}
 @media(max-width:760px){.site-background-video{object-position:center center!important}}
+
+
+/* FINAL VIDEO LAYER + CLEAN GLASS RESET */
+html,body{background:transparent!important;background-color:transparent!important;isolation:isolate}
+body{position:relative}
+.site-background-video{
+ position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;
+ object-fit:cover!important;object-position:center center!important;
+ z-index:0!important;display:block!important;visibility:visible!important;opacity:1!important;
+ pointer-events:none!important;filter:none!important;transform:translateZ(0);
+}
+body:before,body:after{display:none!important;content:none!important}
+.ambient{display:none!important}
+body>.shell{position:relative!important;z-index:2!important}
+.glass,.auth-card,.topbar,.chat,.right-panel,.note,.composer,.ai-result,
+.followup-panel,.followup-item,.modal,.modal-card,.panel{
+ background:transparent!important;background-color:transparent!important;
+ background-image:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+ box-shadow:none!important;border:0!important;
+}
+button,.primary,.send-btn,.refresh-btn,.signout-btn,.top-nav-btn,
+.message-action,.delete-note,.reaction-btn,.copy-draft{
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+@media(prefers-reduced-motion:reduce){.site-background-video{display:block!important}}
