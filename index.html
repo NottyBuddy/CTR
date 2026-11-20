@@ -34,14 +34,6 @@
 <section id="groupView" class="notes-view">
 <div class="chat-head"><div><div class="eyebrow">SHARED CHANNEL</div><h2>Group Notes <span class="online-pill">● LIVE</span></h2><p>Updates shared with every signed-in CTR member.</p></div><div class="head-count">◉ <span id="noteCount">0</span> records</div></div>
 <div id="connectionBanner" class="connection-banner">Connecting to shared records…</div>
-<section class="ai-assistant glass">
-<div class="ai-head"><div><div class="eyebrow">CTR AI ASSISTANT</div><h3>CRM Note Generator</h3><p>Paste rough customer details. Generate a normal CRM note and a follow-up note.</p></div><span class="ai-tag">AI</span></div>
-<textarea id="aiInput" rows="4" placeholder="Paste customer name, phone, location, requirements, timeline, assigned person and discussion details…"></textarea>
-<div class="ai-actions"><span id="aiStatus">Review generated notes before sharing.</span><button id="generateAI" class="send-btn" type="button">Generate notes ↗</button></div>
-<div id="aiResults" class="ai-results hidden">
-<div class="ai-result"><div class="ai-result-head"><strong>Normal CRM Note</strong><button type="button" class="text-btn ai-use" data-ai-use="normal">Use this note</button></div><textarea id="aiNormal" rows="7" readonly></textarea></div>
-<div class="ai-result"><div class="ai-result-head"><strong>Follow-up Note</strong><button type="button" class="text-btn ai-use" data-ai-use="followup">Use this note</button></div><textarea id="aiFollowup" rows="6" readonly></textarea></div>
-</div></section>
 <div class="color-picker-wrap"><span>Your chat colour</span><div id="colorChoices" class="color-choices"></div><small id="colorLock">Choose one colour. It cannot be changed later.</small></div>
 <div id="notes" class="notes"></div>
 <form id="noteForm" class="composer"><textarea id="noteInput" rows="3" placeholder="Paste CRM notes here…" required></textarea><div class="composer-foot"><span>Only share information appropriate for the team.</span><button class="send-btn" type="submit">Send update <b>↗</b></button></div></form>
@@ -51,6 +43,7 @@
 <div id="personalNotes" class="notes"></div>
 <form id="personalForm" class="composer"><textarea id="personalInput" rows="3" placeholder="Add a private callback note…" required></textarea><div class="composer-foot"><span>Private to your signed-in account.</span><button class="send-btn" type="submit">Save note <b>↗</b></button></div></form>
 </section>
-</section></div>
+</section>
+<aside class="right-panel glass" id="crmGenerator"><div class="right-panel-head"><div class="eyebrow">QUICK DRAFT</div><h3>CRM Note Generator</h3><p>Paste customer details to prepare both formats.</p></div><textarea id="aiInput" rows="5" placeholder="Customer Name | Contact Number&#10;Paste conversation, requirement and assigned person…"></textarea><div class="ai-actions"><span id="aiStatus">Drafts are prepared locally. Review before sharing.</span><button id="generateAI" class="send-btn" type="button">Generate ↗</button></div><div id="aiResults" class="ai-results hidden"><div class="ai-result"><div class="ai-result-head"><strong>Group Share</strong><button type="button" class="text-btn ai-use" data-ai-use="group">Send to group</button></div><div id="aiGroup" class="draft-preview"></div><button type="button" class="copy-draft" data-copy="group">Copy group note</button></div><div class="ai-result"><div class="ai-result-head"><strong>CRM Entry</strong><button type="button" class="text-btn ai-use" data-ai-use="crm">Copy for CRM</button></div><div id="aiCrm" class="draft-preview"></div><button type="button" class="copy-draft" data-copy="crm">Copy CRM note</button></div></div></aside></div>
 <footer class="app-footer">CTR · CALLING TEAM RECORDS <span>Updates sync across signed-in users</span></footer>
 </section></main><script src="app.js"></script></body></html>
