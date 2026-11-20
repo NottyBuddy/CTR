@@ -2,7 +2,8 @@
 const SUPABASE_URL="https://icootmtssyergamuxlxb.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_qgEIXxXXBq2TaNxLMZPkwg_fcwKcdGW";
 const $=id=>document.getElementById(id);
-let db,user,group=[],personal=[],direct=[],team=[],channel;\nconst ADMIN_EMAIL="mahesh.s@hrhnext.com";\nconst isAdmin=()=>String(user?.email||"").toLowerCase()===ADMIN_EMAIL;
+let db,user,group=[],personal=[],direct=[],team=[],channel;
+const ADMIN_EMAIL="mahesh.s@hrhnext.com";\nconst isAdmin=()=>String(user?.email||"").toLowerCase()===ADMIN_EMAIL;
 const teamNames={
  "hrhca39899_indiframe@hrhnow.in":"Amrutha Shiva Kumar",
  "hrhca39898_indiframe@hrhnow.in":"Nandkishor Kasoju",
@@ -130,7 +131,8 @@ function realtime(){
  channel=db.channel("ctr-live-"+user.id)
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_group_notes"},async()=>{const [{data,error},{data:profiles}]=await Promise.all([db.from("ctr_group_notes").select("*").order("created_at").limit(500),db.from("ctr_profiles").select("user_id,chat_color")]);if(!error){const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=(data||[]).map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()}})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_profiles"},async()=>{const [{data:mine},{data:profiles}]=await Promise.all([db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),db.from("ctr_profiles").select("user_id,chat_color")]);renderColors(mine?.chat_color||null);const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=group.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()})
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes",filter:"user_id=eq."+user.id},async()=>{const {data}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500);personal=data||[];renderPersonal()})\n .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async()=>{if(!$("directView").classList.contains("hidden"))await loadDirect()})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes",filter:"user_id=eq."+user.id},async()=>{const {data}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500);personal=data||[];renderPersonal()})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async()=>{if(!$("directView").classList.contains("hidden"))await loadDirect()})
  .subscribe(s=>{if(s==="SUBSCRIBED")status("Live sync connected · group updates appear automatically.");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")status("Live sync interrupted. Refresh to reconnect.")});
 }
 async function enter(u){
