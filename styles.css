@@ -219,3 +219,5 @@ body .shell select {
 body .shell button:hover {
  box-shadow:0 0 22px rgba(255,42,82,.13)!important;
 }
+
+#followupsView .followup-panel{margin:0;padding:22px;background:rgba(255,255,255,.018);border:0!important;box-shadow:none!important}#followupsView .followup-form{max-width:760px}#followupsView .followup-list{max-width:900px}#followupsView .followup-actions .message-action{min-width:88px}
