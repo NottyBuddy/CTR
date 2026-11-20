@@ -3,7 +3,8 @@ const SUPABASE_URL="https://icootmtssyergamuxlxb.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_qgEIXxXXBq2TaNxLMZPkwg_fcwKcdGW";
 const $=id=>document.getElementById(id);
 let db,user,group=[],personal=[],direct=[],team=[],channel;
-let groupFilter="",dateFilter="",personalFilter="",directFilter="";\nconst seenKey=k=>"ctr_seen_"+k+"_"+(user?.id||"");const markSeen=k=>{if(user)localStorage.setItem(seenKey(k),new Date().toISOString());updateUnread()};const countUnread=(a,k)=>a.filter(x=>new Date(x.created_at)>new Date(localStorage.getItem(seenKey(k))||0)).length;function updateUnread(){if(!user)return;for(const [id,n] of [["groupUnread",countUnread(group.filter(x=>x.user_id!==user.id),"group")],["directUnread",countUnread(direct.filter(x=>x.recipient_id===user.id),"direct")]]){const e=$(id);if(e){e.textContent=n;e.classList.toggle("hidden",!n)}}}
+let groupFilter="",dateFilter="",personalFilter="",directFilter="";
+const seenKey=k=>"ctr_seen_"+k+"_"+(user?.id||"");const markSeen=k=>{if(user)localStorage.setItem(seenKey(k),new Date().toISOString());updateUnread()};const countUnread=(a,k)=>a.filter(x=>new Date(x.created_at)>new Date(localStorage.getItem(seenKey(k))||0)).length;function updateUnread(){if(!user)return;for(const [id,n] of [["groupUnread",countUnread(group.filter(x=>x.user_id!==user.id),"group")],["directUnread",countUnread(direct.filter(x=>x.recipient_id===user.id),"direct")]]){const e=$(id);if(e){e.textContent=n;e.classList.toggle("hidden",!n)}}}
 const ADMIN_EMAIL="mahesh.s@hrhnext.com";
 const isAdmin=()=>String(user?.email||"").toLowerCase()===ADMIN_EMAIL;
 const teamNames={
