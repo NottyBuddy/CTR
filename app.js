@@ -3,6 +3,13 @@ const SUPABASE_URL="https://icootmtssyergamuxlxb.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_qgEIXxXXBq2TaNxLMZPkwg_fcwKcdGW";
 const $=id=>document.getElementById(id);
 let db,user,group=[],personal=[],channel;
+const teamNames={
+ "hrhca39899_indiframe@hrhnow.in":"Amrutha Shiva Kumar",
+ "hrhca39898_indiframe@hrhnow.in":"Nandkishor Kasoju",
+ "hrhca39264_indiframe@hrhnow.in":"Mohd Javeed Ali",
+ "mahesh.s@hrhnext.com":"Mahesh Sharma"
+};
+const displayName=email=>teamNames[String(email||"").toLowerCase()]||"CTR Member";
 const palette=["#8E7CFF","#36A6D9","#20B58A","#E59A3B","#E16C91","#A1A94B","#D477D1","#6E91C9"];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const initials=s=>(s||"U").trim()[0].toUpperCase();
@@ -10,14 +17,31 @@ const time=s=>new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"s
 function status(t,auth=false){$(auth?"authStatus":"connectionBanner").textContent=t}
 function renderGroup(){
  $("noteCount").textContent=group.length;
- $("notes").innerHTML=group.length?group.map(n=>`<article class="note ${n.user_id===user.id?"mine":""}" style="--user-chat:${esc(n.chat_color)}"><div class="note-top"><div class="note-avatar" style="background:${esc(n.chat_color)}">${esc(initials(n.author_email))}</div><span class="note-author">${esc(n.author_email)}${n.user_id===user.id?" · You":""}</span><span class="note-time">${esc(time(n.created_at))}</span>${n.user_id===user.id?`<button class="delete-note" data-gdelete="${n.id}">Delete</button>`:""}</div><div class="note-body">${esc(n.body)}</div></article>`).join(""):'<div class="empty-state"><h3>No group updates yet</h3><p>Paste the first CRM update to start the shared record.</p></div>';
+ $("notes").innerHTML=group.length?group.map(n=>`<article class="note ${n.user_id===user.id?"mine":""}" style="--user-chat:${esc(n.chat_color)}"><div class="note-top"><div class="note-avatar" style="background:${esc(n.chat_color)}">${esc(initials(displayName(n.author_email)))}</div><span class="note-author">${esc(displayName(n.author_email))}${n.user_id===user.id?" · You":""}</span><span class="note-time">${esc(time(n.created_at))}</span>${n.user_id===user.id?`<button class="delete-note" data-gdelete="${n.id}">Delete</button>`:""}</div><div class="note-body">${esc(n.body)}</div></article>`).join(""):'<div class="empty-state"><h3>No group updates yet</h3><p>Paste the first CRM update to start the shared record.</p></div>';
  $("notes").scrollTop=$("notes").scrollHeight;
 }
 function renderPersonal(){
  $("personalCount").textContent=personal.length;
  $("personalNotes").innerHTML=personal.length?personal.map(n=>`<article class="note personal-note"><div class="note-top"><span class="note-author">PRIVATE NOTE</span><span class="note-time">${esc(time(n.created_at))}</span><button class="delete-note" data-pdelete="${n.id}">Delete</button></div><div class="note-body">${esc(n.body)}</div></article>`).join(""):'<div class="empty-state"><h3>Your private notes</h3><p>Keep open-call, callback and follow-up reminders here. Only you can see them.</p></div>';
 }
-function showView(v){$("groupView").classList.toggle("hidden",v!=="group");$("personalView").classList.toggle("hidden",v!=="personal");document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v))}
+function showView(v){$("groupView").classList.toggle("hidden",v!=="group");$("personalView").classList.toggle("hidden",v!=="personal");
+$("generateAI").onclick=async()=>{
+ const raw=$("aiInput").value.trim();if(!raw){$("aiStatus").textContent="Paste customer details first.";return}
+ $("generateAI").disabled=true;$("aiStatus").textContent="Generating both notes…";
+ try{
+  const {data,error}=await db.functions.invoke("ctr-ai-note",{body:{raw}});
+  if(error)throw error;
+  if(!data?.normal_note||!data?.follow_up_note)throw new Error(data?.error||"AI response was incomplete.");
+  $("aiNormal").value=data.normal_note;$("aiFollowup").value=data.follow_up_note;
+  $("aiResults").classList.remove("hidden");$("aiStatus").textContent="Generated. Review both notes before sharing.";
+ }catch(e){$("aiStatus").textContent="AI setup required or request failed: "+(e.message||"Unknown error");}
+ finally{$("generateAI").disabled=false}
+};
+document.querySelectorAll("[data-ai-use]").forEach(b=>b.onclick=()=>{
+ $("noteInput").value=b.dataset.aiUse==="normal"?$("aiNormal").value:$("aiFollowup").value;
+ $("noteInput").focus();$("aiStatus").textContent="Added to the group composer. Press Send update when ready.";
+});
+\ndocument.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v))}
 async function loadAll(){
  const [g,p,c,profiles]=await Promise.all([db.from("ctr_group_notes").select("*").order("created_at").limit(500),db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500),db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),db.from("ctr_profiles").select("user_id,chat_color")]);
  if(g.error||p.error||c.error||profiles.error)throw(g.error||p.error||c.error||profiles.error);
@@ -42,7 +66,7 @@ function realtime(){
 }
 async function enter(u){
  user=u;$("authView").classList.add("hidden");$("appView").classList.remove("hidden");
- $("userEmail").textContent=u.email;$("sideEmail").textContent=u.email;$("avatar").textContent=initials(u.email);
+ $("userEmail").textContent=displayName(u.email);$("sideEmail").textContent=displayName(u.email);$("avatar").textContent=initials(displayName(u.email));
  try{await loadAll();realtime()}catch(e){status("Database setup required: "+e.message)}
 }
 async function boot(){
