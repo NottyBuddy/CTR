@@ -5,14 +5,25 @@
 <meta name="theme-color" content="#0b1218"><title>CTR — Calling Team Records</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=ctr-followup-create-20261120-2">
+<link rel="stylesheet" href="styles.css?v=ctr-samurai-logo-20261120-1">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="ambient a1"></div><div class="ambient a2"></div><div class="ambient a3"></div>
 <main class="shell">
 <section id="authView" class="auth-wrap">
-<div class="brand"><div class="brand-mark" aria-hidden="true">♛</div><div><div class="brand-name">CTR</div><div class="brand-sub">CALLING TEAM RECORDS</div></div></div>
+<div class="brand"><div class="brand-mark" aria-hidden="true"><svg class="ctr-emblem" viewBox="0 0 200 200" role="img" aria-label="CTR samurai crescent logo" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="ctrMoon" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff536f"/><stop offset=".58" stop-color="#d7193f"/><stop offset="1" stop-color="#8e0926"/></linearGradient><linearGradient id="ctrSteel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".5" stop-color="#c9c5c8"/><stop offset="1" stop-color="#777176"/></linearGradient></defs>
+<g class="ctr-emblem-arc"><path d="M151 22A83 83 0 1 0 177 143A70 70 0 1 1 151 22Z" fill="none" stroke="url(#ctrMoon)" stroke-width="9" stroke-linecap="round"/><path d="M151 22A83 83 0 0 1 177 143" fill="none" stroke="#ff536f" stroke-width="2" opacity=".55"/></g>
+<g class="ctr-emblem-warrior" fill="#111014" stroke="#f3edf0" stroke-linejoin="round" stroke-width="2.2">
+<path d="M61 69L103 43L145 69L135 73H70Z" fill="#111014"/><path d="M70 69Q101 78 135 69" fill="none" stroke="#ff536f" stroke-width="2"/>
+<path d="M83 77Q101 70 119 78L126 96L117 109L92 109L78 96Z"/><path d="M82 91L120 91" fill="none" stroke="#ff536f" stroke-width="2"/>
+<path d="M91 108Q73 119 70 148L57 171L83 166L101 139L116 170L141 178L128 146Q127 120 111 108Z"/>
+<path d="M77 118L51 138L38 151L49 158L81 139M119 119L144 137L159 145L151 155L119 141" fill="#17151a"/>
+<path d="M42 150L25 163L30 168L53 157" fill="none" stroke="#ff536f" stroke-width="3"/>
+<path d="M116 122L166 165" fill="none" stroke="url(#ctrSteel)" stroke-width="4" stroke-linecap="round"/><path d="M108 116L121 128" fill="none" stroke="#ff536f" stroke-width="4" stroke-linecap="round"/>
+</g><path d="M50 180Q100 194 151 174" fill="none" stroke="#fff" stroke-width="1.5" opacity=".65"/>
+</svg></div><div><div class="brand-name">CTR</div><div class="brand-sub">CALLING TEAM RECORDS</div></div></div>
 <div class="auth-card glass"><div class="eyebrow">TEAM WORKSPACE</div><h1>One team.<br><span>One shared record.</span></h1><p class="muted">Sign in to access your team's live CRM notes.</p>
 <form id="authForm" action="#" method="post" onsubmit="return false;">
 <label>Email address<input id="email" type="email" autocomplete="email" placeholder="name@company.com" required></label>
@@ -24,7 +35,18 @@
 </section>
 <section id="appView" class="app-view hidden">
 <header class="topbar glass">
-<div class="brand compact"><div class="brand-mark" aria-hidden="true">♛</div><div><div class="brand-name">CTR</div><div class="brand-sub">CALLING TEAM RECORDS</div></div></div>
+<div class="brand compact"><div class="brand-mark" aria-hidden="true"><svg class="ctr-emblem" viewBox="0 0 200 200" role="img" aria-label="CTR samurai crescent logo" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="ctrMoon" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff536f"/><stop offset=".58" stop-color="#d7193f"/><stop offset="1" stop-color="#8e0926"/></linearGradient><linearGradient id="ctrSteel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".5" stop-color="#c9c5c8"/><stop offset="1" stop-color="#777176"/></linearGradient></defs>
+<g class="ctr-emblem-arc"><path d="M151 22A83 83 0 1 0 177 143A70 70 0 1 1 151 22Z" fill="none" stroke="url(#ctrMoon)" stroke-width="9" stroke-linecap="round"/><path d="M151 22A83 83 0 0 1 177 143" fill="none" stroke="#ff536f" stroke-width="2" opacity=".55"/></g>
+<g class="ctr-emblem-warrior" fill="#111014" stroke="#f3edf0" stroke-linejoin="round" stroke-width="2.2">
+<path d="M61 69L103 43L145 69L135 73H70Z" fill="#111014"/><path d="M70 69Q101 78 135 69" fill="none" stroke="#ff536f" stroke-width="2"/>
+<path d="M83 77Q101 70 119 78L126 96L117 109L92 109L78 96Z"/><path d="M82 91L120 91" fill="none" stroke="#ff536f" stroke-width="2"/>
+<path d="M91 108Q73 119 70 148L57 171L83 166L101 139L116 170L141 178L128 146Q127 120 111 108Z"/>
+<path d="M77 118L51 138L38 151L49 158L81 139M119 119L144 137L159 145L151 155L119 141" fill="#17151a"/>
+<path d="M42 150L25 163L30 168L53 157" fill="none" stroke="#ff536f" stroke-width="3"/>
+<path d="M116 122L166 165" fill="none" stroke="url(#ctrSteel)" stroke-width="4" stroke-linecap="round"/><path d="M108 116L121 128" fill="none" stroke="#ff536f" stroke-width="4" stroke-linecap="round"/>
+</g><path d="M50 180Q100 194 151 174" fill="none" stroke="#fff" stroke-width="1.5" opacity=".65"/>
+</svg></div><div><div class="brand-name">CTR</div><div class="brand-sub">CALLING TEAM RECORDS</div></div></div>
 <nav class="top-nav" aria-label="Workspace views">
 <button class="top-nav-btn active" data-view="group"><span class="nav-symbol">▤</span>Group Chat <span id="groupUnread" class="unread-badge hidden">0</span></button>
 <button class="top-nav-btn" data-view="personal"><span class="nav-symbol">▧</span>Personal Chat</button>
