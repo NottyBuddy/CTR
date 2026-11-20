@@ -238,3 +238,7 @@ body .shell button:hover {
 .ctr-emblem-arc,.ctr-emblem-warrior{animation:none!important;transform:none!important}
 .brand-name{background:none!important;-webkit-text-fill-color:#f5f1f2!important;color:#f5f1f2!important}
 .brand-sub{color:#b9aeb2!important}
+
+/* Use the uploaded transparent samurai-crescent artwork as the CTR logo */
+.ctr-emblem{display:block;width:100%;height:100%;object-fit:contain;overflow:visible;filter:drop-shadow(0 0 5px rgba(255,35,79,.18));}
+.brand-mark{background:transparent!important;padding:0!important;}
