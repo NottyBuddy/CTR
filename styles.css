@@ -483,3 +483,6 @@ input::placeholder,textarea::placeholder{color:#e0d6da!important;opacity:1!impor
 
 /* Mirror only the login logo, not the page background */
 #authView > .brand .ctr-emblem{transform:scaleX(-1)!important}
+
+/* Flip the complete login emblem wrapper for a reliable mirror */
+#authView > .brand .brand-mark{transform:scaleX(-1)!important}
