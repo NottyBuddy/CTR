@@ -473,5 +473,5 @@ input::placeholder,textarea::placeholder{color:#e0d6da!important;opacity:1!impor
 
 
 /* Login screen logo size */
-#authView > .brand .brand-mark{width:76px;height:76px;flex:0 0 76px}
+#authView > .brand .brand-mark{width:92px;height:92px;flex:0 0 92px}
 #authView > .brand .ctr-emblem{width:100%;height:100%;object-fit:contain}
