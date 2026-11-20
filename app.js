@@ -56,7 +56,7 @@ let followups=[];
 function renderFollowups(){
  const box=$("followupList");if(!box)return;
  const rows=followups.filter(x=>x.status!=="completed").sort((a,b)=>new Date(a.callback_at)-new Date(b.callback_at));
- $("followupCount").textContent=rows.length;
+ $("followupCount").textContent=rows.length;const navCount=$("followupNavCount");if(navCount)navCount.textContent=rows.length;
  box.innerHTML=rows.length?rows.map(f=>'<article class="followup-item"><div class="followup-info"><strong>'+esc(f.customer_name)+'</strong><span>'+esc(f.phone)+'</span><time>'+esc(time(f.callback_at))+'</time><p>'+esc(f.details||"")+'</p></div><div class="followup-actions"><button class="message-action" data-copy-phone="'+f.phone.replace(/\\D/g,"")+'">Copy phone</button><button class="message-action" data-follow-done="'+f.id+'">Complete</button></div></article>').join(""):'<div class="empty-state">No pending follow-ups.</div>';
 }
 async function loadFollowups(){const box=$("followupList");const r=await db.from("ctr_followups").select("*").order("callback_at").limit(500);if(r.error){followups=[];$("followupCount").textContent="!";box.innerHTML=`<div class="empty-state">Follow-ups are unavailable: ${esc(r.error.message)}. Run the CTR follow-up SQL in Supabase, then refresh.</div>`;return}followups=r.data||[];renderFollowups()}
@@ -250,7 +250,7 @@ $("forgotPassword").onclick=async()=>{if(!db)return;const email=$("email").value
 document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>showView(b.dataset.view));
 $("colorChoices").onclick=e=>{const b=e.target.closest("[data-color]");if(b&&!b.disabled)chooseColor(b.dataset.color)};
 $("generateAI").onclick=generateNotes;
-$("refreshData").onclick=refreshMessages;$("enableNotifications").onclick=enableNotifications;
+$("refreshData").onclick=refreshMessages;$("enableNotifications")?.addEventListener("click",enableNotifications);
 $("directRecipient").onchange=renderDirect;
 $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value.toLowerCase().trim();renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
 $("directForm").onsubmit=async e=>{
