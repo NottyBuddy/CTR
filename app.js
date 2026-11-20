@@ -46,7 +46,7 @@ function enhanceGroupMessages(rows){
   else card.classList.add("message-group-start");
   prior=groupKey;
   if(n.user_id!==user.id&&new Date(n.created_at).getTime()>seen&&!unreadDone){const sep=document.createElement("div");sep.className="unread-divider";sep.textContent="New messages";card.before(sep);unreadDone=true}
-  const body=n.body||"",m=body.match(/(?:\\+?91[\\s-]?)?[6-9]\\d{9}/);
+  const body=n.body||"",m=body.match(/(?:\+?91[\s-]?)?[6-9]\d{9}/);
   const top=card.querySelector(".note-top");
   if(m&&top){const phone=m[0].replace(/\\D/g,"");const call=document.createElement("a");call.className="message-action call-action";call.href="tel:"+phone;call.textContent="Call";top.append(call);const cp=document.createElement("button");cp.className="message-action";cp.type="button";cp.dataset.copyPhone=phone;cp.textContent="Copy number";top.append(cp)}
   const tools=document.createElement("div");tools.className="note-tools";const copy=document.createElement("button");copy.type="button";copy.className="message-action";copy.dataset.copyNote=n.id;copy.textContent="Copy note";tools.append(copy);card.append(tools);
