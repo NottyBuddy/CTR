@@ -113,3 +113,25 @@ input:focus,textarea:focus,select:focus {
 .brand-sub{letter-spacing:1.8px;color:#d8aab4!important}
 .pin-label{display:inline-flex;align-items:center;gap:4px;color:#ffd27d!important;background:rgba(255,210,125,.08);padding:3px 7px;border-radius:99px;font-size:9px}
 .followup-item time{color:#ff9caf!important}
+
+
+/* CTR animated crimson silk-wave background */
+body:after{
+ content:"";position:fixed;inset:-18% -12%;z-index:-2;pointer-events:none;
+ background:
+  radial-gradient(ellipse 68% 12% at 8% 83%,transparent 43%,rgba(255,25,69,.08) 46%,rgba(255,35,79,.58) 49%,rgba(255,112,137,.22) 50.5%,transparent 55%),
+  radial-gradient(ellipse 62% 10% at 91% 24%,transparent 42%,rgba(255,22,66,.06) 46%,rgba(255,36,82,.5) 49%,rgba(255,116,145,.18) 51%,transparent 56%),
+  radial-gradient(ellipse 70% 13% at 53% 108%,transparent 43%,rgba(255,27,73,.05) 46%,rgba(255,32,78,.42) 49%,rgba(255,112,137,.16) 51%,transparent 56%),
+  radial-gradient(ellipse 58% 9% at 97% 76%,transparent 42%,rgba(255,24,70,.06) 46%,rgba(255,36,82,.36) 49%,rgba(255,116,145,.12) 51%,transparent 56%),
+  linear-gradient(115deg,transparent 34%,rgba(255,24,69,.055) 48%,transparent 61%);
+ background-size:125% 125%,135% 135%,120% 120%,140% 140%,180% 180%;
+ background-position:0% 100%,100% 0%,45% 100%,100% 80%,0% 50%;
+ filter:blur(9px) saturate(125%);opacity:.88;
+ transform:translate3d(0,0,0);animation:ctrSilkWaves 19s ease-in-out infinite alternate;
+}
+@keyframes ctrSilkWaves{
+ 0%{background-position:0% 100%,100% 0%,45% 100%,100% 80%,0% 50%;transform:translate3d(-1.5%,1%,0) scale(1)}
+ 50%{background-position:35% 75%,65% 28%,60% 82%,72% 58%,50% 45%;transform:translate3d(1%, -1%,0) scale(1.035)}
+ 100%{background-position:100% 55%,0% 70%,85% 55%,15% 30%,100% 60%;transform:translate3d(-.5%,-1.5%,0) scale(1.06)}
+}
+@media(prefers-reduced-motion:reduce){body:after{animation:none}}
