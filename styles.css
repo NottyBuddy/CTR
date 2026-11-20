@@ -242,3 +242,87 @@ body .shell button:hover {
 /* Use the uploaded transparent samurai-crescent artwork as the CTR logo */
 .ctr-emblem{display:block;width:100%;height:100%;object-fit:contain;overflow:visible;filter:drop-shadow(0 0 5px rgba(255,35,79,.18));}
 .brand-mark{background:transparent!important;padding:0!important;}
+
+
+/* CTR — cinematic samurai anime interface (crimson / ink / ivory) */
+:root{
+ --bg:#070609;--text:#f7f1f2;--muted:#b4a4aa;
+ --red:#e51d43;--red2:#ff4968;--reddeep:#780e25;
+ --panel:rgba(14,10,14,.68);--panel2:rgba(26,12,19,.55);
+}
+body{
+ background:
+  radial-gradient(ellipse 34% 48% at 82% 18%,rgba(160,13,43,.22),transparent 72%),
+  radial-gradient(ellipse 45% 34% at 5% 88%,rgba(95,11,32,.20),transparent 72%),
+  linear-gradient(135deg,#050507 0%,#0b080c 48%,#10070b 100%)!important;
+ font-family:"DM Sans",sans-serif;
+}
+body:before{
+ content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+ background:
+  radial-gradient(circle at 82% 16%,rgba(225,24,62,.12) 0 8%,transparent 8.3%),
+  radial-gradient(ellipse at 82% 16%,transparent 0 14%,rgba(255,45,78,.13) 14.2%,transparent 15%),
+  repeating-linear-gradient(122deg,transparent 0 95px,rgba(255,255,255,.012) 96px,transparent 97px 180px),
+  linear-gradient(115deg,transparent 30%,rgba(211,20,56,.055) 49%,transparent 66%);
+ background-size:100% 100%,100% 100%,100% 100%,220% 100%;
+ animation:animeInkDrift 28s ease-in-out infinite alternate;
+}
+body:after{
+ content:"";position:fixed;inset:-12%;z-index:-1;pointer-events:none;
+ background:
+  radial-gradient(ellipse 45% 3% at 15% 78%,transparent 42%,rgba(255,31,69,.28) 48%,rgba(255,31,69,.07) 53%,transparent 61%),
+  radial-gradient(ellipse 40% 2.5% at 86% 35%,transparent 40%,rgba(255,31,69,.24) 48%,rgba(255,31,69,.06) 53%,transparent 62%),
+  radial-gradient(ellipse 38% 2% at 55% 108%,transparent 42%,rgba(255,255,255,.12) 48%,rgba(255,35,72,.16) 52%,transparent 62%);
+ filter:blur(13px);opacity:.8;
+ animation:animeCrimsonWaves 24s ease-in-out infinite alternate;
+}
+@keyframes animeInkDrift{0%{background-position:0 0,0 0,0 0,0 0}100%{background-position:0 0,0 0,35px -22px,100% 0}}
+@keyframes animeCrimsonWaves{0%{transform:translate3d(-1.5%,1%,0) rotate(-1deg) scale(1)}50%{transform:translate3d(1%, -1%,0) rotate(.5deg) scale(1.035)}100%{transform:translate3d(-.5%,-1.5%,0) rotate(1deg) scale(1.06)}}
+.glass,.auth-card,.topbar,.chat,.right-panel{
+ background:linear-gradient(145deg,rgba(25,15,21,.72),rgba(8,7,10,.72))!important;
+ backdrop-filter:blur(25px) saturate(130%);-webkit-backdrop-filter:blur(25px) saturate(130%);
+ box-shadow:0 22px 70px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.035)!important;
+}
+.brand-mark{background:transparent!important;filter:drop-shadow(0 0 10px rgba(231,26,65,.24))}
+.ctr-emblem{filter:drop-shadow(0 0 7px rgba(235,24,64,.3))!important}
+.brand-name{font-family:Manrope,sans-serif;letter-spacing:3px;text-shadow:0 0 24px rgba(225,26,65,.18)}
+.brand-sub{letter-spacing:2.3px;color:#d5bfc5!important}
+.auth-card{position:relative;overflow:hidden}
+.auth-card:before,.right-panel:before{
+ content:"";position:absolute;top:0;left:12%;right:12%;height:1px;
+ background:linear-gradient(90deg,transparent,rgba(255,76,105,.55),transparent);
+ pointer-events:none;
+}
+.eyebrow{color:#ff6c86;letter-spacing:2.5px}
+.auth-card h1 span{color:#ff536f;text-shadow:0 0 28px rgba(229,29,67,.22)}
+.primary,.send-btn{
+ background:linear-gradient(105deg,#f04a68,#bd1239 62%,#770d27)!important;
+ color:#fff5f6!important;letter-spacing:.2px;
+ box-shadow:0 8px 25px rgba(178,12,47,.2),inset 0 1px rgba(255,255,255,.18);
+}
+.primary:hover,.send-btn:hover{box-shadow:0 10px 32px rgba(231,29,67,.34)!important}
+.topbar{border-radius:18px}
+.top-nav-btn{position:relative;color:#c6b5bb}
+.top-nav-btn.active{background:linear-gradient(110deg,rgba(202,20,57,.22),rgba(255,255,255,.025));color:#fff0f2}
+.top-nav-btn.active:after{content:"";position:absolute;bottom:3px;left:22%;right:22%;height:2px;border-radius:4px;background:#ee3458;box-shadow:0 0 12px #ee3458}
+.nav-symbol{color:#ed5a76!important;font-family:serif;font-weight:700}
+.chat,.right-panel{border-radius:20px}
+.chat-head h2,.right-panel-head h3,.followup-panel h3{letter-spacing:-.5px}
+.online-pill{background:rgba(229,29,67,.15);color:#ff8298}
+.note{background:linear-gradient(135deg,rgba(47,20,30,.78),rgba(18,12,17,.86));box-shadow:0 9px 28px rgba(0,0,0,.3)}
+.note.mine{background:linear-gradient(135deg,rgba(117,13,39,.72),rgba(48,9,23,.9))}
+.note-avatar{border-radius:50%;box-shadow:0 0 16px rgba(234,38,75,.18)}
+.composer,.ai-result,.followup-item{background:rgba(255,255,255,.025)!important}
+input,textarea,select{background:rgba(0,0,0,.35);color:#fff4f5}
+input:focus,textarea:focus,select:focus{box-shadow:0 0 0 1px rgba(239,57,89,.45),0 0 24px rgba(239,57,89,.12)!important}
+.refresh-btn,.signout-btn{background:rgba(255,255,255,.045);color:#f4e8eb}
+.signout-btn{color:#ff9caf;background:rgba(220,23,61,.12)}
+.unread-badge{background:#d51b42;color:#fff;box-shadow:0 0 12px rgba(213,27,66,.28)}
+.connection-banner{background:rgba(216,24,62,.07);color:#ff9caf}
+.app-footer{color:#92727c}
+@media(max-width:760px){
+ body:before{background-size:100% 100%,100% 100%,170% 100%,220% 100%}
+ .top-nav-btn.active:after{bottom:2px}
+ .chat,.right-panel,.topbar{backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+}
+@media(prefers-reduced-motion:reduce){body:before,body:after{animation:none!important}}
