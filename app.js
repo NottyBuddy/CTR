@@ -180,7 +180,7 @@ function sendMessageNotification(kind,row){
  const body=raw.length>130?raw.slice(0,127)+"…":raw;
  try{
   const note=new Notification(kind==="group"?"CTR · Group Chat":"CTR · Direct Message",{body:sender+": "+body,tag:"ctr-"+kind+"-"+row.id,renotify:false});
-  note.onclick=()=>{window.focus();setView(kind==="group"?"group":"direct");note.close()};
+  note.onclick=()=>{window.focus();showView(kind==="group"?"group":"direct");note.close()};
  }catch(e){console.warn("CTR notification unavailable",e)}
 }
 async function enableNotifications(){
