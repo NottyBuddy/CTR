@@ -12,7 +12,7 @@ A two-space CRM notes workspace:
 4. Replace the two placeholders at the top of `app.js`. Never use a service-role key in frontend code.
 5. In **Authentication → URL Configuration**, add your GitHub Pages URL to allowed redirect URLs.
 6. Enable Realtime for `ctr_group_notes` and `ctr_personal_notes` in Database → Replication if the SQL publication commands were not applied.
-7. Deploy `main` from `/(root)` in GitHub Pages.
+7. In GitHub **Settings → Pages**, set **Build and deployment → Source** to **GitHub Actions**. The included workflow deploys the site on every push to `main`.
 
 ## Access
 Create accounts using CTR's sign-up screen. For a controlled team, disable public sign-ups after the required accounts are created or use an invite-only process. Configure email confirmation and SMTP as required.
