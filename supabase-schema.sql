@@ -126,3 +126,32 @@ drop policy if exists "CTR admin can delete any direct message" on public.ctr_di
 create policy "CTR admin can delete any direct message"
 on public.ctr_direct_messages for delete to authenticated
 using (lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
+
+
+-- CTR: expanded admin permissions, edits, pinning, reactions and deletion audit.
+alter table public.ctr_group_notes add column if not exists edited_at timestamptz;
+alter table public.ctr_group_notes add column if not exists is_pinned boolean not null default false;
+alter table public.ctr_group_notes add column if not exists reactions jsonb not null default '{}'::jsonb;
+alter table public.ctr_personal_notes add column if not exists edited_at timestamptz;
+drop policy if exists "Users can read own personal notes" on public.ctr_personal_notes;
+create policy "Users and admin can read personal notes" on public.ctr_personal_notes for select to authenticated using(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
+drop policy if exists "Users can delete own personal notes" on public.ctr_personal_notes;
+create policy "Users delete own and admin all personal notes" on public.ctr_personal_notes for delete to authenticated using(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
+drop policy if exists "Users can update own personal notes" on public.ctr_personal_notes;
+create policy "Users and admin update personal notes" on public.ctr_personal_notes for update to authenticated using(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com') with check(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
+drop policy if exists "Users can update own group notes" on public.ctr_group_notes;
+create policy "Users and admin update group notes" on public.ctr_group_notes for update to authenticated using(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com') with check(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
+drop policy if exists "CTR admin can delete any group note" on public.ctr_group_notes;
+create policy "Users delete own and admin all group notes" on public.ctr_group_notes for delete to authenticated using(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
+create table if not exists public.ctr_moderation_log(id uuid primary key default gen_random_uuid(),table_name text not null,record_id uuid not null,deleted_by uuid,deleted_by_email text,original_body text,deleted_at timestamptz not null default now());
+alter table public.ctr_moderation_log enable row level security;
+drop policy if exists "Admin can read moderation log" on public.ctr_moderation_log;
+create policy "Admin can read moderation log" on public.ctr_moderation_log for select to authenticated using(lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
+create or replace function public.ctr_audit_note_delete() returns trigger language plpgsql security definer set search_path=public as $$
+begin insert into public.ctr_moderation_log(table_name,record_id,deleted_by,deleted_by_email,original_body) values(tg_table_name,old.id,auth.uid(),auth.jwt()->>'email',old.body);return old;end;$$;
+drop trigger if exists ctr_group_note_delete_audit on public.ctr_group_notes;
+create trigger ctr_group_note_delete_audit before delete on public.ctr_group_notes for each row execute function public.ctr_audit_note_delete();
+drop trigger if exists ctr_personal_note_delete_audit on public.ctr_personal_notes;
+create trigger ctr_personal_note_delete_audit before delete on public.ctr_personal_notes for each row execute function public.ctr_audit_note_delete();
+drop trigger if exists ctr_direct_message_delete_audit on public.ctr_direct_messages;
+create trigger ctr_direct_message_delete_audit before delete on public.ctr_direct_messages for each row execute function public.ctr_audit_note_delete();
