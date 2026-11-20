@@ -15,10 +15,20 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const initials=s=>(s||"U").trim()[0].toUpperCase();
 const time=s=>new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"short"}).format(new Date(s));
 function status(t,auth=false){$(auth?"authStatus":"connectionBanner").textContent=t}
-function renderGroup(){
+function formatNoteHtml(body){
+ const lines=String(body||"").split(/\\r?\\n/);
+ return lines.map((line,i)=>{
+  const safe=esc(line);
+  if(i===0&&line.includes("|"))return "<strong>"+safe+"</strong>";
+  if(/^Assigned to\\s*:/i.test(line))return "<strong>Assigned to</strong>"+safe.replace(/^Assigned to\\s*:/i,":");
+  return safe||"&nbsp;";
+ }).join("<br>");
+}
+function renderGroup(forceBottom=false){
+ const box=$("notes"),wasNearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<110;
  $("noteCount").textContent=group.length;
- $("notes").innerHTML=group.length?group.map(n=>`<article class="note ${n.user_id===user.id?"mine":""}" style="--user-chat:${esc(n.chat_color)}"><div class="note-top"><div class="note-avatar" style="background:${esc(n.chat_color)}">${esc(initials(displayName(n.author_email)))}</div><span class="note-author">${esc(displayName(n.author_email))}${n.user_id===user.id?" · You":""}</span><span class="note-time">${esc(time(n.created_at))}</span>${n.user_id===user.id?`<button class="delete-note" data-gdelete="${n.id}">Delete</button>`:""}</div><div class="note-body">${esc(n.body)}</div></article>`).join(""):'<div class="empty-state"><h3>No group updates yet</h3><p>Paste the first CRM update to start the shared record.</p></div>';
- $("notes").scrollTop=$("notes").scrollHeight;
+ $("notes").innerHTML=group.length?group.map(n=>`<article class="note ${n.user_id===user.id?"mine":""}" style="--user-chat:${esc(n.chat_color)}"><div class="note-top"><div class="note-avatar" style="background:${esc(n.chat_color)}">${esc(initials(displayName(n.author_email)))}</div><span class="note-author">${esc(displayName(n.author_email))}${n.user_id===user.id?" · You":""}</span><span class="note-time">${esc(time(n.created_at))}</span>${n.user_id===user.id?`<button class="delete-note" data-gdelete="${n.id}">Delete</button>`:""}</div><div class="note-body">${formatNoteHtml(n.body)}</div></article>`).join(""):'<div class="empty-state"><h3>No group updates yet</h3><p>Paste the first CRM update to start the shared record.</p></div>';
+ if(forceBottom||wasNearBottom)requestAnimationFrame(()=>{box.scrollTop=box.scrollHeight});
 }
 function renderPersonal(){
  $("personalCount").textContent=personal.length;
@@ -29,30 +39,28 @@ function showView(v){
  $("personalView").classList.toggle("hidden",v!=="personal");
  document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
 }
+let generatedDrafts={group:"",crm:""};
 function smartDrafts(raw){
- const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
- const pick=(patterns)=>{for(const p of patterns){const m=raw.match(p);if(m)return (m[1]||m[0]).trim()}return ""};
- const name=pick([/^(?:customer\s*name|name)\s*[:|-]\s*(.+)$/im,/^([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+){1,3})\s*\|/m]);
- const phone=pick([/(\+?\d[\d\s-]{8,}\d)/]);
- const area=pick([/(?:location|area|city)\s*[:|-]\s*([^\n,]+)/i]);
- const assigned=pick([/(?:assigned\s*(?:to|person)?|sales\s*person)\s*[:|-]\s*([^\n]+)/i]);
- const callback=pick([/(?:callback|call\s*back|follow.?up)\s*[:|-]\s*([^\n]+)/i]);
- const visit=pick([/(?:site\s*visit|visit)\s*[:|-]\s*([^\n]+)/i]);
- const title=name||"Customer details";
- const normal=[`Customer: ${title}`,phone?`Phone: ${phone}`:"",area?`Location: ${area}`:"","Customer requirement and discussion:",...lines.filter(x=>x!==name&&x!==phone&&x!==area), "","Note: Details not provided in the source have not been assumed."].filter(Boolean).join("\n");
- const follow=[`Customer: ${title}`,phone?`Contact: ${phone}`:"",callback?`Next contact: ${callback}`:"Next contact: To be scheduled",visit?`Site visit: ${visit}`:"Site visit: To be confirmed",assigned?`Assigned to: ${assigned}`:"Assigned person: To be confirmed","Pending items: Confirm any missing measurements or specifications.","Next action: Contact the customer, verify pending details and update the CRM after the interaction.","","Source details:",raw].filter(Boolean).join("\n");
- return {normal_note:normal,follow_up_note:follow};
+ const lines=raw.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
+ const heading=lines.find(x=>x.includes("|"))||"Customer Name | Contact Number";
+ const assignedLine=lines.find(x=>/^assigned\\s*to\\s*[:|-]/i.test(x));
+ const assigned=assignedLine?assignedLine.replace(/^assigned\\s*to\\s*[:|-]\\s*/i,"").trim():"Not specified";
+ const narrative=lines.filter(x=>x!==heading&&x!==assignedLine&&!/^customer\\s*name\\s*[:|-]/i.test(x)).join(" ");
+ const text=narrative||"Connected with the customer. Further discussion and requirement details are yet to be updated.";
+ const groupNote=heading+"\\n\\n"+text+"\\n\\nAssigned to: "+assigned;
+ const crmNote=text+"\\n\\nAssigned to: "+assigned;
+ return {group:groupNote,crm:crmNote};
 }
 async function generateNotes(){
  const raw=$("aiInput").value.trim();
  if(!raw){$("aiStatus").textContent="Paste customer details first.";return}
- $("generateAI").disabled=true;$("aiStatus").textContent="Preparing structured notes…";
+ $("generateAI").disabled=true;$("aiStatus").textContent="Preparing both note formats…";
  try{
-  const drafts=smartDrafts(raw);
-  $("aiNormal").value=drafts.normal_note;
-  $("aiFollowup").value=drafts.follow_up_note;
+  generatedDrafts=smartDrafts(raw);
+  $("aiGroup").innerHTML=formatNoteHtml(generatedDrafts.group);
+  $("aiCrm").innerHTML=formatNoteHtml(generatedDrafts.crm);
   $("aiResults").classList.remove("hidden");
-  $("aiStatus").textContent="Drafts ready. Check details and use the note you need.";
+  $("aiStatus").textContent="Both formats are ready. Review before sharing.";
  }catch(e){$("aiStatus").textContent="Could not prepare notes: "+e.message}
  finally{$("generateAI").disabled=false}
 }
@@ -61,7 +69,7 @@ async function loadAll(){
  if(g.error||p.error||c.error||profiles.error)throw(g.error||p.error||c.error||profiles.error);
  const colors=Object.fromEntries((profiles.data||[]).map(x=>[x.user_id,x.chat_color]));
  group=(g.data||[]).map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));personal=p.data||[];
- renderGroup();renderPersonal();renderColors(c.data?.chat_color||null);
+ renderGroup(true);renderPersonal();renderColors(c.data?.chat_color||null);
 }
 function renderColors(chosen){
  $("colorChoices").innerHTML=palette.map(col=>`<button type="button" class="color-choice ${chosen===col?"selected":""}" data-color="${col}" style="--swatch:${col}" ${chosen?"disabled":""} aria-label="Choose ${col}"></button>`).join("");
@@ -104,11 +112,26 @@ $("forgotPassword").onclick=async()=>{if(!db)return;const email=$("email").value
 document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>showView(b.dataset.view));
 $("colorChoices").onclick=e=>{const b=e.target.closest("[data-color]");if(b&&!b.disabled)chooseColor(b.dataset.color)};
 $("generateAI").onclick=generateNotes;
-document.querySelectorAll("[data-ai-use]").forEach(b=>b.onclick=()=>{
- $("noteInput").value=b.dataset.aiUse==="normal"?$("aiNormal").value:$("aiFollowup").value;
- $("noteInput").focus();$("aiStatus").textContent="Added to the group composer. Press Send update when ready.";
+document.addEventListener("click",async e=>{
+ const use=e.target.closest("[data-ai-use]");
+ if(use){
+  if(use.dataset.aiUse==="group"){
+   if(!generatedDrafts.group||!user)return;
+   const {error}=await db.from("ctr_group_notes").insert({user_id:user.id,author_email:user.email,body:generatedDrafts.group});
+   $("aiStatus").textContent=error?"Could not share: "+error.message:"Group note shared successfully.";
+  }else if(use.dataset.aiUse==="crm"){
+   try{await navigator.clipboard.writeText(generatedDrafts.crm);$("aiStatus").textContent="CRM note copied. Paste it into your CRM."}
+   catch{$("aiStatus").textContent="Clipboard access unavailable. Select and copy the CRM text."}
+  }
+ }
+ const copy=e.target.closest("[data-copy]");
+ if(copy){
+  const text=generatedDrafts[copy.dataset.copy];
+  try{await navigator.clipboard.writeText(text);$("aiStatus").textContent="Copied "+(copy.dataset.copy==="group"?"group":"CRM")+" note."}
+  catch{$("aiStatus").textContent="Clipboard access unavailable. Select the note and copy it."}
+ }
 });
-$("noteForm").onsubmit=async e=>{e.preventDefault();const body=$("noteInput").value.trim();if(!body||!user)return;const {error}=await db.from("ctr_group_notes").insert({user_id:user.id,author_email:user.email,body});if(error)status("Could not send: "+error.message);else $("noteInput").value=""};
+$("noteForm").onsubmit=async e=>{e.preventDefault();const body=$("noteInput").value.trim();if(!body||!user)return;const {error}=await db.from("ctr_group_notes").insert({user_id:user.id,author_email:user.email,body});if(error)status("Could not send: "+error.message);else {$("noteInput").value="";renderGroup(true)}};
 $("personalForm").onsubmit=async e=>{e.preventDefault();const body=$("personalInput").value.trim();if(!body||!user)return;const {error}=await db.from("ctr_personal_notes").insert({user_id:user.id,body});if(error)status("Could not save: "+error.message);else $("personalInput").value=""};
 document.addEventListener("click",async e=>{const g=e.target.dataset.gdelete,p=e.target.dataset.pdelete;if(g){const {error}=await db.from("ctr_group_notes").delete().eq("id",g);if(error)status(error.message)}if(p){const {error}=await db.from("ctr_personal_notes").delete().eq("id",p);if(error)status(error.message)}});
 $("signOut").onclick=async()=>{if(channel)await db.removeChannel(channel);await db.auth.signOut()};
