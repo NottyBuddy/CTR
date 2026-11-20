@@ -42,7 +42,7 @@ function renderDirect(){
  $("directCount").textContent=direct.length;
  const rows=direct.filter(m=>(!directFilter||[m.body,team.find(x=>x.user_id===m.sender_id)?.display_name,team.find(x=>x.user_id===m.recipient_id)?.display_name].join(" ").toLowerCase().includes(directFilter))&&(admin&&!selected?true:
   (m.sender_id===user.id&&m.recipient_id===selected)||(m.sender_id===selected&&m.recipient_id===user.id)
- )));
+  ));
  $("directNotes").innerHTML=rows.length?rows.map(m=>{
   const sender=team.find(x=>x.user_id===m.sender_id),recipient=team.find(x=>x.user_id===m.recipient_id);
   const from=sender?.display_name||"CTR Member",to=recipient?.display_name||"CTR Member";
