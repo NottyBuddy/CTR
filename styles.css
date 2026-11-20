@@ -470,3 +470,8 @@ input::placeholder,textarea::placeholder{color:#e0d6da!important;opacity:1!impor
 .notification-toggle{white-space:nowrap!important}
 .notification-toggle.notifications-on{color:#f5d48a!important}
 @media(max-width:760px){.notification-toggle{font-size:9px!important;padding:8px 9px!important}.top-meta{flex-wrap:wrap}}
+
+
+/* Login screen logo size */
+#authView > .brand .brand-mark{width:76px;height:76px;flex:0 0 76px}
+#authView > .brand .ctr-emblem{width:100%;height:100%;object-fit:contain}
