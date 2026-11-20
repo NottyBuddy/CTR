@@ -29,7 +29,7 @@ function formatNoteHtml(body){
 function renderGroup(forceBottom=false){
  const box=$("notes"),wasNearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<110;
  $("noteCount").textContent=group.length;
- $("notes").innerHTML=group.length?group.map(n=>`<article class="note ${n.user_id===user.id?"mine":""}" style="--user-chat:${esc(n.chat_color)}"><div class="note-top"><div class="note-avatar" style="background:${esc(n.chat_color)}">${esc(initials(displayName(n.author_email)))}</div><span class="note-author">${esc(displayName(n.author_email))}${n.user_id===user.id?" · You":""}</span><span class="note-time">${esc(time(n.created_at))}</span>${n.user_id===user.id?`<button class="delete-note" data-gdelete="${n.id}">Delete</button>`:""}</div><div class="note-body">${formatNoteHtml(n.body)}</div></article>`).join(""):'<div class="empty-state"><h3>No group updates yet</h3><p>Paste the first CRM update to start the shared record.</p></div>';
+ $("notes").innerHTML=group.length?group.map(n=>`<article class="note ${n.user_id===user.id?"mine":""}" style="--user-chat:${esc(n.chat_color)}"><div class="note-top"><div class="note-avatar" style="background:${esc(n.chat_color)}">${esc(initials(displayName(n.author_email)))}</div><span class="note-author">${esc(displayName(n.author_email))}${n.user_id===user.id?" · You":""}</span><span class="note-time">${esc(time(n.created_at))}</span>${(n.user_id===user.id||isAdmin())?`<button class="delete-note" data-gdelete="${n.id}">${isAdmin()&&n.user_id!==user.id?"Admin · Delete":"Delete"}</button>`:""}</div><div class="note-body">${formatNoteHtml(n.body)}</div></article>`).join(""):'<div class="empty-state"><h3>No group updates yet</h3><p>Paste the first CRM update to start the shared record.</p></div>';
  if(forceBottom||wasNearBottom)requestAnimationFrame(()=>{box.scrollTop=box.scrollHeight});
 }
 function renderDirect(){
@@ -42,7 +42,7 @@ function renderDirect(){
  $("directNotes").innerHTML=rows.length?rows.map(m=>{
   const sender=team.find(x=>x.user_id===m.sender_id),recipient=team.find(x=>x.user_id===m.recipient_id);
   const from=sender?.display_name||"CTR Member",to=recipient?.display_name||"CTR Member";
-  return `<article class="note direct-note"><div class="note-top"><span class="note-author">${esc(from)} <span class="direct-route">→ ${esc(to)}</span></span><span class="note-time">${esc(time(m.created_at))}</span></div><div class="note-body">${esc(m.body)}</div></article>`;
+  return `<article class="note direct-note"><div class="note-top"><span class="note-author">${esc(from)} <span class="direct-route">→ ${esc(to)}</span></span><span class="note-time">${esc(time(m.created_at))}</span>${admin?`<button class="delete-note" data-ddelete="${m.id}">Admin · Delete</button>`:""}</div><div class="note-body">${esc(m.body)}</div></article>`;
  }).join(""):'<div class="empty-state"><h3>No direct messages yet</h3><p>Choose a team member above to start a private conversation.</p></div>';
 }
 async function loadDirect(){
@@ -192,6 +192,6 @@ document.addEventListener("click",async e=>{
 });
 $("noteForm").onsubmit=async e=>{e.preventDefault();const body=$("noteInput").value.trim();if(!body||!user)return;const {error}=await db.from("ctr_group_notes").insert({user_id:user.id,author_email:user.email,body});if(error)status("Could not send: "+error.message);else {$("noteInput").value="";renderGroup(true)}};
 $("personalForm").onsubmit=async e=>{e.preventDefault();const body=$("personalInput").value.trim();if(!body||!user)return;const {error}=await db.from("ctr_personal_notes").insert({user_id:user.id,body});if(error)status("Could not save: "+error.message);else $("personalInput").value=""};
-document.addEventListener("click",async e=>{const g=e.target.dataset.gdelete,p=e.target.dataset.pdelete;if(g){const {error}=await db.from("ctr_group_notes").delete().eq("id",g);if(error)status(error.message)}if(p){const {error}=await db.from("ctr_personal_notes").delete().eq("id",p);if(error)status(error.message)}});
+document.addEventListener("click",async e=>{const g=e.target.dataset.gdelete,p=e.target.dataset.pdelete,d=e.target.dataset.ddelete;if(g){if(!confirm("Delete this group message?"))return;const {error}=await db.from("ctr_group_notes").delete().eq("id",g);if(error)status("Delete failed: "+error.message);else{group=group.filter(n=>n.id!==g);renderGroup();status("Group message deleted.")}}if(p){if(!confirm("Delete this personal note?"))return;const {error}=await db.from("ctr_personal_notes").delete().eq("id",p);if(error)status("Delete failed: "+error.message);else{personal=personal.filter(n=>n.id!==p);renderPersonal()}}if(d&&isAdmin()){if(!confirm("Admin: permanently delete this direct message?"))return;const {error}=await db.from("ctr_direct_messages").delete().eq("id",d);if(error)status("Delete failed: "+error.message);else{direct=direct.filter(m=>m.id!==d);renderDirect();status("Direct message deleted by admin.")}}});
 $("signOut").onclick=async()=>{if(channel)await db.removeChannel(channel);await db.auth.signOut()};
 boot();
