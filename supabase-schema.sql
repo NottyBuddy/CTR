@@ -155,3 +155,23 @@ drop trigger if exists ctr_personal_note_delete_audit on public.ctr_personal_not
 create trigger ctr_personal_note_delete_audit before delete on public.ctr_personal_notes for each row execute function public.ctr_audit_note_delete();
 drop trigger if exists ctr_direct_message_delete_audit on public.ctr_direct_messages;
 create trigger ctr_direct_message_delete_audit before delete on public.ctr_direct_messages for each row execute function public.ctr_audit_note_delete();
+
+
+-- FINAL CTR permissions: normal users cannot delete group or personal notes.
+drop policy if exists "Users can delete own group notes" on public.ctr_group_notes;
+drop policy if exists "CTR admin can delete any group note" on public.ctr_group_notes;
+drop policy if exists "Users delete own and admin all group notes" on public.ctr_group_notes;
+create policy "Only CTR admin can delete group notes"
+on public.ctr_group_notes for delete to authenticated
+using(lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
+
+drop policy if exists "Users can delete own personal notes" on public.ctr_personal_notes;
+drop policy if exists "Users delete own and admin all personal notes" on public.ctr_personal_notes;
+create policy "Only CTR admin can delete personal notes"
+on public.ctr_personal_notes for delete to authenticated
+using(lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
+
+drop policy if exists "Users and admin can read personal notes" on public.ctr_personal_notes;
+create policy "Owners and CTR admin can read personal notes"
+on public.ctr_personal_notes for select to authenticated
+using(auth.uid()=user_id or lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com');
