@@ -34,8 +34,32 @@ function renderGroup(forceBottom=false){
  let rows=group.filter(n=>(!groupFilter||[n.body,displayName(n.author_email),n.author_email].join(" ").toLowerCase().includes(groupFilter))&&(!dateFilter||new Date(n.created_at).toISOString().slice(0,10)===dateFilter));
  rows.sort((x,y)=>Number(!!y.is_pinned)-Number(!!x.is_pinned)||new Date(x.created_at)-new Date(y.created_at));$("noteCount").textContent=rows.length;let last="";
  $("notes").innerHTML=rows.length?rows.map(n=>{const day=new Date(n.created_at).toDateString(),sep=day!==last?(last=day,`<div class="date-separator">${esc(dayLabel(n.created_at))}</div>`):"";return sep+`<article class="note ${n.user_id===user.id?"mine":""}" data-note-id="${n.id}"><div class="note-top"><div class="note-avatar" style="background:${esc(n.chat_color)}">${esc(initials(displayName(n.author_email)))}</div><span class="note-author">${esc(displayName(n.author_email))}${n.user_id===user.id?" · You":""}</span><span class="note-time">${esc(time(n.created_at))}${n.edited_at?" · edited":""}</span>${n.is_pinned?'<span class="pin-label">Pinned</span>':""}${n.user_id===user.id||isAdmin()?`<button class="message-action" data-edit="${n.id}">Edit</button>`:""}${isAdmin()?`<button class="delete-note" data-gdelete="${n.id}">Admin · Delete</button>`:""}${isAdmin()?`<button class="message-action" data-pin="${n.id}">${n.is_pinned?"Unpin":"Pin"}</button>`:""}</div><div class="note-body">${formatNoteHtml(n.body)}</div><div class="reaction-row">${["👍","✅","👀"].map(e=>{const users=(n.reactions||{})[e]||[];return `<button class="reaction-btn ${users.includes(user.id)?"reacted":""}" data-react="${n.id}" data-emoji="${e}" type="button" aria-pressed="${users.includes(user.id)}">${e} ${users.length}</button>`}).join("")}</div></article>`}).join(""):'<div class="empty-state"><h3>No matching updates</h3><p>Try clearing the filters.</p></div>';
- if(forceBottom||near)requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);updateUnread();
+ enhanceGroupMessages(rows);if(forceBottom||near)requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);updateUnread();
 }
+
+function enhanceGroupMessages(rows){
+ const seen=new Date(localStorage.getItem(seenKey("group"))||0).getTime();let prior="",unreadDone=false;
+ document.querySelectorAll("#notes .note[data-note-id]").forEach(card=>{
+  const n=rows.find(x=>x.id===card.dataset.noteId);if(!n)return;
+  const groupKey=n.user_id+"|"+new Date(n.created_at).toDateString();
+  if(groupKey===prior){card.classList.add("message-group-continued");const av=card.querySelector(".note-avatar"),au=card.querySelector(".note-author");if(av)av.hidden=true;if(au)au.hidden=true}
+  else card.classList.add("message-group-start");
+  prior=groupKey;
+  if(n.user_id!==user.id&&new Date(n.created_at).getTime()>seen&&!unreadDone){const sep=document.createElement("div");sep.className="unread-divider";sep.textContent="New messages";card.before(sep);unreadDone=true}
+  const body=n.body||"",m=body.match(/(?:\\+?91[\\s-]?)?[6-9]\\d{9}/);
+  const top=card.querySelector(".note-top");
+  if(m&&top){const phone=m[0].replace(/\\D/g,"");const call=document.createElement("a");call.className="message-action call-action";call.href="tel:"+phone;call.textContent="Call";top.append(call);const cp=document.createElement("button");cp.className="message-action";cp.type="button";cp.dataset.copyPhone=phone;cp.textContent="Copy number";top.append(cp)}
+  const tools=document.createElement("div");tools.className="note-tools";const copy=document.createElement("button");copy.type="button";copy.className="message-action";copy.dataset.copyNote=n.id;copy.textContent="Copy note";tools.append(copy);card.append(tools);
+ });
+}
+let followups=[];
+function renderFollowups(){
+ const box=$("followupList");if(!box)return;const rows=followups.filter(x=>x.status!=="completed").sort((a,b)=>new Date(a.callback_at)-new Date(b.callback_at));
+ $("followupCount").textContent=rows.length;
+ box.innerHTML=rows.length?rows.map(f=>'<article class="followup-item"><div class="followup-info"><strong>'+esc(f.customer_name)+'</strong><span>'+esc(f.phone)+'</span><time>'+esc(time(f.callback_at))+'</time><p>'+esc(f.details||"")+'</p></div><div class="followup-actions"><a class="message-action" href="tel:'+f.phone.replace(/\\D/g,"")+'">Call</a><button class="message-action" data-copy-phone="'+f.phone.replace(/\\D/g,"")+'">Copy</button><button class="message-action" data-follow-done="'+f.id+'">Complete</button></div></article>').join(""):'<div class="empty-state">No pending follow-ups.</div>';
+}
+async function loadFollowups(){const r=await db.from("ctr_followups").select("*").order("callback_at").limit(500);if(r.error){$("followupList").textContent="Run the follow-up SQL update in Supabase to enable reminders.";return}followups=r.data||[];renderFollowups()}
+
 function renderDirect(){
  const admin=isAdmin(),selected=$("directRecipient").value;
  $("directAdminHint").classList.toggle("hidden",!admin);
@@ -74,7 +98,7 @@ async function refreshMessages(){
   if(g.error||p.error||c.error||profiles.error)throw(g.error||p.error||c.error||profiles.error);
   const colors=Object.fromEntries((profiles.data||[]).map(x=>[x.user_id,x.chat_color]));
   group=(g.data||[]).map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));personal=p.data||[];
-  renderGroup(true);renderPersonal();
+  renderGroup(true);renderPersonal();await loadFollowups();
   await loadDirect();
   status("Messages refreshed.");
  }catch(e){status("Refresh failed: "+e.message)}
@@ -122,7 +146,7 @@ async function loadAll(){
  if(g.error||p.error||c.error||profiles.error)throw(g.error||p.error||c.error||profiles.error);
  const colors=Object.fromEntries((profiles.data||[]).map(x=>[x.user_id,x.chat_color]));
  group=(g.data||[]).map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));personal=p.data||[];
- renderGroup(true);renderPersonal();renderColors(c.data?.chat_color||null);
+ renderGroup(true);renderPersonal();renderColors(c.data?.chat_color||null);await loadFollowups();
 }
 function renderColors(chosen){
  $("colorChoices").innerHTML=palette.map(col=>`<button type="button" class="color-choice ${chosen===col?"selected":""}" data-color="${col}" style="--swatch:${col}" ${chosen?"disabled":""} aria-label="Choose ${col}"></button>`).join("");
@@ -140,6 +164,7 @@ function realtime(){
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_profiles"},async()=>{const [{data:mine},{data:profiles}]=await Promise.all([db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),db.from("ctr_profiles").select("user_id,chat_color")]);renderColors(mine?.chat_color||null);const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=group.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes",},async()=>{const {data}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500);personal=data||[];renderPersonal()})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async()=>{if(!$("directView").classList.contains("hidden"))await loadDirect()})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_followups"},loadFollowups)
  .subscribe(s=>{if(s==="SUBSCRIBED")status("Live sync connected · group updates appear automatically.");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")status("Live sync interrupted. Refresh to reconnect.")});
 }
 async function enter(u){
@@ -179,6 +204,9 @@ $("directForm").onsubmit=async e=>{
  $("directInput").value="";await loadDirect();status("Direct message sent.");
 };
 document.addEventListener("click",async e=>{
+ const cp=e.target.closest("[data-copy-phone]");if(cp){try{await navigator.clipboard.writeText(cp.dataset.copyPhone);status("Phone copied.")}catch{status("Clipboard unavailable.")}return}
+ const cn=e.target.closest("[data-copy-note]");if(cn){const n=group.find(x=>x.id===cn.dataset.copyNote);if(n){try{await navigator.clipboard.writeText(n.body);status("CRM note copied.")}catch{status("Clipboard unavailable.")}}return}
+ const done=e.target.closest("[data-follow-done]");if(done){const r=await db.from("ctr_followups").update({status:"completed",completed_at:new Date().toISOString()}).eq("id",done.dataset.followDone);if(r.error)status(r.error.message);else{await loadFollowups();status("Follow-up completed.")}return}
  const use=e.target.closest("[data-ai-use]");
  if(use){
   if(use.dataset.aiUse==="group"){
@@ -197,6 +225,7 @@ document.addEventListener("click",async e=>{
   catch{$("aiStatus").textContent="Clipboard access unavailable. Select the note and copy it."}
  }
 });
+$("followupForm").onsubmit=async e=>{e.preventDefault();const payload={user_id:user.id,customer_name:$("followupCustomer").value.trim(),phone:$("followupPhone").value.trim(),callback_at:new Date($("followupAt").value).toISOString(),details:$("followupDetails").value.trim(),status:"pending"};const r=await db.from("ctr_followups").insert(payload);if(r.error){status("Could not schedule: "+r.error.message);return}$("followupForm").reset();await loadFollowups();status("Callback scheduled.");};
 $("noteForm").onsubmit=async e=>{e.preventDefault();const body=$("noteInput").value.trim();if(!body||!user)return;const {error}=await db.from("ctr_group_notes").insert({user_id:user.id,author_email:user.email,body});if(error)status("Could not send: "+error.message);else {$("noteInput").value="";renderGroup(true)}};
 $("personalForm").onsubmit=async e=>{e.preventDefault();const body=$("personalInput").value.trim();if(!body||!user)return;const {error}=await db.from("ctr_personal_notes").insert({user_id:user.id,body});if(error)status("Could not save: "+error.message);else $("personalInput").value=""};
 document.addEventListener("click",async e=>{const target=e.target.closest("button");if(!target)return;const g=target.dataset.gdelete,p=target.dataset.pdelete,d=target.dataset.ddelete;const edit=target.dataset.edit,pedit=target.dataset.pedit,pin=target.dataset.pin,rid=target.dataset.react,emoji=target.dataset.emoji;
