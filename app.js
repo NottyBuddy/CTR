@@ -3,7 +3,8 @@ const SUPABASE_URL="https://icootmtssyergamuxlxb.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_qgEIXxXXBq2TaNxLMZPkwg_fcwKcdGW";
 const $=id=>document.getElementById(id);
 let db,user,group=[],personal=[],direct=[],team=[],channel;
-const ADMIN_EMAIL="mahesh.s@hrhnext.com";\nconst isAdmin=()=>String(user?.email||"").toLowerCase()===ADMIN_EMAIL;
+const ADMIN_EMAIL="mahesh.s@hrhnext.com";
+const isAdmin=()=>String(user?.email||"").toLowerCase()===ADMIN_EMAIL;
 const teamNames={
  "hrhca39899_indiframe@hrhnow.in":"Amrutha Shiva Kumar",
  "hrhca39898_indiframe@hrhnow.in":"Nandkishor Kasoju",
