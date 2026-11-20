@@ -470,3 +470,42 @@ body .shell [class*="card"],body .shell [class*="panel"]{
  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
 }
 .note,.note.mine,.note.direct-note{border:0!important;outline:0!important}
+
+
+/* Final transparent samurai theme polish */
+html,body{scrollbar-width:none!important;-ms-overflow-style:none!important}
+html::-webkit-scrollbar,body::-webkit-scrollbar,*::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+body{overflow-x:hidden!important}
+.site-background-video{display:none!important}
+body::before{
+ content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+ background:linear-gradient(180deg,rgba(3,3,5,.48),rgba(3,3,5,.68)),url("samurai-bg.png") center center/cover no-repeat;
+}
+.shell{position:relative;z-index:2}
+.note-avatar,.avatar,.profile-avatar,.user-avatar,.message-avatar{
+ background:#050505!important;background-color:#050505!important;color:#fff!important;
+ border:1px solid rgba(255,255,255,.22)!important;
+}
+.glass,.auth-card,.topbar,.chat,.right-panel,.note,.composer,.ai-result,
+.followup-panel,.followup-item,.modal,.modal-card,.panel,
+[class*="card"],[class*="panel"]{
+ background:transparent!important;background-color:transparent!important;
+ border:0!important;outline:0!important;box-shadow:none!important;
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+button,.top-nav-btn,.primary,.send-btn,.refresh-btn,.signout-btn,
+.message-action,.delete-note,.reaction-btn,.copy-draft,.text-btn{
+ border:0!important;outline:0!important;box-shadow:none!important;
+ background-color:transparent!important;
+}
+.note-body,.draft-preview,input,textarea,select,.chat-head h2,.chat-head p,
+.note-author,.note-time,.muted,label,.composer-foot,.head-count,
+.right-panel-head h3,.right-panel-head p,.followup-item,.app-footer,
+.direct-toolbar,.direct-hint{
+ color:#fff!important;text-shadow:0 1px 3px rgba(0,0,0,.95)!important;
+}
+.note-body,.draft-preview{font-size:15px!important;line-height:1.75!important}
+.note-time,.muted,.chat-head p,.right-panel-head p,.composer-foot,.app-footer{
+ color:#eee5e8!important;
+}
+input::placeholder,textarea::placeholder{color:#e0d6da!important;opacity:1!important}
