@@ -23,13 +23,14 @@
 <div class="auth-foot">PRIVATE TEAM SPACE <i></i> SECURE ACCESS</div>
 </section>
 <section id="appView" class="app-view hidden">
-<header class="topbar glass"><div class="brand compact"><div class="brand-mark">C</div><div><div class="brand-name">CTR</div><div class="brand-sub">CALLING TEAM RECORDS</div></div></div>
-<div class="top-meta"><span class="live-dot"></span><span>Shared workspace</span><span class="divider"></span><span id="userEmail">—</span><button id="signOut" class="icon-btn" title="Sign out">↗</button></div></header>
+<header class="topbar glass">
+<div class="brand compact"><div class="brand-mark">C</div><div><div class="brand-name">CTR</div><div class="brand-sub">CALLING TEAM RECORDS</div></div></div>
+<nav class="top-nav" aria-label="Workspace views">
+<button class="top-nav-btn active" data-view="group"><span class="nav-symbol">▤</span>Group Chat</button>
+<button class="top-nav-btn" data-view="personal"><span class="nav-symbol">▧</span>Personal Chat</button>
+</nav>
+<div class="top-meta"><span class="live-dot"></span><span>Live</span><span class="divider"></span><span id="userEmail">—</span><button id="signOut" class="signout-btn" title="Sign out">Sign out <span>↗</span></button></div></header>
 <div class="workspace">
-<aside class="side glass"><div class="side-label">WORKSPACE</div>
-<button class="room active" data-view="group"><div class="room-icon">▤</div><div><strong>Group Notes</strong><small>Shared with the team</small></div></button>
-<button class="room" data-view="personal"><div class="room-icon">▧</div><div><strong>Personal Notes</strong><small>Private callbacks & follow-ups</small></div></button>
-<div class="side-bottom"><div class="avatar" id="avatar">U</div><div class="side-user"><strong id="sideEmail">User</strong><small>Team member</small></div></div></aside>
 <section class="chat glass">
 <section id="groupView" class="notes-view">
 <div class="chat-head"><div><div class="eyebrow">SHARED CHANNEL</div><h2>Group Notes <span class="online-pill">● LIVE</span></h2><p>Updates shared with every signed-in CTR member.</p></div><div class="head-count">◉ <span id="noteCount">0</span> records</div></div>
