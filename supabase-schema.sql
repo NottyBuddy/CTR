@@ -232,3 +232,30 @@ do $$ begin
  alter publication supabase_realtime add table public.ctr_followups;
 exception when duplicate_object then null; when undefined_object then null;
 end $$;
+
+
+-- CTR pinning: admin-only atomic toggle with explicit permission check.
+create or replace function public.ctr_toggle_group_pin(p_note_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path=public
+as $$
+declare v_pinned boolean;
+begin
+ if auth.uid() is null or lower(coalesce(auth.jwt()->>'email','')) <> 'mahesh.s@hrhnext.com' then
+  raise exception 'Only CTR admin can pin or unpin messages';
+ end if;
+ update public.ctr_group_notes set is_pinned=not is_pinned where id=p_note_id returning is_pinned into v_pinned;
+ if not found then raise exception 'Message not found'; end if;
+ return v_pinned;
+end;
+$$;
+revoke all on function public.ctr_toggle_group_pin(uuid) from public;
+grant execute on function public.ctr_toggle_group_pin(uuid) to authenticated;
+
+-- Follow-ups are shared by the team; any authenticated team member can complete them.
+drop policy if exists "Owners and admin update followups" on public.ctr_followups;
+drop policy if exists "CTR members can complete followups" on public.ctr_followups;
+create policy "CTR members can complete followups" on public.ctr_followups
+ for update to authenticated using(true) with check(true);
