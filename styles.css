@@ -363,3 +363,85 @@ input:focus,textarea:focus{
 @media(prefers-reduced-motion:reduce){
  body:before,.ambient{animation:none!important}
 }
+
+
+/* Header navigation and completely borderless workspace */
+:root{--line:transparent}
+*{border-color:transparent!important}
+.glass,.topbar,.chat,.right-panel,.auth-card,.composer,.note,.ai-result,.room,.icon-btn,
+input,textarea,.connection-banner,.color-picker-wrap,.chat-head,.composer-foot,.side-bottom{
+ border:0!important;outline-color:transparent;
+}
+.topbar{
+ min-height:76px;height:auto;padding:12px 20px;display:grid;
+ grid-template-columns:auto 1fr auto;gap:22px;border-radius:20px;
+ background:rgba(15,29,37,.78);
+ box-shadow:0 14px 45px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.045);
+}
+.top-nav{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0}
+.top-nav-btn{
+ display:inline-flex;align-items:center;justify-content:center;gap:9px;
+ min-height:42px;padding:0 17px;border:0;border-radius:12px;
+ background:transparent;color:#9fb4ba;font:600 12px "DM Sans",sans-serif;
+ cursor:pointer;white-space:nowrap;transition:background .2s,color .2s,transform .2s;
+}
+.top-nav-btn:hover{background:rgba(57,198,176,.08);color:#e8fffb;transform:translateY(-1px)}
+.top-nav-btn.active{background:rgba(57,198,176,.15);color:#85e4d6;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.nav-symbol{font-size:16px;line-height:1}
+.top-meta{justify-content:flex-end;white-space:nowrap}
+.signout-btn{
+ display:inline-flex;align-items:center;gap:12px;padding:10px 14px;margin-left:5px;
+ border:0;border-radius:11px;background:rgba(255,255,255,.055);
+ color:#d7e6e8;font:600 11px "DM Sans",sans-serif;cursor:pointer;
+ transition:background .2s,color .2s,transform .2s;
+}
+.signout-btn:hover{background:rgba(57,198,176,.14);color:#a5f0e5;transform:translateY(-1px)}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:22px;margin:20px 0;align-items:start}
+.side{display:none!important}
+.chat{
+ min-width:0;min-height:calc(100vh - 170px);padding:0 26px 22px;
+ background:rgba(18,31,39,.52);box-shadow:none;border-radius:20px;
+}
+.right-panel{
+ position:relative;top:auto;max-height:none;overflow:visible;
+ background:rgba(18,31,39,.52);box-shadow:none;border-radius:20px;padding:22px 18px;
+}
+.chat-head{border:0!important;padding:25px 0 18px}
+.color-picker-wrap{border:0!important;padding:12px 0}
+.composer{background:rgba(5,16,22,.35);box-shadow:none;border-radius:14px}
+.note{box-shadow:inset 3px 0 var(--user-chat,var(--accent))!important;border-radius:12px}
+.ai-result{background:rgba(255,255,255,.035);box-shadow:none}
+input,textarea{background:rgba(5,15,21,.45);box-shadow:none!important;border-radius:11px}
+input:focus,textarea:focus{box-shadow:0 0 0 2px rgba(57,198,176,.22)!important}
+.connection-banner{background:rgba(139,180,112,.07)}
+.app-footer{border:0!important}
+@media(max-width:1000px){
+ .topbar{grid-template-columns:auto 1fr;gap:10px}
+ .top-nav{grid-column:1/-1;grid-row:2;justify-content:flex-start;order:3}
+ .top-meta{grid-column:2;grid-row:1}
+ .workspace{grid-template-columns:minmax(0,1fr) 290px;gap:14px}
+}
+@media(max-width:760px){
+ .shell{padding:10px}
+ .topbar{grid-template-columns:1fr auto;gap:10px;padding:11px 12px;min-height:0}
+ .topbar .brand{grid-column:1;grid-row:1}
+ .top-meta{grid-column:2;grid-row:1;gap:7px}
+ .top-meta>span:not(.live-dot),.top-meta .divider{display:none}
+ .top-nav{grid-column:1/-1;grid-row:2;width:100%;gap:7px}
+ .top-nav-btn{flex:1;padding:0 8px;min-height:40px;font-size:11px}
+ .signout-btn{padding:9px 10px;font-size:10px;gap:6px}
+ .workspace{display:flex;flex-direction:column;gap:12px;margin:12px 0}
+ .chat{order:1;width:100%;min-height:65vh;padding:0 14px 14px}
+ .right-panel{order:2;width:100%;padding:17px 14px}
+ .notes{max-height:52vh;min-height:220px}
+ .chat-head{padding:19px 0 13px}
+ .chat-head h2{font-size:18px}
+ .chat-head p{max-width:250px;line-height:1.5}
+ .composer-foot{gap:8px}
+}
+@media(max-width:390px){
+ .compact .brand-mark{width:33px;height:33px}
+ .compact .brand-name{font-size:15px}
+ .compact .brand-sub{font-size:8px;letter-spacing:1.3px}
+ .top-nav-btn{gap:6px}
+}
