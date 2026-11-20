@@ -2,7 +2,7 @@
 const SUPABASE_URL="https://icootmtssyergamuxlxb.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_qgEIXxXXBq2TaNxLMZPkwg_fcwKcdGW";
 const $=id=>document.getElementById(id);
-let db,user,group=[],personal=[],direct=[],team=[],channel;
+let db,user,group=[],personal=[],direct=[],team=[],channel;\nlet groupFilter="",dateFilter="",personalFilter="",directFilter="";\nconst seenKey=k=>"ctr_seen_"+k+"_"+(user?.id||"");const markSeen=k=>{if(user)localStorage.setItem(seenKey(k),new Date().toISOString());updateUnread()};const countUnread=(a,k)=>a.filter(x=>new Date(x.created_at)>new Date(localStorage.getItem(seenKey(k))||0)).length;function updateUnread(){if(!user)return;for(const [id,n] of [["groupUnread",countUnread(group.filter(x=>x.user_id!==user.id),"group")],["directUnread",countUnread(direct.filter(x=>x.recipient_id===user.id),"direct")]]){const e=$(id);if(e){e.textContent=n;e.classList.toggle("hidden",!n)}}}
 const ADMIN_EMAIL="mahesh.s@hrhnext.com";
 const isAdmin=()=>String(user?.email||"").toLowerCase()===ADMIN_EMAIL;
 const teamNames={
@@ -26,19 +26,21 @@ function formatNoteHtml(body){
   return safe||"&nbsp;";
  }).join("<br>");
 }
+function dayLabel(v){const d=new Date(v),t=new Date(),y=new Date();y.setDate(t.getDate()-1);return d.toDateString()===t.toDateString()?"Today":d.toDateString()===y.toDateString()?"Yesterday":new Intl.DateTimeFormat(undefined,{dateStyle:"full"}).format(d)}
 function renderGroup(forceBottom=false){
- const box=$("notes"),wasNearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<110;
- $("noteCount").textContent=group.length;
- $("notes").innerHTML=group.length?group.map(n=>`<article class="note ${n.user_id===user.id?"mine":""}" style="--user-chat:${esc(n.chat_color)}"><div class="note-top"><div class="note-avatar" style="background:${esc(n.chat_color)}">${esc(initials(displayName(n.author_email)))}</div><span class="note-author">${esc(displayName(n.author_email))}${n.user_id===user.id?" · You":""}</span><span class="note-time">${esc(time(n.created_at))}</span>${(n.user_id===user.id||isAdmin())?`<button class="delete-note" data-gdelete="${n.id}">${isAdmin()&&n.user_id!==user.id?"Admin · Delete":"Delete"}</button>`:""}</div><div class="note-body">${formatNoteHtml(n.body)}</div></article>`).join(""):'<div class="empty-state"><h3>No group updates yet</h3><p>Paste the first CRM update to start the shared record.</p></div>';
- if(forceBottom||wasNearBottom)requestAnimationFrame(()=>{box.scrollTop=box.scrollHeight});
+ const box=$("notes"),near=box.scrollHeight-box.scrollTop-box.clientHeight<110;
+ let rows=group.filter(n=>(!groupFilter||[n.body,displayName(n.author_email),n.author_email].join(" ").toLowerCase().includes(groupFilter))&&(!dateFilter||new Date(n.created_at).toISOString().slice(0,10)===dateFilter));
+ rows.sort((x,y)=>Number(!!y.is_pinned)-Number(!!x.is_pinned)||new Date(x.created_at)-new Date(y.created_at));$("noteCount").textContent=rows.length;let last="";
+ $("notes").innerHTML=rows.length?rows.map(n=>{const day=new Date(n.created_at).toDateString(),sep=day!==last?(last=day,`<div class="date-separator">${esc(dayLabel(n.created_at))}</div>`):"";return sep+`<article class="note ${n.user_id===user.id?"mine":""}" data-note-id="${n.id}"><div class="note-top"><div class="note-avatar" style="background:${esc(n.chat_color)}">${esc(initials(displayName(n.author_email)))}</div><span class="note-author">${esc(displayName(n.author_email))}${n.user_id===user.id?" · You":""}</span><span class="note-time">${esc(time(n.created_at))}${n.edited_at?" · edited":""}</span>${n.is_pinned?'<span class="pin-label">Pinned</span>':""}${n.user_id===user.id||isAdmin()?`<button class="message-action" data-edit="${n.id}">Edit</button><button class="delete-note" data-gdelete="${n.id}">Delete</button>`:""}${isAdmin()?`<button class="message-action" data-pin="${n.id}">${n.is_pinned?"Unpin":"Pin"}</button>`:""}</div><div class="note-body">${formatNoteHtml(n.body)}</div><div class="reaction-row">${["👍","✅","👀"].map(e=>`<button class="reaction-btn" data-react="${n.id}" data-emoji="${e}">${e} ${(n.reactions||{})[e]?.length||0}</button>`).join("")}</div></article>`}).join(""):'<div class="empty-state"><h3>No matching updates</h3><p>Try clearing the filters.</p></div>';
+ if(forceBottom||near)requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);updateUnread();
 }
 function renderDirect(){
  const admin=isAdmin(),selected=$("directRecipient").value;
  $("directAdminHint").classList.toggle("hidden",!admin);
  $("directCount").textContent=direct.length;
- const rows=direct.filter(m=>admin&&!selected?true:(
+ const rows=direct.filter(m=>(!directFilter||[m.body,team.find(x=>x.user_id===m.sender_id)?.display_name,team.find(x=>x.user_id===m.recipient_id)?.display_name].join(" ").toLowerCase().includes(directFilter))&&(admin&&!selected?true:
   (m.sender_id===user.id&&m.recipient_id===selected)||(m.sender_id===selected&&m.recipient_id===user.id)
- ));
+ )));
  $("directNotes").innerHTML=rows.length?rows.map(m=>{
   const sender=team.find(x=>x.user_id===m.sender_id),recipient=team.find(x=>x.user_id===m.recipient_id);
   const from=sender?.display_name||"CTR Member",to=recipient?.display_name||"CTR Member";
@@ -55,7 +57,7 @@ async function loadDirect(){
  if(old&&team.some(p=>p.user_id===old))sel.value=old;
  const {data,error}=await db.from("ctr_direct_messages").select("*").order("created_at",{ascending:true}).limit(1000);
  if(error){status("Could not load direct messages: "+error.message);return}
- direct=data||[];renderDirect();
+ direct=data||[];renderDirect();updateUnread();
 }
 async function refreshMessages(){
  const btn=$("refreshData");btn.disabled=true;btn.textContent="↻ Refreshing…";
@@ -77,14 +79,14 @@ async function refreshMessages(){
 }
 function renderPersonal(){
  $("personalCount").textContent=personal.length;
- $("personalNotes").innerHTML=personal.length?personal.map(n=>`<article class="note personal-note"><div class="note-top"><span class="note-author">PRIVATE NOTE</span><span class="note-time">${esc(time(n.created_at))}</span><button class="delete-note" data-pdelete="${n.id}">Delete</button></div><div class="note-body">${esc(n.body)}</div></article>`).join(""):'<div class="empty-state"><h3>Your private notes</h3><p>Keep open-call, callback and follow-up reminders here. Only you can see them.</p></div>';
+ $("personalNotes").innerHTML=personal.length?personal.map(n=>`<article class="note personal-note"><div class="note-top"><span class="note-author">PRIVATE NOTE</span><span class="note-time">${esc(time(n.created_at))}${n.edited_at?" · edited":""}</span><button class="message-action" data-pedit="${n.id}">Edit</button><button class="delete-note" data-pdelete="${n.id}">Delete</button></div><div class="note-body">${esc(n.body)}</div></article>`).join(""):'<div class="empty-state"><h3>Your private notes</h3><p>Keep open-call, callback and follow-up reminders here. Only you can see them.</p></div>';
 }
 function showView(v){
  $("groupView").classList.toggle("hidden",v!=="group");
  $("personalView").classList.toggle("hidden",v!=="personal");
  $("directView").classList.toggle("hidden",v!=="direct");
  document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
- if(v==="direct")loadDirect();
+ if(v==="direct"){loadDirect();markSeen("direct")}if(v==="group")markSeen("group");
 }
 let generatedDrafts={group:"",crm:""};
 function smartDrafts(raw){
@@ -132,7 +134,7 @@ function realtime(){
  channel=db.channel("ctr-live-"+user.id)
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_group_notes"},async()=>{const [{data,error},{data:profiles}]=await Promise.all([db.from("ctr_group_notes").select("*").order("created_at").limit(500),db.from("ctr_profiles").select("user_id,chat_color")]);if(!error){const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=(data||[]).map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()}})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_profiles"},async()=>{const [{data:mine},{data:profiles}]=await Promise.all([db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),db.from("ctr_profiles").select("user_id,chat_color")]);renderColors(mine?.chat_color||null);const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=group.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()})
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes",filter:"user_id=eq."+user.id},async()=>{const {data}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500);personal=data||[];renderPersonal()})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes",},async()=>{const {data}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500);personal=data||[];renderPersonal()})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async()=>{if(!$("directView").classList.contains("hidden"))await loadDirect()})
  .subscribe(s=>{if(s==="SUBSCRIBED")status("Live sync connected · group updates appear automatically.");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")status("Live sync interrupted. Refresh to reconnect.")});
 }
@@ -161,7 +163,7 @@ document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>showView(b.dat
 $("colorChoices").onclick=e=>{const b=e.target.closest("[data-color]");if(b&&!b.disabled)chooseColor(b.dataset.color)};
 $("generateAI").onclick=generateNotes;
 $("refreshData").onclick=refreshMessages;
-$("directRecipient").onchange=renderDirect;
+$("directRecipient").onchange=renderDirect;\n$("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value.toLowerCase().trim();renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
 $("directForm").onsubmit=async e=>{
  e.preventDefault();
  const recipient=$("directRecipient").value,body=$("directInput").value.trim();
@@ -192,6 +194,15 @@ document.addEventListener("click",async e=>{
 });
 $("noteForm").onsubmit=async e=>{e.preventDefault();const body=$("noteInput").value.trim();if(!body||!user)return;const {error}=await db.from("ctr_group_notes").insert({user_id:user.id,author_email:user.email,body});if(error)status("Could not send: "+error.message);else {$("noteInput").value="";renderGroup(true)}};
 $("personalForm").onsubmit=async e=>{e.preventDefault();const body=$("personalInput").value.trim();if(!body||!user)return;const {error}=await db.from("ctr_personal_notes").insert({user_id:user.id,body});if(error)status("Could not save: "+error.message);else $("personalInput").value=""};
-document.addEventListener("click",async e=>{const g=e.target.dataset.gdelete,p=e.target.dataset.pdelete,d=e.target.dataset.ddelete;if(g){if(!confirm("Delete this group message?"))return;const {error}=await db.from("ctr_group_notes").delete().eq("id",g);if(error)status("Delete failed: "+error.message);else{group=group.filter(n=>n.id!==g);renderGroup();status("Group message deleted.")}}if(p){if(!confirm("Delete this personal note?"))return;const {error}=await db.from("ctr_personal_notes").delete().eq("id",p);if(error)status("Delete failed: "+error.message);else{personal=personal.filter(n=>n.id!==p);renderPersonal()}}if(d&&isAdmin()){if(!confirm("Admin: permanently delete this direct message?"))return;const {error}=await db.from("ctr_direct_messages").delete().eq("id",d);if(error)status("Delete failed: "+error.message);else{direct=direct.filter(m=>m.id!==d);renderDirect();status("Direct message deleted by admin.")}}});
+document.addEventListener("click",async e=>{const g=e.target.dataset.gdelete,p=e.target.dataset.pdelete,d=e.target.dataset.ddelete;const edit=e.target.dataset.edit,pedit=e.target.dataset.pedit,pin=e.target.dataset.pin,rid=e.target.dataset.react,emoji=e.target.dataset.emoji;
+if(edit){const n=group.find(x=>x.id===edit);if(n){const body=prompt("Edit message",n.body);if(body!==null&&body.trim()){const {error}=await db.from("ctr_group_notes").update({body:body.trim(),edited_at:new Date().toISOString()}).eq("id",edit);if(error)status(error.message)}}}
+if(pedit){const n=personal.find(x=>x.id===pedit);if(n){const body=prompt("Edit personal note",n.body);if(body!==null&&body.trim()){const {error}=await db.from("ctr_personal_notes").update({body:body.trim(),edited_at:new Date().toISOString()}).eq("id",pedit);if(error)status(error.message)}}}
+if(pin&&isAdmin()){const n=group.find(x=>x.id===pin);if(n){const {error}=await db.from("ctr_group_notes").update({is_pinned:!n.is_pinned}).eq("id",pin);if(error)status(error.message)}}
+if(rid&&emoji){const n=group.find(x=>x.id===rid);if(n){const rs={...(n.reactions||{})},arr=[...(rs[emoji]||[])],i=arr.indexOf(user.id);i>=0?arr.splice(i,1):arr.push(user.id);rs[emoji]=arr;const {error}=await db.from("ctr_group_notes").update({reactions:rs}).eq("id",rid);if(error)status(error.message)}}
+if(g){if(!confirm("Delete this group message?"))return;const {error}=await db.from("ctr_group_notes").delete().eq("id",g);if(error)status("Delete failed: "+error.message);else status("Group message deleted.")}if(p){if(!confirm("Delete this personal note?"))return;const {error}=await db.from("ctr_personal_notes").delete().eq("id",p);if(error)status("Delete failed: "+error.message);else status("Personal note deleted.")}if(d&&isAdmin()){if(!confirm("Admin: permanently delete this direct message?"))return;const {error}=await db.from("ctr_direct_messages").delete().eq("id",d);if(error)status("Delete failed: "+error.message);else{direct=direct.filter(m=>m.id!==d);renderDirect();status("Direct message deleted by admin.")}}});
 $("signOut").onclick=async()=>{if(channel)await db.removeChannel(channel);await db.auth.signOut()};
 boot();
+
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&user){if(!$("groupView").classList.contains("hidden"))markSeen("group");if(!$("directView").classList.contains("hidden"))markSeen("direct")}});
+let holdTimer;document.addEventListener("touchstart",e=>{const card=e.target.closest(".note[data-note-id]");if(!card)return;holdTimer=setTimeout(()=>{const n=group.find(x=>x.id===card.dataset.noteId);if(n&&confirm("Quote this message in Group Chat?")){$("noteInput").value="↪ "+displayName(n.author_email)+": "+n.body+"\n\n";$("noteInput").focus()}},650)},{passive:true});document.addEventListener("touchend",()=>clearTimeout(holdTimer),{passive:true});document.addEventListener("touchmove",()=>clearTimeout(holdTimer),{passive:true});
+document.addEventListener("touchstart",e=>{const c=e.target.closest(".note[data-note-id]");if(c)c.dataset.startX=e.touches[0].clientX},{passive:true});document.addEventListener("touchend",e=>{const c=e.target.closest(".note[data-note-id]");if(!c||!c.dataset.startX)return;const dx=e.changedTouches[0].clientX-Number(c.dataset.startX);delete c.dataset.startX;if(dx>85){const n=group.find(x=>x.id===c.dataset.noteId);if(n){$("noteInput").value="↪ "+displayName(n.author_email)+": "+n.body+"\n\n";$("noteInput").focus()}}},{passive:true});
