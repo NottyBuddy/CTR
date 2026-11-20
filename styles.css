@@ -204,3 +204,7 @@ input:focus,textarea:focus{border:0!important;box-shadow:inset 0 0 0 1px rgba(18
  .right-panel #aiInput{min-height:105px}
  .draft-preview{max-height:220px}
 }
+
+/* Truly borderless message cards: retain depth with soft inset colour instead of outlines */
+.note{border:0!important;border-left:0!important;box-shadow:inset 3px 0 var(--user-chat,var(--accent)),0 8px 25px #0002!important}
+.note.mine{border:0!important;border-left:0!important}
