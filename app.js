@@ -54,9 +54,10 @@ function enhanceGroupMessages(rows){
 }
 let followups=[];
 function renderFollowups(){
- const box=$("followupList");if(!box)return;const rows=followups.filter(x=>x.status!=="completed").sort((a,b)=>new Date(a.callback_at)-new Date(b.callback_at));
+ const box=$("followupList");if(!box)return;
+ const rows=followups.filter(x=>x.status!=="completed").sort((a,b)=>new Date(a.callback_at)-new Date(b.callback_at));
  $("followupCount").textContent=rows.length;
- box.innerHTML=rows.length?rows.map(f=>'<article class="followup-item"><div class="followup-info"><strong>'+esc(f.customer_name)+'</strong><span>'+esc(f.phone)+'</span><time>'+esc(time(f.callback_at))+'</time><p>'+esc(f.details||"")+'</p></div><div class="followup-actions"><a class="message-action" href="tel:'+f.phone.replace(/\\D/g,"")+'">Call</a><button class="message-action" data-copy-phone="'+f.phone.replace(/\\D/g,"")+'">Copy</button><button class="message-action" data-follow-done="'+f.id+'">Complete</button></div></article>').join(""):'<div class="empty-state">No pending follow-ups.</div>';
+ box.innerHTML=rows.length?rows.map(f=>'<article class="followup-item"><div class="followup-info"><strong>'+esc(f.customer_name)+'</strong><span>'+esc(f.phone)+'</span><time>'+esc(time(f.callback_at))+'</time><p>'+esc(f.details||"")+'</p></div><div class="followup-actions"><button class="message-action" data-copy-phone="'+f.phone.replace(/\\D/g,"")+'">Copy phone</button><button class="message-action" data-follow-done="'+f.id+'">Complete</button></div></article>').join(""):'<div class="empty-state">No pending follow-ups.</div>';
 }
 async function loadFollowups(){const box=$("followupList");const r=await db.from("ctr_followups").select("*").order("callback_at").limit(500);if(r.error){followups=[];$("followupCount").textContent="!";box.innerHTML=`<div class="empty-state">Follow-ups are unavailable: ${esc(r.error.message)}. Run the CTR follow-up SQL in Supabase, then refresh.</div>`;return}followups=r.data||[];renderFollowups()}
 
@@ -113,6 +114,8 @@ function showView(v){
  $("groupView").classList.toggle("hidden",v!=="group");
  $("personalView").classList.toggle("hidden",v!=="personal");
  $("directView").classList.toggle("hidden",v!=="direct");
+ $("followupsView").classList.toggle("hidden",v!=="followups");
+ if(v==="followups")loadFollowups();
  document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
  if(v==="direct"){loadDirect();markSeen("direct")}if(v==="group")markSeen("group");
 }
@@ -206,7 +209,7 @@ $("directForm").onsubmit=async e=>{
 document.addEventListener("click",async e=>{
  const cp=e.target.closest("[data-copy-phone]");if(cp){try{await navigator.clipboard.writeText(cp.dataset.copyPhone);status("Phone copied.")}catch{status("Clipboard unavailable.")}return}
  const cn=e.target.closest("[data-copy-note]");if(cn){const n=group.find(x=>x.id===cn.dataset.copyNote);if(n){try{await navigator.clipboard.writeText(n.body);status("CRM note copied.")}catch{status("Clipboard unavailable.")}}return}
- const done=e.target.closest("[data-follow-done]");if(done){done.disabled=true;const r=await db.from("ctr_followups").update({status:"completed",completed_at:new Date().toISOString()}).eq("id",done.dataset.followDone).eq("status","pending");done.disabled=false;if(r.error)status("Could not complete follow-up: "+r.error.message);else{await loadFollowups();status("Follow-up marked complete.")}return}
+ const done=e.target.closest("[data-follow-done]");if(done){if(!window.confirm("Mark this follow-up as complete? It will be removed from Pending Follow-ups."))return;done.disabled=true;const r=await db.from("ctr_followups").update({status:"completed",completed_at:new Date().toISOString()}).eq("id",done.dataset.followDone).eq("status","pending");done.disabled=false;if(r.error)status("Could not complete follow-up: "+r.error.message);else{await loadFollowups();status("Follow-up completed and removed from pending list.")}return}
  const use=e.target.closest("[data-ai-use]");
  if(use){
   if(use.dataset.aiUse==="group"){
