@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 100" width="500" height="100">
+<g stroke="#252525" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round">
+<!-- 1: Shaolin temple -->
+<g transform="translate(0 0)">
+<path fill="#e8a92b" d="M9 31 Q24 4 50 8 Q76 4 91 31 Q70 27 50 21 Q30 27 9 31Z"/><path fill="#f2c34b" d="M15 31H85L79 37H21Z"/>
+<path fill="#d98b24" d="M22 45Q50 31 78 45L72 51H28Z"/><path fill="#f2c34b" d="M27 45H73V50H27Z"/>
+<path fill="#e8a92b" d="M5 61Q22 42 40 56L35 62H12Z M95 61Q78 42 60 56L65 62H88Z"/>
+<path fill="#f4e5b6" d="M31 51H69V81H31Z"/><path fill="#d94a25" d="M22 70H78V87H22Z"/><path fill="#f3c34c" d="M38 58H62V65H38Z M43 73H57V87H43Z"/>
+<path fill="none" stroke="#e0b74a" d="M35 53V68M43 53V68M50 53V68M57 53V68M65 53V68"/>
+<path fill="#eee4c8" d="M9 87H91L96 94H4Z"/><path fill="#f2c34b" d="M42 8L50 0L58 8Z"/>
+</g>
+<!-- 2: crossed Sai -->
+<g transform="translate(100 0)" fill="none">
+<g stroke="#343434" stroke-width="5"><path d="M24 83L76 17M76 83L24 17"/><path d="M20 82L12 91M80 82L88 91" stroke-width="7"/></g>
+<g stroke="#343434" stroke-width="4"><path d="M24 83Q6 77 12 60Q15 53 18 48M24 83Q43 79 37 62Q34 55 31 50M76 83Q94 77 88 60Q85 53 82 48M76 83Q57 79 63 62Q66 55 69 50"/></g>
+<g stroke="#e3b51c" stroke-width="3"><path d="M14 78L23 84M18 72L27 78M77 84L86 78M73 78L82 72"/></g>
+</g>
+<!-- 3: Makibishi / three-point shuriken -->
+<g transform="translate(200 0)">
+<path fill="#171717" stroke="none" d="M50 3L62 39L96 24L69 52L96 88L57 68L50 98L43 68L4 88L31 52L4 24L38 39Z"/>
+<path fill="#fff" stroke="none" d="M50 29L57 45L73 50L57 57L50 75L43 57L27 50L43 45Z"/>
+<path fill="none" stroke="#555" stroke-width="1.5" d="M50 3L50 29M4 24L27 50M96 24L73 50M4 88L43 57M96 88L57 57"/>
+</g>
+<!-- 4: Samurai helmet inside shield -->
+<g transform="translate(300 0)">
+<path fill="none" stroke="#252525" stroke-width="5" d="M13 22L50 9L87 22V57Q83 82 50 96Q17 82 13 57Z"/>
+<path fill="#222" d="M27 43Q21 28 34 20L43 10L47 25L53 25L58 10L67 20Q79 29 73 43L66 39L62 49H38L34 39Z"/>
+<path fill="#f2eee5" d="M35 43H65L62 60Q50 70 38 60Z"/>
+<path fill="#222" d="M27 43L17 55L35 58L42 51L50 58L58 51L65 58L83 55L73 43L66 48H34Z"/>
+<path fill="none" stroke="#eee" stroke-width="2" d="M39 31H61M42 53L50 57L58 53M50 11V25"/>
+<path fill="#222" d="M18 59L34 63L39 73L25 76Z M82 59L66 63L61 73L75 76Z"/>
+</g>
+<!-- 5: shield with crossed swords -->
+<g transform="translate(400 0)">
+<path fill="#343434" d="M50 24L79 30V58Q75 79 50 94Q25 79 21 58V30Z"/>
+<path fill="#fff" d="M50 31L72 36V57Q68 73 50 84Q32 73 28 57V36Z"/>
+<g stroke="#343434" stroke-width="4" stroke-linecap="round"><path d="M16 13L84 87M84 13L16 87"/></g>
+<g stroke="#343434" stroke-width="5"><path d="M13 9L21 17M79 83L87 91M87 9L79 17M21 83L13 91"/></g>
+<g fill="#343434" stroke="none"><path d="M10 5L17 10L14 18L7 13Z M90 5L83 10L86 18L93 13Z M7 87L14 82L18 89L11 95Z M93 87L86 82L82 89L89 95Z"/></g>
+</g>
+</g></svg>
