@@ -547,3 +547,22 @@ body::after{
  .global-search-wrap>input{min-height:40px}
  .global-search-results{left:0;right:0;width:100%}
 }
+
+
+/* Requested refinement: white mist is limited to the Samurai backdrop */
+body::before{
+ background:
+  radial-gradient(ellipse 78% 48% at 50% 52%,rgba(255,255,255,.20),transparent 76%),
+  radial-gradient(ellipse 90% 32% at 50% 100%,rgba(255,255,255,.17),transparent 78%),
+  linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.12)),
+  url("/CTR/file_000000005f188208adc8f107a4f7bc8b.png") center center/cover no-repeat!important;
+}
+/* Keep search immediately to the right of Agent Dashboard on desktop */
+@media(min-width:1181px){
+ .top-nav{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;min-width:0;gap:3px}
+ .global-search-wrap{flex:0 0 178px!important;width:178px!important;min-width:178px!important;max-width:178px!important;margin:0 0 0 8px!important}
+}
+@media(min-width:761px) and (max-width:1180px){
+ .top-nav{display:flex!important;flex-wrap:wrap!important;align-items:center!important}
+ .global-search-wrap{flex:0 0 178px!important;width:178px!important;min-width:178px!important;margin:0 0 0 8px!important}
+}
