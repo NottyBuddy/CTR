@@ -334,3 +334,25 @@ boot().catch(err=>{console.error("CTR startup failed",err);status("App startup f
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&user){if(!$("groupView").classList.contains("hidden"))markSeen("group");if(!$("directView").classList.contains("hidden"))markSeen("direct")}});
 let holdTimer;document.addEventListener("touchstart",e=>{const card=e.target.closest(".note[data-note-id]");if(!card)return;holdTimer=setTimeout(()=>{const n=group.find(x=>x.id===card.dataset.noteId);if(n&&confirm("Quote this message in Group Chat?")){$("noteInput").value="↪ "+displayName(n.author_email)+": "+n.body+"\n\n";$("noteInput").focus()}},650)},{passive:true});document.addEventListener("touchend",()=>clearTimeout(holdTimer),{passive:true});document.addEventListener("touchmove",()=>clearTimeout(holdTimer),{passive:true});
 document.addEventListener("touchstart",e=>{const c=e.target.closest(".note[data-note-id]");if(c)c.dataset.startX=e.touches[0].clientX},{passive:true});document.addEventListener("touchend",async e=>{const c=e.target.closest(".note[data-note-id]");if(!c||!c.dataset.startX)return;const dx=e.changedTouches[0].clientX-Number(c.dataset.startX);delete c.dataset.startX;const n=group.find(x=>x.id===c.dataset.noteId);if(!n)return;if(dx>85){$("noteInput").value="↪ "+displayName(n.author_email)+": "+n.body+"\n\n";$("noteInput").focus()}else if(dx< -85){try{await navigator.clipboard.writeText(n.body);status("CRM note copied by swipe.")}catch{status("Clipboard unavailable.")}}},{passive:true});
+
+
+// Desktop sidebar expand/collapse preference.
+(()=>{
+ const root=document.querySelector(".app-view");
+ const toggle=document.getElementById("sidebarToggle");
+ if(!root||!toggle)return;
+ const key="ctr_sidebar_collapsed";
+ const apply=collapsed=>{
+  root.classList.toggle("sidebar-collapsed",collapsed);
+  toggle.setAttribute("aria-label",collapsed?"Expand sidebar":"Collapse sidebar");
+  toggle.title=collapsed?"Expand sidebar":"Collapse sidebar";
+  const label=toggle.querySelector(".toggle-label");
+  if(label)label.textContent=collapsed?"Expand":"Collapse";
+ };
+ apply(localStorage.getItem(key)==="1");
+ toggle.addEventListener("click",()=>{
+  const collapsed=!root.classList.contains("sidebar-collapsed");
+  localStorage.setItem(key,collapsed?"1":"0");
+  apply(collapsed);
+ });
+})();
