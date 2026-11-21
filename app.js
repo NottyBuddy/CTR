@@ -59,17 +59,23 @@ function renderFollowups(){
  $("followupCount").textContent=rows.length;const navCount=$("followupNavCount");if(navCount)navCount.textContent=rows.length;
  box.innerHTML=rows.length?rows.map(f=>'<article class="followup-item"><div class="followup-info"><strong>'+esc(f.customer_name)+'</strong><span>'+esc(f.phone)+'</span><time>'+esc(time(f.callback_at))+'</time><p>'+esc(f.details||"")+'</p></div><div class="followup-actions"><button class="message-action" data-copy-phone="'+f.phone.replace(/\\D/g,"")+'">Copy phone</button><button class="message-action" data-follow-done="'+f.id+'">Complete</button></div></article>').join(""):'<div class="empty-state">No pending follow-ups.</div>';
 }
-async function loadFollowups(){const box=$("followupList");const r=await db.from("ctr_followups").select("*").order("callback_at").limit(500);if(r.error){followups=[];$("followupCount").textContent="!";box.innerHTML=`<div class="empty-state">Follow-ups are unavailable: ${esc(r.error.message)}. Run the CTR follow-up SQL in Supabase, then refresh.</div>`;return}followups=r.data||[];renderFollowups()}
+async function loadFollowups(){const box=$("followupList");const r=await db.from("ctr_followups").select("*").order("callback_at").limit(500);if(r.error){followups=[];$("followupCount").textContent="!";box.innerHTML=`<div class="empty-state">Follow-ups are unavailable: ${esc(r.error.message)}. Run the CTR follow-up SQL in Supabase, then refresh.</div>`;return}followups=r.data||[];renderFollowups();renderAgentDashboard()}
 
-function renderAgentDashboard(){
- const box=$("agentDashboard");if(!box)return;
+async function renderAgentDashboard(){
+ const box=$("agentDashboard");if(!box||!user)return;
  const agents=(isAdmin()?team.filter(t=>String(t.email||"").toLowerCase()!==ADMIN_EMAIL):team.filter(t=>t.user_id===user.id));
- const rows=agents.map(t=>{
-  const notes=group.filter(n=>n.user_id===t.user_id).length+personal.filter(n=>n.user_id===t.user_id).length;
-  const mine=followups.filter(x=>x.user_id===t.user_id);
-  return {name:t.display_name||displayName(t.email),notes,pending:mine.filter(x=>x.status!=="completed").length,completed:mine.filter(x=>x.status==="completed").length};
- });
- box.innerHTML=rows.length?rows.map(r=>`<article class="agent-card"><div class="agent-card-head"><strong>${esc(r.name)}</strong><span class="agent-card-label">AGENT ACTIVITY</span></div><div class="agent-metrics"><div><strong>${r.notes}</strong><span>Total notes</span></div><div><strong>${r.pending}</strong><span>Pending follow-ups</span></div><div><strong>${r.completed}</strong><span>Completed callbacks</span></div></div></article>`).join(""):'<div class="empty-state">No agent activity available yet.</div>';
+ if(!agents.length){box.innerHTML='<div class="empty-state">No agent activity available yet.</div>';return}
+ box.innerHTML='<div class="empty-state">Updating agent activity…</div>';
+ const rows=await Promise.all(agents.map(async t=>{
+  const [g,p,pending,completed]=await Promise.all([
+   db.from("ctr_group_notes").select("id",{count:"exact",head:true}).eq("user_id",t.user_id),
+   db.from("ctr_personal_notes").select("id",{count:"exact",head:true}).eq("user_id",t.user_id),
+   db.from("ctr_followups").select("id",{count:"exact",head:true}).eq("user_id",t.user_id).neq("status","completed"),
+   db.from("ctr_followups").select("id",{count:"exact",head:true}).eq("user_id",t.user_id).eq("status","completed")
+  ]);
+  return {name:t.display_name||displayName(t.email),notes:(g.count||0)+(p.count||0),pending:pending.count||0,completed:completed.count||0,error:g.error||p.error||pending.error||completed.error};
+ }));
+ box.innerHTML=rows.map(r=>`<article class="agent-card"><div class="agent-card-head"><strong>${esc(r.name)}</strong><span class="agent-card-label">AGENT ACTIVITY</span></div><div class="agent-metrics"><div><strong>${r.error?"—":r.notes}</strong><span>Total notes</span></div><div><strong>${r.error?"—":r.pending}</strong><span>Pending follow-ups</span></div><div><strong>${r.error?"—":r.completed}</strong><span>Completed callbacks</span></div></div>${r.error?'<small class="agent-metric-error">Some counts could not be loaded.</small>':""}</article>`).join("");
 }
 function globalSearch(query){
  const panel=$("globalSearchResults");if(!panel)return;
@@ -217,9 +223,9 @@ async function enableNotifications(){
 function realtime(){
  if(channel)db.removeChannel(channel);
  channel=db.channel("ctr-live-"+user.id)
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_group_notes"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("group",payload.new);const [{data,error},{data:profiles}]=await Promise.all([db.from("ctr_group_notes").select("*").order("created_at").limit(500),db.from("ctr_profiles").select("user_id,chat_color")]);if(!error){const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=(data||[]).map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()}})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_group_notes"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("group",payload.new);const [{data,error},{data:profiles}]=await Promise.all([db.from("ctr_group_notes").select("*").order("created_at").limit(500),db.from("ctr_profiles").select("user_id,chat_color")]);if(!error){const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=(data||[]).map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup();renderAgentDashboard()}})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_profiles"},async()=>{const [{data:mine},{data:profiles}]=await Promise.all([db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),db.from("ctr_profiles").select("user_id,chat_color")]);renderColors(mine?.chat_color||null);const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=group.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()})
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes"},async()=>{const {data}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500);personal=data||[];renderPersonal()})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes"},async()=>{const {data}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500);personal=data||[];renderPersonal();renderAgentDashboard()})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("direct",payload.new);await loadDirect()})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_followups"},loadFollowups)
  .subscribe(s=>{if(s==="SUBSCRIBED")status("Live sync connected · group updates appear automatically.");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")status("Live sync interrupted. Refresh to reconnect.")});
