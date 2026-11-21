@@ -661,3 +661,26 @@ body::after{
 body::before{
  filter:grayscale(1) brightness(1.12) contrast(1.08)!important;
 }
+
+
+/* Keep monochrome treatment strictly on the Samurai backdrop; restore crimson UI accents. */
+.top-nav-btn{color:#f2e8eb!important}
+.top-nav-btn .nav-symbol,.global-search-wrap .nav-symbol{
+ color:#ff496d!important;
+ text-shadow:0 0 7px rgba(255,20,65,.72),0 0 16px rgba(255,20,65,.48)!important;
+}
+.top-nav-btn:hover,.top-nav-btn.active{
+ color:#fff!important;
+ background:rgba(255,25,67,.13)!important;
+ box-shadow:inset 0 0 0 1px rgba(255,55,88,.20),0 0 18px rgba(255,20,65,.20)!important;
+}
+.top-nav-btn.active .nav-symbol{color:#ff315d!important}
+.global-search-wrap:focus-within,.global-search-wrap:hover{
+ background:rgba(255,25,67,.12)!important;
+ box-shadow:0 0 16px rgba(255,20,65,.18)!important;
+}
+.agent-card,.ai-result,.followup-item,.auth-card,.right-panel,.chat,.composer{
+ background:linear-gradient(135deg,rgba(100,8,31,.24),rgba(25,5,12,.28))!important;
+ box-shadow:0 0 22px rgba(255,18,62,.16),inset 0 0 28px rgba(255,18,62,.055)!important;
+}
+.note{background:linear-gradient(110deg,rgba(95,8,30,.19),rgba(22,5,12,.14))!important}
