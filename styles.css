@@ -1054,3 +1054,10 @@ body::after{
 .sidebar-nav>.brand .brand-mark{width:85px!important;height:85px!important;flex:0 0 85px!important}
 .app-view.sidebar-collapsed .sidebar-nav>.brand .brand-mark{width:85px!important;height:85px!important;flex-basis:85px!important}
 @media(max-width:760px){.sidebar-nav>.brand .brand-mark{width:85px!important;height:85px!important;flex:0 0 85px!important}}
+
+
+/* User-supplied Samurai icon set: transparent artwork with restrained crimson glow. */
+.sidebar-nav .top-nav-btn>svg,.sidebar-nav .global-search-wrap>svg{width:28px!important;height:28px!important;flex:0 0 28px!important;fill:none;stroke:currentColor;filter:drop-shadow(0 0 4px rgba(255,24,65,.85)) drop-shadow(0 0 9px rgba(220,15,52,.48));overflow:visible}
+.sidebar-nav .top-nav-btn[data-view="group"]>svg{filter:drop-shadow(0 0 4px rgba(255,24,65,.9)) drop-shadow(0 0 10px rgba(220,15,52,.55))}
+.sidebar-nav .top-nav-btn:hover>svg,.sidebar-nav .top-nav-btn.active>svg,.sidebar-nav .global-search-wrap:focus-within>svg{filter:drop-shadow(0 0 6px rgba(255,24,65,1)) drop-shadow(0 0 13px rgba(220,15,52,.7))}
+@media(max-width:760px){.sidebar-nav .top-nav-btn>svg,.sidebar-nav .global-search-wrap>svg{width:22px!important;height:22px!important;flex-basis:22px!important}}
