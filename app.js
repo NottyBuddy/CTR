@@ -3,7 +3,7 @@ const SUPABASE_URL="https://icootmtssyergamuxlxb.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_qgEIXxXXBq2TaNxLMZPkwg_fcwKcdGW";
 const $=id=>document.getElementById(id);
 let db,user,group=[],personal=[],direct=[],team=[],channel;
-let groupFilter="",dateFilter="",personalFilter="",directFilter="";
+let groupFilter="",dateFilter="",personalFilter="",directFilter="",followupSearchFilter="";
 const seenKey=k=>"ctr_seen_"+k+"_"+(user?.id||"");const markSeen=k=>{if(user)localStorage.setItem(seenKey(k),new Date().toISOString());updateUnread()};const countUnread=(a,k)=>a.filter(x=>new Date(x.created_at)>new Date(localStorage.getItem(seenKey(k))||0)).length;function updateUnread(){if(!user)return;for(const [id,n] of [["groupUnread",countUnread(group.filter(x=>x.user_id!==user.id),"group")],["directUnread",countUnread(direct.filter(x=>x.recipient_id===user.id),"direct")]]){const e=$(id);if(e){e.textContent=n;e.classList.toggle("hidden",!n)}}}
 const ADMIN_EMAIL="mahesh.s@hrhnext.com";
 const isAdmin=()=>String(user?.email||"").toLowerCase()===ADMIN_EMAIL;
@@ -55,15 +55,18 @@ function enhanceGroupMessages(rows){
 let followups=[];
 function renderFollowups(){
  const box=$("followupList");if(!box)return;
- const rows=followups.filter(x=>x.status!=="completed").sort((a,b)=>new Date(a.callback_at)-new Date(b.callback_at));
- $("followupCount").textContent=rows.length;const navCount=$("followupNavCount");if(navCount)navCount.textContent=rows.length;
- box.innerHTML=rows.length?rows.map(f=>'<article class="followup-item"><div class="followup-info"><strong>'+esc(f.customer_name)+'</strong><span>'+esc(f.phone)+'</span><time>'+esc(time(f.callback_at))+'</time><p>'+esc(f.details||"")+'</p></div><div class="followup-actions"><button class="message-action" data-copy-phone="'+f.phone.replace(/\\D/g,"")+'">Copy phone</button><button class="message-action" data-follow-done="'+f.id+'">Complete</button></div></article>').join(""):'<div class="empty-state">No pending follow-ups.</div>';
+ const pending=followups.filter(x=>x.status!=="completed");
+ const q=followupSearchFilter.trim().toLowerCase();
+ const rows=(q?followups.filter(f=>[f.customer_name,f.phone,f.details,team.find(t=>t.user_id===f.user_id)?.display_name||displayName(team.find(t=>t.user_id===f.user_id)?.email)].join(" ").toLowerCase().includes(q)):pending).sort((a,b)=>new Date(a.callback_at)-new Date(b.callback_at));
+ $("followupCount").textContent=pending.length;const navCount=$("followupNavCount");if(navCount)navCount.textContent=pending.length;
+ box.innerHTML=rows.length?rows.map(f=>'<article class="followup-item" data-followup-id="'+f.id+'"><div class="followup-info"><strong>'+esc(f.customer_name)+'</strong><span>'+esc(f.phone)+'</span><time>'+esc(time(f.callback_at))+'</time><p>'+esc(f.details||"")+'</p><small class="followup-status">'+(f.status==="completed"?"Completed":"Pending")+' · '+esc(team.find(t=>t.user_id===f.user_id)?.display_name||displayName(team.find(t=>t.user_id===f.user_id)?.email))+'</small></div><div class="followup-actions"><button class="message-action" data-copy-phone="'+f.phone.replace(/\\D/g,"")+'">Copy phone</button>'+(f.status!=="completed"?'<button class="message-action" data-follow-done="'+f.id+'">Complete</button>':'')+'</div></article>').join(""):(q?'<div class="empty-state">No matching follow-ups.</div>':'<div class="empty-state">No pending follow-ups.</div>');
 }
 async function loadFollowups(){const box=$("followupList");const r=await db.from("ctr_followups").select("*").order("callback_at").limit(500);if(r.error){followups=[];$("followupCount").textContent="!";box.innerHTML=`<div class="empty-state">Follow-ups are unavailable: ${esc(r.error.message)}. Run the CTR follow-up SQL in Supabase, then refresh.</div>`;return}followups=r.data||[];renderFollowups();renderAgentDashboard()}
 
 async function renderAgentDashboard(){
  const box=$("agentDashboard");if(!box||!user)return;
  const agents=(isAdmin()?team.filter(t=>String(t.email||"").toLowerCase()!==ADMIN_EMAIL):team.filter(t=>t.user_id===user.id));
+ if(!isAdmin()&&!agents.length)agents.push({user_id:user.id,email:user.email,display_name:displayName(user.email)});
  if(!agents.length){box.innerHTML='<div class="empty-state">No agent activity available yet.</div>';return}
  box.innerHTML='<div class="empty-state">Updating agent activity…</div>';
  const rows=await Promise.all(agents.map(async t=>{
@@ -85,7 +88,7 @@ function globalSearch(query){
  add("Group note","group",group,n=>[n.body,n.author_email,displayName(n.author_email)].join(" "),n=>displayName(n.author_email),n=>n.created_at);
  add("Personal note","personal",personal,n=>[n.body,team.find(t=>t.user_id===n.user_id)?.display_name].join(" "),n=>team.find(t=>t.user_id===n.user_id)?.display_name||"Personal note",n=>n.created_at);
  add("Direct message","direct",direct,n=>[n.body,team.find(t=>t.user_id===n.sender_id)?.display_name,team.find(t=>t.user_id===n.recipient_id)?.display_name].join(" "),n=>team.find(t=>t.user_id===n.sender_id)?.display_name||"Direct message",n=>n.created_at);
- add("Follow-up","followups",followups,n=>[n.customer_name,n.phone,n.details].join(" "),n=>n.customer_name,n=>n.callback_at);
+ add("Follow-up","followups",followups,n=>[n.customer_name,n.phone,n.details,team.find(t=>t.user_id===n.user_id)?.display_name||displayName(team.find(t=>t.user_id===n.user_id)?.email)].join(" "),n=>n.customer_name,n=>n.callback_at);
  const limited=hits.slice(0,30);
  panel.innerHTML=limited.length?'<div class="global-search-head">'+hits.length+' matching record'+(hits.length===1?'':'s')+(hits.length>30?' · showing first 30':'')+'</div>'+limited.map(r=>`<button type="button" class="global-search-hit" data-search-view="${r.view}"><span><b>${esc(r.title)}</b><small>${esc(r.kind)} · ${esc(time(r.date))}</small></span><span class="global-hit-snippet">${esc(r.text.slice(0,150))}</span></button>`).join(""):'<div class="global-search-empty">No matching records found.</div>';
  panel.classList.remove("hidden");
@@ -296,7 +299,7 @@ $("directForm").onsubmit=async e=>{
 document.addEventListener("click",async e=>{
  const cp=e.target.closest("[data-copy-phone]");if(cp){try{await navigator.clipboard.writeText(cp.dataset.copyPhone);status("Phone copied.")}catch{status("Clipboard unavailable.")}return}
  const cn=e.target.closest("[data-copy-note]");if(cn){const n=group.find(x=>x.id===cn.dataset.copyNote);if(n){try{await navigator.clipboard.writeText(n.body);status("CRM note copied.")}catch{status("Clipboard unavailable.")}}return}
- const searchHit=e.target.closest("[data-search-view]");if(searchHit){const view=searchHit.dataset.searchView;showView(view);const q=$("globalSearch").value.trim();if(view==="group"){$("groupSearch").value=q;groupFilter=q;renderGroup()}else if(view==="personal"){$("personalSearch").value=q;personalFilter=q;renderPersonal()}else if(view==="direct"){$("directSearch").value=q;directFilter=q;renderDirect()}$("globalSearchResults").classList.add("hidden");return}
+ const searchHit=e.target.closest("[data-search-view]");if(searchHit){const view=searchHit.dataset.searchView;showView(view);const q=$("globalSearch").value.trim();if(view==="group"){$("groupSearch").value=q;groupFilter=q;renderGroup()}else if(view==="personal"){$("personalSearch").value=q;personalFilter=q;renderPersonal()}else if(view==="direct"){$("directSearch").value=q;directFilter=q;renderDirect()}else if(view==="followups"){followupSearchFilter=q;renderFollowups();requestAnimationFrame(()=>{const target=$("followupList").querySelector(".followup-item");target?.scrollIntoView({behavior:"smooth",block:"center"})})}$("globalSearchResults").classList.add("hidden");return}
  const done=e.target.closest("[data-follow-done]");if(done){if(!window.confirm("Mark this follow-up as complete? It will be removed from Pending Follow-ups."))return;done.disabled=true;const r=await db.from("ctr_followups").update({status:"completed",completed_at:new Date().toISOString()}).eq("id",done.dataset.followDone).eq("status","pending");done.disabled=false;if(r.error)status("Could not complete follow-up: "+r.error.message);else{await loadFollowups();status("Follow-up completed and removed from pending list.")}return}
  const use=e.target.closest("[data-ai-use]");
  if(use){
