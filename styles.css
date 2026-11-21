@@ -599,3 +599,59 @@ body::before{
  .top-nav{flex-wrap:wrap!important}
  .global-search-wrap{flex:1 1 100%!important;width:100%!important;max-width:none!important;min-width:100%!important;margin-top:5px!important}
 }
+
+
+/* Navigation search matches the other icon-and-label navigation items */
+.global-search-wrap{
+ display:flex!important;align-items:center!important;gap:7px!important;
+ flex:0 0 auto!important;width:auto!important;min-width:0!important;
+ max-width:none!important;margin:0 0 0 2px!important;padding:0 8px!important;
+ height:36px;border-radius:12px;white-space:nowrap;
+}
+.global-search-wrap .nav-symbol{
+ display:inline-block!important;flex:0 0 auto;font-size:15px!important;
+ min-width:18px!important;text-align:center;color:#ff496d!important;
+ text-shadow:0 0 7px rgba(255,20,65,.65),0 0 15px rgba(255,20,65,.38)!important;
+}
+.global-search-wrap>input{
+ width:48px!important;min-width:48px!important;max-width:48px!important;
+ min-height:32px!important;margin:0!important;padding:5px 0!important;
+ border:0!important;border-radius:0!important;background:transparent!important;
+ box-shadow:none!important;backdrop-filter:none!important;
+ color:#c6b5bb!important;font-size:11px!important;font-weight:700!important;
+ text-shadow:none!important;cursor:text;
+}
+.global-search-wrap>input::placeholder{color:#c6b5bb!important;opacity:1!important}
+.global-search-wrap:focus-within,.global-search-wrap:hover{
+ background:rgba(255,255,255,.06)!important;
+}
+.global-search-wrap:focus-within>input{width:118px!important;max-width:118px!important;color:#fff!important}
+.global-search-wrap:focus-within>input::placeholder{color:#fff!important}
+.global-search-results{z-index:100!important}
+
+/* Replace red atmospheric tint on the Samurai photograph with white mist.
+   Red glow remains on cards and controls. */
+body::before{
+ background-image:
+  linear-gradient(0deg,rgba(255,255,255,.24),rgba(255,255,255,.24)),
+  radial-gradient(ellipse 90% 62% at 50% 54%,rgba(255,255,255,.36) 0%,rgba(255,255,255,.18) 48%,transparent 82%),
+  radial-gradient(ellipse 85% 36% at 50% 100%,rgba(255,255,255,.22),transparent 80%),
+  url("/CTR/file_000000005f188208adc8f107a4f7bc8b.png")!important;
+ background-position:center,center,center,center center!important;
+ background-size:cover,cover,cover,cover!important;
+ background-repeat:no-repeat!important;
+}
+body::after{
+ background:
+  radial-gradient(ellipse 72% 22% at 18% 72%,rgba(255,255,255,.30),transparent 70%),
+  radial-gradient(ellipse 66% 20% at 82% 38%,rgba(255,255,255,.27),transparent 72%),
+  radial-gradient(ellipse 80% 25% at 52% 100%,rgba(255,255,255,.22),transparent 72%)!important;
+ opacity:.78!important;filter:blur(38px)!important;mix-blend-mode:screen!important;
+}
+.ambient,.a1,.a2{opacity:.08!important}
+.a1,.a2{background:#fff!important}
+@media(max-width:760px){
+ .global-search-wrap{flex:0 0 auto!important;width:auto!important;min-width:0!important;max-width:none!important;margin:3px 0!important;padding:0 8px!important}
+ .global-search-wrap>input{width:54px!important;min-width:54px!important;max-width:54px!important}
+ .global-search-wrap:focus-within>input{width:110px!important;max-width:110px!important}
+}
