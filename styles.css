@@ -1064,7 +1064,7 @@ body::after{
 
 
 /* Original user-provided Samurai icon artwork; transparent PNG sprite with red glow. */
-.sidebar-nav .samurai-icon{display:inline-block!important;width:28px!important;height:28px!important;min-width:28px!important;flex:0 0 28px!important;background-image:url('./assets/ctr-samurai-icons.png')!important;background-repeat:no-repeat!important;background-size:500% 100%!important;filter:drop-shadow(0 0 4px rgba(255,20,58,.95)) drop-shadow(0 0 9px rgba(220,10,45,.62))!important;}
+.sidebar-nav .samurai-icon{display:inline-block!important;width:28px!important;height:28px!important;min-width:28px!important;flex:0 0 28px!important;background-image:url('./assets/ctr-samurai-icons.svg')!important;background-repeat:no-repeat!important;background-size:500% 100%!important;filter:drop-shadow(0 0 4px rgba(255,20,58,.95)) drop-shadow(0 0 9px rgba(220,10,45,.62))!important;}
 .sidebar-nav .samurai-group{background-position:0% center!important}.sidebar-nav .samurai-followups{background-position:25% center!important}.sidebar-nav .samurai-direct{background-position:50% center!important}.sidebar-nav .samurai-personal{background-position:75% center!important}.sidebar-nav .samurai-search{background-position:100% center!important}
 .sidebar-nav .top-nav-btn:hover .samurai-icon,.sidebar-nav .top-nav-btn.active .samurai-icon,.sidebar-nav .global-search-wrap:focus-within .samurai-icon{filter:drop-shadow(0 0 6px rgba(255,18,58,1)) drop-shadow(0 0 13px rgba(220,10,45,.8))!important}
 @media(max-width:760px){.sidebar-nav .samurai-icon{width:24px!important;height:24px!important;min-width:24px!important;flex-basis:24px!important}}
