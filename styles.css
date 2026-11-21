@@ -1037,3 +1037,14 @@ body::after{
  .sidebar-nav>.brand .brand-mark{width:64px!important;height:64px!important;flex:0 0 64px!important}
  .app-view.sidebar-collapsed .sidebar-nav>.brand .brand-mark{width:52px!important;height:52px!important;flex-basis:52px!important}
 }
+
+
+/* Increase the main CTR emblem without changing navigation icon sizes. */
+@media(min-width:761px){
+ .sidebar-nav>.brand .brand-mark{width:72px!important;height:72px!important;flex:0 0 72px!important}
+ .app-view.sidebar-collapsed .sidebar-nav>.brand .brand-mark{width:58px!important;height:58px!important;flex-basis:58px!important}
+ .sidebar-nav>.brand{min-height:76px!important;gap:8px!important}
+}
+@media(max-width:760px){
+ .sidebar-nav>.brand .brand-mark{width:52px!important;height:52px!important;flex:0 0 52px!important}
+}
