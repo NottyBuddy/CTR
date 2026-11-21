@@ -813,3 +813,79 @@ body::after{
  .main-area .top-meta{justify-content:flex-end;gap:6px}
  .main-area .workspace{margin:8px 0}
 }
+
+
+/* Compact, plain Samurai sidebar — no oversized rail, card shell, or wasted space. */
+@media(min-width:761px){
+ .app-view{
+  grid-template-columns:176px minmax(0,1fr)!important;
+  gap:14px!important;
+  align-items:start!important;
+  min-height:0!important;
+ }
+ .sidebar-nav{
+  position:sticky!important;top:12px!important;
+  height:auto!important;min-height:0!important;
+  padding:10px 8px!important;margin:0!important;
+  background:transparent!important;background-color:transparent!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  overflow:visible!important;
+ }
+ .sidebar-nav .brand{
+  margin:0 0 16px 2px!important;padding:0!important;
+  gap:8px!important;
+ }
+ .sidebar-nav .brand-mark{width:38px!important;height:38px!important}
+ .sidebar-caption{padding:0 8px 8px!important;font-size:8px!important;letter-spacing:1.5px!important}
+ .sidebar-nav .top-nav{gap:2px!important}
+ .sidebar-nav .top-nav-btn{
+  min-height:38px!important;height:38px!important;
+  padding:7px 8px!important;gap:9px!important;
+  border-radius:5px!important;font-size:11px!important;
+  font-weight:500!important;letter-spacing:0!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  justify-content:flex-start!important;
+ }
+ .sidebar-nav .top-nav-btn:hover,.sidebar-nav .top-nav-btn.active{
+  background:rgba(255,30,70,.055)!important;
+  box-shadow:inset 2px 0 0 rgba(255,45,85,.78),0 0 9px rgba(255,20,65,.10)!important;
+ }
+ .sidebar-nav .top-nav-btn>svg{
+  width:18px!important;height:18px!important;min-width:18px!important;
+  stroke:#ff4569!important;filter:drop-shadow(0 0 3px rgba(255,35,83,.58))!important;
+ }
+ .sidebar-nav .global-search-wrap{
+  min-height:38px!important;height:38px!important;flex:0 0 38px!important;
+  margin:2px 0 0!important;padding:6px 8px!important;gap:9px!important;
+  background:transparent!important;border:0!important;border-radius:5px!important;
+  box-shadow:none!important;
+ }
+ .sidebar-nav .global-search-wrap>svg{
+  width:18px!important;height:18px!important;min-width:18px!important;
+  stroke:#ff4569!important;filter:drop-shadow(0 0 3px rgba(255,35,83,.58))!important;
+ }
+ .sidebar-nav .global-search-wrap>input{
+  width:calc(100% - 27px)!important;min-width:0!important;
+  max-width:none!important;padding:5px 0!important;font-size:11px!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+ }
+ .sidebar-nav .global-search-wrap:focus-within{background:rgba(255,30,70,.05)!important;box-shadow:inset 0 0 0 1px rgba(255,45,85,.22)!important}
+ .sidebar-nav .sidebar-bottom{
+  margin-top:18px!important;padding:10px 5px 0!important;
+  border-top:1px solid rgba(255,55,90,.12)!important;
+  font-size:7px!important;letter-spacing:1px!important;
+ }
+ .main-area{min-width:0!important}
+ .main-area>.topbar{
+  min-height:42px!important;padding:4px 0!important;margin:0 0 5px!important;
+  background:transparent!important;border:0!important;border-radius:0!important;
+  box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+ }
+ .main-area .workspace{margin:4px 0 0!important}
+}
+@media(min-width:761px) and (max-width:1180px){
+ .app-view{grid-template-columns:160px minmax(0,1fr)!important;gap:10px!important}
+ .sidebar-nav{padding:8px 5px!important}
+ .sidebar-nav .top-nav-btn{font-size:10px!important;gap:7px!important}
+}
