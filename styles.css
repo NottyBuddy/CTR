@@ -655,3 +655,9 @@ body::after{
  .global-search-wrap>input{width:54px!important;min-width:54px!important;max-width:54px!important}
  .global-search-wrap:focus-within>input{width:110px!important;max-width:110px!important}
 }
+
+
+/* Samurai photograph itself: true monochrome black-and-white, not a red-to-white fog overlay. */
+body::before{
+ filter:grayscale(1) brightness(1.12) contrast(1.08)!important;
+}
