@@ -1030,3 +1030,10 @@ body::after{
  }
  .app-view.sidebar-collapsed .sidebar-nav .sidebar-credit{display:none!important}
 }
+
+
+/* Increase the sidebar CTR crest while keeping navigation symbols unchanged. */
+@media(min-width:761px){
+ .sidebar-nav>.brand .brand-mark{width:64px!important;height:64px!important;flex:0 0 64px!important}
+ .app-view.sidebar-collapsed .sidebar-nav>.brand .brand-mark{width:52px!important;height:52px!important;flex-basis:52px!important}
+}
