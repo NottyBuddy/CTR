@@ -813,3 +813,96 @@ body::after{
  .main-area .top-meta{justify-content:flex-end;gap:6px}
  .main-area .workspace{margin:8px 0}
 }
+
+
+/* Samurai command rail: all workspace navigation lives in a left sidebar. */
+@media(min-width:901px){
+ .app-view{
+  display:grid!important;
+  grid-template-columns:226px minmax(0,1fr)!important;
+  grid-template-rows:minmax(0,1fr) auto!important;
+  column-gap:24px!important;row-gap:10px!important;
+  align-items:stretch!important;
+ }
+ .app-view>.topbar{
+  grid-column:1!important;grid-row:1/3!important;
+  position:sticky!important;top:18px!important;align-self:start!important;
+  height:calc(100vh - 36px)!important;min-height:620px!important;
+  display:flex!important;flex-direction:column!important;
+  align-items:stretch!important;justify-content:flex-start!important;
+  gap:26px!important;padding:24px 15px!important;
+  border-radius:0 22px 22px 0!important;
+  margin-left:-22px!important;width:calc(100% + 22px)!important;
+ }
+ .app-view>.topbar>.brand{margin:0 0 8px 4px!important;padding:4px 2px 20px!important}
+ .app-view>.topbar>.top-nav{
+  display:flex!important;flex-direction:column!important;
+  align-items:stretch!important;justify-content:flex-start!important;
+  gap:8px!important;width:100%!important;min-width:0!important;
+  overflow:visible!important;flex:1 1 auto!important;
+ }
+ .app-view>.topbar .top-nav-btn{
+  width:100%!important;min-height:48px!important;flex:0 0 auto!important;
+  justify-content:flex-start!important;gap:13px!important;
+  padding:11px 12px!important;border-radius:12px!important;
+  font-size:12px!important;letter-spacing:.15px!important;
+  white-space:nowrap!important;
+ }
+ .app-view>.topbar .samurai-icon{
+  width:25px!important;min-width:25px!important;
+  display:inline-grid!important;place-items:center!important;
+  font-family:"Noto Serif JP","Yu Mincho",serif!important;
+  font-size:21px!important;line-height:1!important;
+  color:#ff315f!important;
+  text-shadow:0 0 5px rgba(255,35,83,.95),0 0 12px rgba(255,20,65,.72),0 0 20px rgba(255,20,65,.42)!important;
+ }
+ .app-view>.topbar .top-nav-btn.active .samurai-icon,
+ .app-view>.topbar .top-nav-btn:hover .samurai-icon{
+  color:#ff6a85!important;text-shadow:0 0 7px rgba(255,35,83,1),0 0 17px rgba(255,20,65,.82)!important;
+ }
+ .app-view>.topbar .global-search-wrap{
+  display:flex!important;align-items:center!important;gap:13px!important;
+  width:100%!important;min-width:0!important;max-width:none!important;
+  flex:0 0 auto!important;margin:4px 0 0!important;padding:0 12px!important;
+  height:48px!important;border-radius:12px!important;
+ }
+ .app-view>.topbar .global-search-wrap>input{
+  width:100%!important;min-width:0!important;max-width:none!important;
+  min-height:38px!important;font-size:12px!important;
+ }
+ .app-view>.topbar .global-search-wrap:focus-within>input{width:100%!important;max-width:none!important}
+ .app-view>.topbar .top-meta{
+  display:flex!important;flex-direction:column!important;
+  align-items:stretch!important;gap:10px!important;
+  white-space:normal!important;margin-top:auto!important;
+  padding:16px 4px 0!important;
+  border-top:1px solid rgba(255,65,100,.12)!important;
+ }
+ .app-view>.topbar .top-meta .divider{display:none!important}
+ .app-view>.topbar .top-meta #userEmail{
+  display:block!important;overflow-wrap:anywhere!important;
+  white-space:normal!important;font-size:10px!important;
+ }
+ .app-view>.topbar .top-meta .refresh-btn,
+ .app-view>.topbar .top-meta .signout-btn{
+  width:100%!important;text-align:left!important;padding:10px 12px!important;
+ }
+ .app-view>.workspace{
+  grid-column:2!important;grid-row:1!important;
+  min-width:0!important;margin:0 0 12px!important;
+  padding-top:8px!important;
+ }
+ .app-view>.app-footer{grid-column:2!important;grid-row:2!important}
+}
+@media(max-width:900px){
+ .app-view>.topbar{display:flex!important;flex-direction:column!important;align-items:stretch!important}
+ .app-view>.topbar>.top-nav{
+  display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;
+  justify-content:flex-start!important;overflow:visible!important;
+ }
+ .app-view>.topbar .top-nav-btn{flex:0 1 auto!important}
+ .app-view>.topbar .samurai-icon{font-family:"Noto Serif JP","Yu Mincho",serif!important;font-size:19px!important;color:#ff315f!important;text-shadow:0 0 7px rgba(255,20,65,.8)!important}
+ .app-view>.topbar .global-search-wrap{flex:0 0 auto!important;width:auto!important;min-width:0!important}
+ .app-view>.topbar .global-search-wrap>input{width:80px!important;min-width:80px!important;max-width:80px!important}
+ .app-view>.topbar .top-meta{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;justify-content:flex-end!important}
+}
