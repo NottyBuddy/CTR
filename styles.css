@@ -1048,3 +1048,9 @@ body::after{
 @media(max-width:760px){
  .sidebar-nav>.brand .brand-mark{width:52px!important;height:52px!important;flex:0 0 52px!important}
 }
+
+
+/* Set the main website CTR logo to the requested 85px size. */
+.sidebar-nav>.brand .brand-mark{width:85px!important;height:85px!important;flex:0 0 85px!important}
+.app-view.sidebar-collapsed .sidebar-nav>.brand .brand-mark{width:85px!important;height:85px!important;flex-basis:85px!important}
+@media(max-width:760px){.sidebar-nav>.brand .brand-mark{width:85px!important;height:85px!important;flex:0 0 85px!important}}
