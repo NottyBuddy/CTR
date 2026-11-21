@@ -61,6 +61,29 @@ function renderFollowups(){
 }
 async function loadFollowups(){const box=$("followupList");const r=await db.from("ctr_followups").select("*").order("callback_at").limit(500);if(r.error){followups=[];$("followupCount").textContent="!";box.innerHTML=`<div class="empty-state">Follow-ups are unavailable: ${esc(r.error.message)}. Run the CTR follow-up SQL in Supabase, then refresh.</div>`;return}followups=r.data||[];renderFollowups()}
 
+function renderAgentDashboard(){
+ const box=$("agentDashboard");if(!box)return;
+ const agents=(isAdmin()?team.filter(t=>String(t.email||"").toLowerCase()!==ADMIN_EMAIL):team.filter(t=>t.user_id===user.id));
+ const rows=agents.map(t=>{
+  const notes=group.filter(n=>n.user_id===t.user_id).length+personal.filter(n=>n.user_id===t.user_id).length;
+  const mine=followups.filter(x=>x.user_id===t.user_id);
+  return {name:t.display_name||displayName(t.email),notes,pending:mine.filter(x=>x.status!=="completed").length,completed:mine.filter(x=>x.status==="completed").length};
+ });
+ box.innerHTML=rows.length?rows.map(r=>`<article class="agent-card"><div class="agent-card-head"><strong>${esc(r.name)}</strong><span class="agent-card-label">AGENT ACTIVITY</span></div><div class="agent-metrics"><div><strong>${r.notes}</strong><span>Total notes</span></div><div><strong>${r.pending}</strong><span>Pending follow-ups</span></div><div><strong>${r.completed}</strong><span>Completed callbacks</span></div></div></article>`).join(""):'<div class="empty-state">No agent activity available yet.</div>';
+}
+function globalSearch(query){
+ const panel=$("globalSearchResults");if(!panel)return;
+ const q=query.trim().toLowerCase();if(!q){panel.classList.add("hidden");panel.innerHTML="";return}
+ const hits=[];
+ const add=(kind,view,items,getText,getTitle,getDate)=>items.forEach(item=>{const text=String(getText(item)||"");if(text.toLowerCase().includes(q))hits.push({kind,view,title:getTitle(item),text,date:getDate(item)})});
+ add("Group note","group",group,n=>[n.body,n.author_email,displayName(n.author_email)].join(" "),n=>displayName(n.author_email),n=>n.created_at);
+ add("Personal note","personal",personal,n=>[n.body,team.find(t=>t.user_id===n.user_id)?.display_name].join(" "),n=>team.find(t=>t.user_id===n.user_id)?.display_name||"Personal note",n=>n.created_at);
+ add("Direct message","direct",direct,n=>[n.body,team.find(t=>t.user_id===n.sender_id)?.display_name,team.find(t=>t.user_id===n.recipient_id)?.display_name].join(" "),n=>team.find(t=>t.user_id===n.sender_id)?.display_name||"Direct message",n=>n.created_at);
+ add("Follow-up","followups",followups,n=>[n.customer_name,n.phone,n.details].join(" "),n=>n.customer_name,n=>n.callback_at);
+ const limited=hits.slice(0,30);
+ panel.innerHTML=limited.length?'<div class="global-search-head">'+hits.length+' matching record'+(hits.length===1?'':'s')+(hits.length>30?' · showing first 30':'')+'</div>'+limited.map(r=>`<button type="button" class="global-search-hit" data-search-view="${r.view}"><span><b>${esc(r.title)}</b><small>${esc(r.kind)} · ${esc(time(r.date))}</small></span><span class="global-hit-snippet">${esc(r.text.slice(0,150))}</span></button>`).join(""):'<div class="global-search-empty">No matching records found.</div>';
+ panel.classList.remove("hidden");
+}
 function renderDirect(){
  const admin=isAdmin(),selected=$("directRecipient").value;
  $("directAdminHint").classList.toggle("hidden",!admin);
@@ -85,7 +108,7 @@ async function loadDirect(){
  if(old&&team.some(p=>p.user_id===old))sel.value=old;
  const {data,error}=await db.from("ctr_direct_messages").select("*").order("created_at",{ascending:true}).limit(1000);
  if(error){status("Could not load direct messages: "+error.message);return}
- direct=data||[];renderDirect();renderPersonal();updateUnread();
+ direct=data||[];renderDirect();renderPersonal();updateUnread();renderAgentDashboard();
 }
 async function refreshMessages(){
  const btn=$("refreshData");btn.disabled=true;btn.textContent="↻ Refreshing…";
@@ -100,7 +123,7 @@ async function refreshMessages(){
   const colors=Object.fromEntries((profiles.data||[]).map(x=>[x.user_id,x.chat_color]));
   group=(g.data||[]).map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));personal=p.data||[];
   renderGroup(true);renderPersonal();await loadFollowups();
-  await loadDirect();
+  await loadDirect();renderAgentDashboard();
   status("Messages refreshed.");
  }catch(e){status("Refresh failed: "+e.message)}
  finally{btn.disabled=false;btn.textContent="↻ Refresh"}
@@ -117,6 +140,7 @@ function showView(v){
  $("directView").classList.toggle("hidden",v!=="direct");
  $("followupsView").classList.toggle("hidden",v!=="followups");
  if(v==="followups")loadFollowups();
+ $("dashboardView").classList.toggle("hidden",v!=="dashboard");if(v==="dashboard")renderAgentDashboard();
  document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
  if(v==="direct"){loadDirect();markSeen("direct")}if(v==="group")markSeen("group");
 }
@@ -252,6 +276,7 @@ $("colorChoices").onclick=e=>{const b=e.target.closest("[data-color]");if(b&&!b.
 $("generateAI").onclick=generateNotes;
 $("refreshData").onclick=refreshMessages;$("enableNotifications")?.addEventListener("click",enableNotifications);
 $("directRecipient").onchange=renderDirect;
+ $("globalSearch")?.addEventListener("input",e=>globalSearch(e.target.value));
 $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value.toLowerCase().trim();renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
 $("directForm").onsubmit=async e=>{
  e.preventDefault();
@@ -265,6 +290,7 @@ $("directForm").onsubmit=async e=>{
 document.addEventListener("click",async e=>{
  const cp=e.target.closest("[data-copy-phone]");if(cp){try{await navigator.clipboard.writeText(cp.dataset.copyPhone);status("Phone copied.")}catch{status("Clipboard unavailable.")}return}
  const cn=e.target.closest("[data-copy-note]");if(cn){const n=group.find(x=>x.id===cn.dataset.copyNote);if(n){try{await navigator.clipboard.writeText(n.body);status("CRM note copied.")}catch{status("Clipboard unavailable.")}}return}
+ const searchHit=e.target.closest("[data-search-view]");if(searchHit){const view=searchHit.dataset.searchView;showView(view);const q=$("globalSearch").value.trim();if(view==="group"){$("groupSearch").value=q;groupFilter=q;renderGroup()}else if(view==="personal"){$("personalSearch").value=q;personalFilter=q;renderPersonal()}else if(view==="direct"){$("directSearch").value=q;directFilter=q;renderDirect()}$("globalSearchResults").classList.add("hidden");return}
  const done=e.target.closest("[data-follow-done]");if(done){if(!window.confirm("Mark this follow-up as complete? It will be removed from Pending Follow-ups."))return;done.disabled=true;const r=await db.from("ctr_followups").update({status:"completed",completed_at:new Date().toISOString()}).eq("id",done.dataset.followDone).eq("status","pending");done.disabled=false;if(r.error)status("Could not complete follow-up: "+r.error.message);else{await loadFollowups();status("Follow-up completed and removed from pending list.")}return}
  const use=e.target.closest("[data-ai-use]");
  if(use){
