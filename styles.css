@@ -684,3 +684,51 @@ body::before{
  box-shadow:0 0 22px rgba(255,18,62,.16),inset 0 0 28px rgba(255,18,62,.055)!important;
 }
 .note{background:linear-gradient(110deg,rgba(95,8,30,.19),rgba(22,5,12,.14))!important}
+
+
+/* Final correction: clean monochrome Samurai photo; no mist, haze, or atmospheric overlay. */
+body::before{
+ background:url("/CTR/file_000000005f188208adc8f107a4f7bc8b.png") center center/cover no-repeat!important;
+ filter:grayscale(1) brightness(.82) contrast(1.16)!important;
+}
+body::after{
+ background:none!important;
+ opacity:0!important;
+ filter:none!important;
+ mix-blend-mode:normal!important;
+}
+.ambient,.a1,.a2{display:none!important;opacity:0!important;filter:none!important}
+
+/* Restore clearly visible crimson glow only on interface controls and content surfaces. */
+.shell .top-nav-btn{
+ color:#f4e9ed!important;
+ text-shadow:none!important;
+ transition:color .2s ease,background .2s ease,box-shadow .2s ease!important;
+}
+.shell .top-nav-btn .nav-symbol,
+.shell .global-search-wrap .nav-symbol{
+ color:#ff315f!important;
+ text-shadow:0 0 5px rgba(255,35,83,.95),0 0 12px rgba(255,20,65,.78),0 0 22px rgba(255,20,65,.48)!important;
+}
+.shell .top-nav-btn:hover,.shell .top-nav-btn.active,
+.shell .global-search-wrap:hover,.shell .global-search-wrap:focus-within{
+ color:#fff!important;
+ background:rgba(112,5,31,.30)!important;
+ box-shadow:0 0 10px rgba(255,20,65,.32),0 0 22px rgba(255,20,65,.20),inset 0 0 0 1px rgba(255,60,95,.26)!important;
+}
+.shell .top-nav-btn.active .nav-symbol{color:#ff315f!important}
+.shell .global-search-wrap>input{color:#fff!important}
+.shell .agent-card,.shell .ai-result,.shell .followup-item,
+.shell .auth-card,.shell .right-panel,.shell .chat,.shell .composer,
+.shell .followup-panel,.shell .note{
+ background:linear-gradient(135deg,rgba(65,5,22,.82),rgba(12,5,9,.84))!important;
+ border:1px solid rgba(255,48,88,.34)!important;
+ box-shadow:0 0 12px rgba(255,18,62,.30),0 0 28px rgba(255,18,62,.18),inset 0 0 22px rgba(255,18,62,.10)!important;
+ backdrop-filter:blur(7px)!important;
+ -webkit-backdrop-filter:blur(7px)!important;
+}
+.shell .note{background:linear-gradient(110deg,rgba(48,5,18,.78),rgba(13,5,9,.82))!important}
+.shell .agent-card:hover,.shell .ai-result:hover,.shell .followup-item:hover{
+ border-color:rgba(255,65,105,.58)!important;
+ box-shadow:0 0 16px rgba(255,18,62,.40),0 0 34px rgba(255,18,62,.24),inset 0 0 24px rgba(255,18,62,.13)!important;
+}
