@@ -1597,3 +1597,20 @@ html body #authView #authSubmit{cursor:pointer;touch-action:manipulation}
  .app-view .main-area .dm-inbox.mobile-thread-open .dm-thread-pane{display:flex!important}
 }
 @media(prefers-reduced-motion:reduce){.app-view .main-area>.topbar .header-icon-btn.is-refreshing svg{animation:none!important}}
+
+
+/* Direct Chats: keep the global CTR header/navigation visible and stable. */
+@media(min-width:761px){
+ .app-view:has(#directView:not(.hidden)) .main-area>.topbar{display:grid!important;position:relative!important;z-index:20!important}
+ .app-view:has(#directView:not(.hidden)) .workspace{display:block!important;margin:12px 0!important;min-height:0!important}
+ .app-view:has(#directView:not(.hidden)) .chat{min-height:calc(100vh - 170px)!important;padding:0 18px 12px!important}
+ .app-view:has(#directView:not(.hidden)) .direct-inbox-view{min-height:calc(100vh - 190px)!important}
+ .app-view:has(#directView:not(.hidden)) .dm-inbox{height:calc(100vh - 300px)!important;min-height:430px!important}
+}
+@media(max-width:760px){
+ .app-view:has(#directView:not(.hidden)) .main-area>.topbar{display:grid!important;position:sticky!important;top:0!important;z-index:30!important}
+ .app-view:has(#directView:not(.hidden)) .workspace{display:flex!important;margin:10px 0!important}
+ .app-view:has(#directView:not(.hidden)) .chat{min-height:calc(100dvh - 150px)!important}
+ .app-view:has(#directView:not(.hidden)) .direct-inbox-view{min-height:calc(100dvh - 175px)!important}
+ .app-view:has(#directView:not(.hidden)) .dm-inbox{min-height:calc(100dvh - 310px)!important}
+}
