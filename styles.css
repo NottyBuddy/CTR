@@ -1614,3 +1614,29 @@ html body #authView #authSubmit{cursor:pointer;touch-action:manipulation}
  .app-view:has(#directView:not(.hidden)) .direct-inbox-view{min-height:calc(100dvh - 175px)!important}
  .app-view:has(#directView:not(.hidden)) .dm-inbox{min-height:calc(100dvh - 310px)!important}
 }
+
+/* Final direct-message interaction and responsive pane repair. */
+.app-view .main-area .direct-inbox-view{width:100%!important;min-width:0!important;display:flex!important;flex-direction:column!important}
+.app-view .main-area .dm-inbox{display:grid!important;grid-template-columns:minmax(250px,32%) minmax(0,1fr)!important;width:100%!important;min-width:0!important;min-height:560px!important;height:calc(100vh - 260px)!important;overflow:hidden!important}
+.app-view .main-area .dm-list-pane{display:flex!important;flex-direction:column!important;min-width:0!important;min-height:0!important;position:relative!important;z-index:2!important}
+.app-view .main-area .dm-inbox-list{display:block!important;min-height:0!important;flex:1 1 auto!important;overflow-y:auto!important;position:relative!important;z-index:3!important;pointer-events:auto!important}
+.app-view .main-area .dm-conversation{display:flex!important;width:100%!important;min-height:68px!important;position:relative!important;z-index:4!important;pointer-events:auto!important;cursor:pointer!important}
+.app-view .main-area .dm-thread-pane{display:flex!important;flex-direction:column!important;min-width:0!important;min-height:0!important;height:100%!important}
+.app-view .main-area .dm-thread-messages{display:flex!important;flex:1 1 auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important}
+.app-view .main-area .dm-compose-wrap{display:block!important;position:relative!important;z-index:5!important;flex:0 0 auto!important}
+.app-view .main-area .dm-composer{display:flex!important;pointer-events:auto!important}
+.app-view .main-area .dm-composer textarea{display:block!important;pointer-events:auto!important;opacity:1!important}
+@media(max-width:1100px){
+ .app-view .main-area .dm-inbox{display:block!important;height:auto!important;min-height:0!important;overflow:visible!important}
+ .app-view .main-area .dm-list-pane{min-height:420px!important}
+ .app-view .main-area .dm-thread-pane{display:none!important;min-height:560px!important;height:auto!important}
+ .app-view .main-area .dm-inbox.mobile-thread-open .dm-list-pane{display:none!important}
+ .app-view .main-area .dm-inbox.mobile-thread-open .dm-thread-pane{display:flex!important}
+ .app-view .main-area .dm-thread-messages{min-height:320px!important}
+}
+@media(max-width:760px){
+ .app-view .main-area .dm-inbox{min-height:calc(100dvh - 250px)!important}
+ .app-view .main-area .dm-list-pane{min-height:calc(100dvh - 260px)!important}
+ .app-view .main-area .dm-thread-pane{min-height:calc(100dvh - 220px)!important}
+ .app-view .main-area .dm-inbox.mobile-thread-open .dm-thread-pane{display:flex!important}
+}
