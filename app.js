@@ -119,31 +119,37 @@ function renderDirect(){
   const last=messages[messages.length-1];
   const otherId=last.sender_id===user.id?last.recipient_id:last.sender_id;
   const other=team.find(p=>p.user_id===otherId);
-  const name=other?.display_name||"CTR Member";
-  return {key,messages,last,otherId,name,unread:messages.filter(m=>m.recipient_id===user.id&&m.sender_id!==user.id&&new Date(m.created_at)>new Date(localStorage.getItem("ctr_seen_direct_"+user.id)||0)).length};
+  return {key,messages,last,otherId,name:other?.display_name||"CTR Member",unread:messages.filter(m=>m.recipient_id===user.id&&m.sender_id!==user.id&&new Date(m.created_at)>new Date(localStorage.getItem("ctr_seen_direct_"+user.id)||0)).length};
  });
- if(admin){
-  const chosen=$("directRecipient").value;
-  if(chosen&&!pairs.has(directPairKey(user.id,chosen))&&!selectedDirectKey)selectedDirectKey=directPairKey(user.id,chosen);
- }
- conversations.sort((a,b)=>new Date(b.last.created_at)-new Date(a.last.created_at));
+ // WhatsApp-style contact list: show every team member, including people with no previous messages.
+ const listedIds=new Set(conversations.map(c=>c.otherId));
+ people.forEach(person=>{
+  if(!listedIds.has(person.user_id)){
+   conversations.push({key:directPairKey(user.id,person.user_id),messages:[],last:null,otherId:person.user_id,name:person.display_name||"CTR Member",unread:0});
+  }
+ });
+ conversations.sort((a,b)=>(new Date(b.last?.created_at||0)-new Date(a.last?.created_at||0))||a.name.localeCompare(b.name));
  const q=directFilter.toLowerCase();
  conversations=conversations.filter(c=>(directInboxFilter!=="unread"||c.unread>0)&&(!q||[c.name,...c.messages.map(m=>m.body)].join(" ").toLowerCase().includes(q)));
- $("directInboxList").innerHTML=conversations.length?conversations.map(c=>`<button type="button" class="dm-conversation ${selectedDirectKey===c.key?"selected":""}" data-dm-key="${esc(c.key)}" data-dm-other="${esc(c.otherId)}"><span class="dm-avatar">${directAvatar(c.name,c.otherId)}</span><span class="dm-convo-copy"><strong>${esc(c.name)}</strong><span>${esc(c.last.body||"")}</span></span><span class="dm-convo-meta"><time>${esc(time(c.last.created_at))}</time>${c.unread?`<b class="dm-unread-count">${c.unread}</b>`:""}</span></button>`).join(""):'<div class="empty-state"><h3>No conversations yet</h3><p>Choose a team member below to start a private chat.</p></div>';
+ $("directInboxList").innerHTML=conversations.length?conversations.map(c=>{
+  const preview=c.last?(c.last.sender_id===user.id?"You: ":"")+c.last.body:"Start a conversation";
+  return `<button type="button" class="dm-conversation ${selectedDirectKey===c.key?"selected":""}" data-dm-key="${esc(c.key)}" data-dm-other="${esc(c.otherId)}"><span class="dm-avatar">${directAvatar(c.name,c.otherId)}</span><span class="dm-convo-copy"><strong>${esc(c.name)}</strong><span>${esc(preview)}</span></span><span class="dm-convo-meta"><time>${c.last?esc(time(c.last.created_at)):""}</time>${c.unread?`<b class="dm-unread-count">${c.unread}</b>`:""}</span></button>`;
+ }).join(""):'<div class="empty-state"><h3>No matching contacts</h3><p>Try another search or select All.</p></div>';
  let active=conversations.find(c=>c.key===selectedDirectKey);
  if(!active&&selectedDirectKey){
-  const messages=pairs.get(selectedDirectKey)||[];
-  if(messages.length){const last=messages[messages.length-1],otherId=last.sender_id===user.id?last.recipient_id:last.sender_id,other=team.find(p=>p.user_id===otherId);active={key:selectedDirectKey,messages,otherId,name:other?.display_name||"CTR Member",last};}
+  const otherId=selectedDirectKey.split("::").find(id=>id!==user.id)||selectedDirectKey.split("::")[0];
+  const other=team.find(p=>p.user_id===otherId);
+  if(other)active={key:selectedDirectKey,messages:pairs.get(selectedDirectKey)||[],otherId,name:other.display_name||"CTR Member",last:null};
  }
- if(!active&&!admin&&conversations.length){active=conversations[0];selectedDirectKey=active.key;} if(!active&&selectedDirectKey){const otherId=selectedDirectKey.split("::").find(id=>id!==user.id)||selectedDirectKey.split("::")[0];const other=team.find(p=>p.user_id===otherId);if(other)active={key:selectedDirectKey,messages:[],otherId,name:other.display_name,last:null};}
+ $("directView").querySelector(".dm-inbox").classList.toggle("mobile-thread-open",mobileThreadOpen&&!!active);
  if(active){
-  $("directRecipient").value=active.otherId;$("dmNewRecipient").value="";$("directView").querySelector(".dm-inbox").classList.toggle("mobile-thread-open",mobileThreadOpen);
-  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name,active.otherId)}</span><div><strong>${esc(active.name)}</strong><small>CTR team member · Private conversation</small></div>${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}`;
+  $("directRecipient").value=active.otherId;$("dmNewRecipient").value="";
+  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name,active.otherId)}</span><div><strong>${esc(active.name)}</strong><small><span class="dm-online-dot"></span> CTR team member · Private conversation</small></div><div class="dm-thread-actions">${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}</div>`;
   const box=$("directNotes"),near=box.scrollHeight-box.scrollTop-box.clientHeight<100;
   box.innerHTML=active.messages.map(m=>{
    const mine=m.sender_id===user.id,from=team.find(p=>p.user_id===m.sender_id)?.display_name||"CTR Member";
-   return `<article class="dm-message ${mine?"mine":""}">${admin&&!mine?`<span class="dm-message-sender">${esc(from)}</span>`:""}<div>${esc(m.body)}</div><time>${esc(time(m.created_at))}${mine?" · Sent":""}</time>${admin?`<button class="delete-note" data-ddelete="${m.id}">Delete</button>`:""}</article>`;
-  }).join("")||'<div class="empty-state">No messages yet. Say hello.</div>';
+   return `<article class="dm-message ${mine?"mine":""}">${admin&&!mine?`<span class="dm-message-sender">${esc(from)}</span>`:""}<div>${esc(m.body)}</div><time>${esc(time(m.created_at))}${mine?" · ✓✓":""}</time>${admin?`<button class="delete-note" data-ddelete="${m.id}">Delete</button>`:""}</article>`;
+  }).join("")||'<div class="dm-empty-thread"><div class="dm-empty-mark">⚔</div><strong>Start a private conversation</strong><span>Messages sent here are visible to the selected member and CTR admin.</span></div>';
   let previousMessageDay="";
   [...box.querySelectorAll(".dm-message")].forEach((card,index)=>{
    const message=active.messages[index],label=dayLabel(message.created_at);
@@ -152,13 +158,13 @@ function renderDirect(){
   });
   if(near)requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);
   $("directInput").disabled=false;$("directForm").querySelector("button[type=submit]").disabled=false;
-  $("dmComposeHint").textContent="Messages are private to the conversation participants and CTR admin.";
+  $("dmComposeHint").textContent="Private conversation";
  }else{
   $("directRecipient").value="";
-  $("dmThreadHeader").innerHTML='<div class="dm-empty-avatar">⚔</div><div><strong>Select a conversation</strong><small>Your private messages appear here</small></div>';
-  $("directNotes").innerHTML='<div class="empty-state"><h3>Your messages</h3><p>Select a team member to open a conversation.</p></div>';
+  $("dmThreadHeader").innerHTML='<div class="dm-empty-avatar">⚔</div><div><strong>CTR Messages</strong><small>Select a contact to view your conversation</small></div>';
+  $("directNotes").innerHTML='<div class="dm-empty-thread"><div class="dm-empty-mark">⚔</div><strong>Your conversations</strong><span>Select a team member from the contact list to open the chat.</span></div>';
   $("directInput").disabled=true;$("directForm").querySelector("button[type=submit]").disabled=true;
-  $("dmComposeHint").textContent="Choose a conversation to start messaging.";
+  $("dmComposeHint").textContent="Choose a contact to start messaging.";
  }
 }
 async function loadDirect(){
