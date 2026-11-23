@@ -1480,3 +1480,26 @@ html body #authView #authSubmit{cursor:pointer;touch-action:manipulation}
  .app-footer{margin-top:auto!important;width:100%!important;flex:0 0 auto!important;padding:9px 4px 3px!important}
  .sidebar-toggle{display:none!important}
 }
+
+
+/* Compact desktop header sizing: keep the same alignment and artwork. */
+@media (min-width: 761px){
+ .sidebar-nav{padding:7px 20px!important;min-height:82px!important}
+ .sidebar-nav>.brand .brand-mark,.app-view.sidebar-collapsed .sidebar-nav>.brand .brand-mark{
+  width:72px!important;height:72px!important;flex:0 0 72px!important;
+ }
+ .sidebar-nav>.brand{gap:10px!important}
+ .sidebar-nav .top-nav{gap:clamp(7px,1.25vw,17px)!important}
+ .sidebar-nav .top-nav-btn{
+  flex:0 0 48px!important;width:48px!important;height:48px!important;min-height:48px!important;border-radius:13px!important;
+ }
+ .sidebar-nav .top-nav-btn .samurai-icon,.sidebar-nav .top-nav-btn>svg{
+  width:27px!important;height:27px!important;min-width:27px!important;flex:0 0 27px!important;
+ }
+ .sidebar-nav .global-search-wrap{
+  flex:0 0 48px!important;width:48px!important;height:48px!important;min-height:48px!important;
+ }
+ .sidebar-nav .global-search-wrap .samurai-search{
+  width:27px!important;height:27px!important;min-width:27px!important;flex:0 0 27px!important;
+ }
+}
