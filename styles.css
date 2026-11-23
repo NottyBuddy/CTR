@@ -1350,3 +1350,57 @@ html body #authView #authSubmit{cursor:pointer;touch-action:manipulation}
  .app-view:has(#groupView:not(.hidden)) #crmGenerator{display:none!important}
  .dm-inbox{grid-template-columns:minmax(0,1fr)!important}
 }
+
+
+/* WhatsApp Web-inspired CTR messenger layout: contact rail + full conversation pane. */
+@media(min-width:761px){
+ .app-view:has(#directView:not(.hidden)) .main-area>.topbar{display:none!important}
+ .app-view:has(#directView:not(.hidden)) .workspace{display:block!important;margin:0!important;min-height:calc(100vh - 118px)!important}
+ .app-view:has(#directView:not(.hidden)) .chat{width:100%!important;max-width:none!important;min-height:calc(100vh - 118px)!important;padding:0 18px 12px!important}
+ .app-view:has(#directView:not(.hidden)) .direct-inbox-view{display:flex!important;flex-direction:column;min-height:calc(100vh - 130px)!important}
+ .app-view:has(#directView:not(.hidden)) .inbox-heading{padding:12px 4px 10px!important;min-height:66px}
+ .app-view:has(#directView:not(.hidden)) .inbox-heading h2{font-size:20px!important}
+ .app-view:has(#directView:not(.hidden)) .dm-inbox{display:grid!important;grid-template-columns:minmax(290px,34%) minmax(0,1fr)!important;min-height:calc(100vh - 215px)!important;height:calc(100vh - 215px)!important;border-radius:15px!important;background:rgba(9,7,10,.30)!important;overflow:hidden!important}
+ .app-view:has(#directView:not(.hidden)) .dm-list-pane{min-height:0!important;border-right:1px solid rgba(255,255,255,.09)!important}
+ .app-view:has(#directView:not(.hidden)) .dm-list-tools{padding:12px!important}
+ .app-view:has(#directView:not(.hidden)) .dm-inbox-list{min-height:0!important;max-height:none!important}
+ .app-view:has(#directView:not(.hidden)) .dm-thread-pane{height:100%!important;min-height:0!important;background:rgba(8,7,10,.12)!important}
+ .app-view:has(#directView:not(.hidden)) .dm-thread-header{min-height:66px!important;background:rgba(15,10,14,.55)!important}
+ .app-view:has(#directView:not(.hidden)) .dm-thread-messages{max-height:none!important;min-height:0!important;flex:1!important;background:transparent!important}
+ .app-view:has(#directView:not(.hidden)) .dm-compose-wrap{background:rgba(12,8,11,.55)!important}
+}
+.dm-list-tools input#directSearch{width:100%!important;min-height:42px!important;padding:10px 14px 10px 40px!important;border-radius:22px!important;background:rgba(255,255,255,.055)!important}
+.dm-list-tools{position:relative}
+.dm-list-tools:before{content:"⌕";position:absolute;left:28px;top:25px;color:#d4bbc3;font-size:23px;z-index:2;pointer-events:none}
+.dm-filter-row{gap:8px!important;margin-top:12px!important}
+.dm-filter{padding:7px 15px!important;border:1px solid rgba(255,255,255,.10)!important;background:rgba(255,255,255,.025)!important;color:#d4c0c7!important}
+.dm-filter.active{background:rgba(255,35,79,.16)!important;color:#ffdce4!important;border-color:rgba(255,75,110,.22)!important}
+.dm-conversation{min-height:76px!important;padding:12px 14px!important;gap:13px!important}
+.dm-conversation:hover,.dm-conversation.selected{background:rgba(255,255,255,.055)!important}
+.dm-conversation.selected{box-shadow:inset 3px 0 #ef365e!important}
+.dm-avatar{width:48px!important;height:48px!important;flex-basis:48px!important;border-radius:50%!important;background:linear-gradient(145deg,rgba(255,89,124,.26),rgba(72,15,33,.7))!important;border:0!important}
+.dm-convo-copy strong{font-size:13px!important;color:#fff!important}
+.dm-convo-copy>span{font-size:11px!important;color:#bdaab1!important}
+.dm-convo-meta time{font-size:10px!important}
+.dm-thread-header{padding:10px 18px!important}
+.dm-thread-header .dm-avatar-large{width:44px!important;height:44px!important;flex-basis:44px!important}
+.dm-online-dot{display:inline-block;width:7px;height:7px;margin-right:5px;border-radius:50%;background:#55c98a;box-shadow:0 0 8px rgba(85,201,138,.4)}
+.dm-thread-actions{margin-left:auto}
+.dm-message{max-width:min(76%,680px)!important;padding:10px 14px!important;border-radius:12px 12px 12px 3px!important;background:rgba(255,255,255,.085)!important;font-size:13px!important}
+.dm-message.mine{background:linear-gradient(135deg,rgba(112,22,48,.88),rgba(74,13,31,.92))!important;border-radius:12px 12px 3px 12px!important}
+.dm-message time{font-size:9px!important}
+.dm-empty-thread{margin:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;max-width:330px;text-align:center;color:#d9cbd0;padding:28px}
+.dm-empty-thread strong{font:700 15px Manrope;color:#f5e9ed}
+.dm-empty-thread span{font-size:11px;line-height:1.6;color:#aa969e}
+.dm-empty-mark{display:grid;place-items:center;width:60px;height:60px;border-radius:50%;background:rgba(255,35,79,.10);color:#ff9bad;font-size:25px;box-shadow:0 0 28px rgba(255,35,79,.12)}
+@media(max-width:760px){
+ .app-view:has(#directView:not(.hidden)) .main-area>.topbar{display:none!important}
+ .app-view:has(#directView:not(.hidden)) .workspace{margin:0!important}
+ .app-view:has(#directView:not(.hidden)) .chat{padding:0 10px 10px!important;min-height:calc(100dvh - 110px)!important}
+ .app-view:has(#directView:not(.hidden)) .inbox-heading{padding:8px 2px!important}
+ .app-view:has(#directView:not(.hidden)) .dm-inbox{min-height:calc(100dvh - 205px)!important}
+ .app-view:has(#directView:not(.hidden)) .dm-list-pane{min-height:calc(100dvh - 210px)!important}
+ .app-view:has(#directView:not(.hidden)) .dm-thread-pane{min-height:calc(100dvh - 190px)!important}
+ .dm-conversation{min-height:70px!important}
+ .dm-avatar{width:43px!important;height:43px!important;flex-basis:43px!important}
+}
