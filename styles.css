@@ -1151,3 +1151,12 @@ body::after{
 .account-settings-foot{margin-top:17px;color:#9e858e;font-size:10px;line-height:1.5}
 .dm-avatar{font-size:19px}
 @media(max-width:760px){.account-settings-btn{padding:4px 6px;gap:4px;font-size:0}.account-current-avatar{width:30px;height:30px;font-size:17px}.account-settings-card{padding:23px 18px}.account-avatar-choices{gap:8px}}
+
+
+/* Critical visibility fix: mobile app layout must never override the hidden state.
+   The auth screen and signed-in workspace are mutually exclusive on every viewport. */
+.app-view.hidden,
+.auth-wrap.hidden{display:none!important}
+@media(max-width:760px){
+ .app-view:not(.hidden){display:flex!important;flex-direction:column;gap:10px}
+}
