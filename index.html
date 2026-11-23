@@ -52,12 +52,20 @@
 <div class="search-toolbar"><input id="personalSearch" type="search" placeholder="Search personal notes"></div><div id="personalNotes" class="notes"></div><section id="moderationPanel" class="moderation-panel hidden"><h3>Admin moderation history</h3><div id="moderationLog" class="notes"></div></section>
 <form id="personalForm" class="composer"><textarea id="personalInput" rows="3" placeholder="Add a private callback note…" required></textarea><div class="composer-foot"><span>Private to you; visible to CTR admin.</span><button class="send-btn" type="submit">Save note <b>↗</b></button></div></form>
 </section>
-<section id="directView" class="notes-view hidden">
-<div class="chat-head"><div><div class="eyebrow">PRIVATE CONVERSATIONS</div><h2>Direct Messages</h2><p>Send a private message to a team member. Admin can review all conversations.</p></div><div class="head-count">◉ <span id="directCount">0</span> messages</div></div>
-<div class="search-toolbar"><input id="directSearch" type="search" placeholder="Search messages, sender or recipient"></div><div class="direct-toolbar"><label for="directRecipient">Send to team member</label><select id="directRecipient"><option value="">Choose a team member…</option></select><span id="directAdminHint" class="direct-hint hidden">Admin view: all team conversations are visible.</span></div>
-<div id="directNotes" class="notes"></div>
-<form id="directForm" class="composer"><textarea id="directInput" rows="3" placeholder="Write a private message…" required></textarea><div class="composer-foot"><span>Visible to the recipient and CTR admin.</span><button class="send-btn" type="submit">Send message <b>↗</b></button></div></form>
-</section>
+<section id="directView" class="notes-view hidden direct-inbox-view">
+<div class="inbox-heading"><div><div class="eyebrow">PRIVATE CONVERSATIONS</div><h2>Messages</h2><p>Private team conversations · visible to participants and CTR admin</p></div><div class="head-count"><span id="directCount">0</span> messages</div></div>
+<div class="dm-inbox">
+<aside class="dm-list-pane">
+<div class="dm-list-tools"><input id="directSearch" type="search" placeholder="Search conversations…" aria-label="Search conversations"><div class="dm-filter-row"><button class="dm-filter active" data-dm-filter="all" type="button">All</button><button class="dm-filter" data-dm-filter="unread" type="button">Unread</button></div></div>
+<div id="directInboxList" class="dm-inbox-list"><div class="empty-state">Loading conversations…</div></div>
+</aside>
+<section class="dm-thread-pane">
+<header id="dmThreadHeader" class="dm-thread-header"><div class="dm-empty-avatar">⚔</div><div><strong>Select a conversation</strong><small>Your private messages appear here</small></div><span id="directAdminHint" class="direct-hint hidden">Admin view</span></header>
+<div id="directNotes" class="dm-thread-messages"><div class="empty-state"><h3>Your messages</h3><p>Select a team member to open a conversation.</p></div></div>
+<div class="dm-compose-wrap"><div id="dmComposeHint" class="dm-compose-hint">Choose a conversation to start messaging.</div>
+<form id="directForm" class="dm-composer"><select id="directRecipient" aria-label="Conversation recipient"><option value="">Choose a team member…</option></select><textarea id="directInput" rows="1" placeholder="Write a message…" required disabled></textarea><button class="dm-send-btn" type="submit" disabled aria-label="Send message">➤</button></form>
+</div></section></div>
+</section></section>
 </section>
 <aside class="right-panel glass" id="crmGenerator"><div class="right-panel-head"><div class="eyebrow">QUICK DRAFT</div><h3>CRM Note Generator</h3><p>Paste customer details to prepare both formats.</p></div><textarea id="aiInput" rows="5" placeholder="Customer Name | Contact Number&#10;Paste conversation, requirement and assigned person…"></textarea><div class="ai-actions"><span id="aiStatus">Drafts are prepared locally. Review before sharing.</span><button id="generateAI" class="send-btn" type="button">Generate ↗</button></div><div id="aiResults" class="ai-results hidden"><div class="ai-result"><div class="ai-result-head"><strong>Group Share</strong><button type="button" class="text-btn ai-use" data-ai-use="group">Send to group</button></div><div id="aiGroup" class="draft-preview"></div><button type="button" class="copy-draft" data-copy="group">Copy group note</button></div><div class="ai-result"><div class="ai-result-head"><strong>CRM Entry</strong><button type="button" class="text-btn ai-use" data-ai-use="crm">Copy for CRM</button></div><div id="aiCrm" class="draft-preview"></div><button type="button" class="copy-draft" data-copy="crm">Copy CRM note</button></div></div></aside></div>
 <footer class="app-footer">CTR · CALLING TEAM RECORDS <span>Updates sync across signed-in users</span></footer>
