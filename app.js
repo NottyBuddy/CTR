@@ -129,13 +129,14 @@ function renderDirect(){
   }
  });
  conversations.sort((a,b)=>(new Date(b.last?.created_at||0)-new Date(a.last?.created_at||0))||a.name.localeCompare(b.name));
+ const allConversations=conversations;
  const q=directFilter.toLowerCase();
- conversations=conversations.filter(c=>(directInboxFilter!=="unread"||c.unread>0)&&(!q||[c.name,...c.messages.map(m=>m.body)].join(" ").toLowerCase().includes(q)));
+ conversations=allConversations.filter(c=>(directInboxFilter!=="unread"||c.unread>0)&&(!q||[c.name,...c.messages.map(m=>m.body)].join(" ").toLowerCase().includes(q)));
  $("directInboxList").innerHTML=conversations.length?conversations.map(c=>{
   const preview=c.last?(c.last.sender_id===user.id?"You: ":"")+c.last.body:"Start a conversation";
   return `<button type="button" class="dm-conversation ${selectedDirectKey===c.key?"selected":""}" data-dm-key="${esc(c.key)}" data-dm-other="${esc(c.otherId)}"><span class="dm-avatar">${directAvatar(c.name,c.otherId)}</span><span class="dm-convo-copy"><strong>${esc(c.name)}</strong><span>${esc(preview)}</span></span><span class="dm-convo-meta"><time>${c.last?esc(time(c.last.created_at)):""}</time>${c.unread?`<b class="dm-unread-count">${c.unread}</b>`:""}</span></button>`;
  }).join(""):'<div class="empty-state"><h3>No matching contacts</h3><p>Try another search or select All.</p></div>';
- let active=conversations.find(c=>c.key===selectedDirectKey);
+ let active=allConversations.find(c=>c.key===selectedDirectKey);
  if(!active&&selectedDirectKey){
   const otherId=selectedDirectKey.split("::").find(id=>id!==user.id)||selectedDirectKey.split("::")[0];
   const other=team.find(p=>p.user_id===otherId);
@@ -359,12 +360,23 @@ document.querySelectorAll("[data-dm-filter]").forEach(b=>b.addEventListener("cli
 $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value.toLowerCase().trim();renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
 $("directForm").onsubmit=async e=>{
  e.preventDefault();
- const recipient=$("directRecipient").value,body=$("directInput").value.trim();
- if(!recipient){status("Choose a team member before sending.");return}
+ const body=$("directInput").value.trim();
+ const selectedIds=(selectedDirectKey||"").split("::");
+ const recipient=$("directRecipient").value||selectedIds.find(id=>id&&id!==user.id)||"";
+ if(!recipient){status("Open a team member's conversation before sending.");return}
  if(!body)return;
- const {error}=await db.from("ctr_direct_messages").insert({sender_id:user.id,recipient_id:recipient,sender_email:user.email,body});
- if(error){status("Could not send direct message: "+error.message);return}
- $("directInput").value="";await loadDirect();status("Direct message sent.");
+ const send=$("directForm").querySelector('button[type="submit"]');
+ send.disabled=true;
+ try{
+  const {error}=await db.from("ctr_direct_messages").insert({sender_id:user.id,recipient_id:recipient,sender_email:user.email,body});
+  if(error){status("Message not sent: "+error.message);return}
+  $("directInput").value="";
+  selectedDirectKey=directPairKey(user.id,recipient);
+  await loadDirect();
+  markSeen("direct");
+  status("Message sent.");
+ }catch(err){status("Message not sent: "+(err.message||"Please retry."))}
+ finally{send.disabled=false}
 };
 document.addEventListener("click",async e=>{
  const cp=e.target.closest("[data-copy-phone]");if(cp){try{await navigator.clipboard.writeText(cp.dataset.copyPhone);status("Phone copied.")}catch{status("Clipboard unavailable.")}return}
