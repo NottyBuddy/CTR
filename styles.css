@@ -1134,3 +1134,20 @@ body::after{
 @media(min-width:761px){.dm-inbox{min-height:570px}.dm-thread-messages{max-height:calc(100vh - 430px)}}
 
 .dm-new-recipient{margin:0 0 10px!important;padding:10px 12px!important;background:rgba(255,35,79,.08)!important;color:#ffadbc!important;border-radius:11px!important;font-size:11px!important}.dm-new-recipient option{background:#160a10;color:#fff}
+
+
+/* Account avatar picker — isolated UI; no auth or database writes. */
+.account-settings-btn{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.045);color:#f2e6e9;font-size:10px;white-space:nowrap}
+.account-current-avatar{display:grid;place-items:center;width:27px;height:27px;border-radius:50%;background:linear-gradient(145deg,rgba(255,85,117,.3),rgba(72,14,31,.8));font-size:16px;box-shadow:0 0 12px rgba(255,35,79,.15)}
+.account-settings-btn:hover{background:rgba(255,35,79,.12)}
+.account-settings-modal{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.account-settings-card{position:relative;width:min(100%,420px);padding:27px;border-radius:22px;background:linear-gradient(145deg,#1a0d13,#0d090c);box-shadow:0 25px 90px rgba(0,0,0,.65),0 0 35px rgba(255,35,79,.12)}
+.account-settings-card h3{font:800 22px Manrope;margin:8px 0}
+.account-settings-card p{font-size:12px;line-height:1.6;color:#bca8ae;margin:0 25px 18px 0}
+.account-settings-close{position:absolute;right:16px;top:13px;background:transparent;color:#f7dce3;font-size:25px}
+.account-avatar-choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.account-avatar-choice{aspect-ratio:1;border-radius:15px;background:rgba(255,255,255,.045);color:#fff;font-size:25px}
+.account-avatar-choice:hover,.account-avatar-choice.selected{background:rgba(255,35,79,.18);box-shadow:inset 0 0 0 1px rgba(255,90,120,.5),0 0 16px rgba(255,35,79,.13);transform:translateY(-2px)}
+.account-settings-foot{margin-top:17px;color:#9e858e;font-size:10px;line-height:1.5}
+.dm-avatar{font-size:19px}
+@media(max-width:760px){.account-settings-btn{padding:4px 6px;gap:4px;font-size:0}.account-current-avatar{width:30px;height:30px;font-size:17px}.account-settings-card{padding:23px 18px}.account-avatar-choices{gap:8px}}
