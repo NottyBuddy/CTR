@@ -94,7 +94,14 @@ function globalSearch(query){
  panel.classList.remove("hidden");
 }
 function directPairKey(a,b){return [a,b].sort().join("::")}
-function directAvatar(name){const parts=String(name||"CTR Member").trim().split(/\\s+/);return esc((parts[0]?.[0]||"C")+(parts.length>1?parts[parts.length-1][0]:""))}
+function directAvatar(name,userId=""){const chosen=userId?localStorage.getItem("ctr_avatar_"+userId):"";if(chosen)return esc(chosen);const parts=String(name||"CTR Member").trim().split(/\\s+/);return esc((parts[0]?.[0]||"C")+(parts.length>1?parts[parts.length-1][0]:""))}
+const CTR_AVATARS=["⚔️","🛡️","🐉","🐺","🦊","🐯","🦅","🐼","🦁","🐲","🌙","🔥","🎭","👑","🌸","☯️"];
+function setupAccountSettings(){
+ if(!$("accountSettingsBtn")){const b=document.createElement("button");b.id="accountSettingsBtn";b.type="button";b.className="account-settings-btn";b.innerHTML='<span class="account-current-avatar"></span><span>Account settings</span>';b.addEventListener("click",()=>{$("accountSettingsModal").classList.remove("hidden");renderAccountAvatars()});$("userEmail").after(b)}
+ if(!$("accountSettingsModal")){const modal=document.createElement("div");modal.id="accountSettingsModal";modal.className="account-settings-modal hidden";modal.innerHTML='<section class="account-settings-card" role="dialog" aria-modal="true" aria-labelledby="accountSettingsTitle"><button type="button" class="account-settings-close" aria-label="Close">×</button><div class="eyebrow">YOUR PROFILE</div><h3 id="accountSettingsTitle">Account settings</h3><p>Choose an avatar for your CTR chats. This choice is saved on this device for your signed-in account.</p><div id="accountAvatarChoices" class="account-avatar-choices"></div><div class="account-settings-foot">Login details and chat records are not changed.</div></section>';document.body.append(modal);modal.addEventListener("click",e=>{if(e.target===modal||e.target.closest(".account-settings-close"))modal.classList.add("hidden");const pick=e.target.closest("[data-avatar]");if(pick&&user){localStorage.setItem("ctr_avatar_"+user.id,pick.dataset.avatar);renderAccountAvatars();renderDirect()}})}
+ renderAccountAvatars()
+}
+function renderAccountAvatars(){if(!user)return;const selected=localStorage.getItem("ctr_avatar_"+user.id)||"";const grid=$("accountAvatarChoices");if(grid)grid.innerHTML=CTR_AVATARS.map(a=>'<button type="button" class="account-avatar-choice '+(a===selected?"selected":"")+'" data-avatar="'+esc(a)+'" aria-label="Choose avatar">'+a+'</button>').join("");const current=document.querySelector(".account-current-avatar");if(current)current.textContent=selected||directAvatar(displayName(user.email),user.id)}
 function renderDirect(){
  const admin=isAdmin(),people=team.filter(p=>p.user_id!==user.id);
  $("directAdminHint").classList.toggle("hidden",!admin);
@@ -121,7 +128,7 @@ function renderDirect(){
  conversations.sort((a,b)=>new Date(b.last.created_at)-new Date(a.last.created_at));
  const q=directFilter.toLowerCase();
  conversations=conversations.filter(c=>(directInboxFilter!=="unread"||c.unread>0)&&(!q||[c.name,...c.messages.map(m=>m.body)].join(" ").toLowerCase().includes(q)));
- $("directInboxList").innerHTML=conversations.length?conversations.map(c=>`<button type="button" class="dm-conversation ${selectedDirectKey===c.key?"selected":""}" data-dm-key="${esc(c.key)}" data-dm-other="${esc(c.otherId)}"><span class="dm-avatar">${directAvatar(c.name)}</span><span class="dm-convo-copy"><strong>${esc(c.name)}</strong><span>${esc(c.last.body||"")}</span></span><span class="dm-convo-meta"><time>${esc(time(c.last.created_at))}</time>${c.unread?`<b class="dm-unread-count">${c.unread}</b>`:""}</span></button>`).join(""):'<div class="empty-state"><h3>No conversations yet</h3><p>Choose a team member below to start a private chat.</p></div>';
+ $("directInboxList").innerHTML=conversations.length?conversations.map(c=>`<button type="button" class="dm-conversation ${selectedDirectKey===c.key?"selected":""}" data-dm-key="${esc(c.key)}" data-dm-other="${esc(c.otherId)}"><span class="dm-avatar">${directAvatar(c.name,c.otherId)}</span><span class="dm-convo-copy"><strong>${esc(c.name)}</strong><span>${esc(c.last.body||"")}</span></span><span class="dm-convo-meta"><time>${esc(time(c.last.created_at))}</time>${c.unread?`<b class="dm-unread-count">${c.unread}</b>`:""}</span></button>`).join(""):'<div class="empty-state"><h3>No conversations yet</h3><p>Choose a team member below to start a private chat.</p></div>';
  let active=conversations.find(c=>c.key===selectedDirectKey);
  if(!active&&selectedDirectKey){
   const messages=pairs.get(selectedDirectKey)||[];
@@ -130,7 +137,7 @@ function renderDirect(){
  if(!active&&!admin&&conversations.length){active=conversations[0];selectedDirectKey=active.key;} if(!active&&selectedDirectKey){const otherId=selectedDirectKey.split("::").find(id=>id!==user.id)||selectedDirectKey.split("::")[0];const other=team.find(p=>p.user_id===otherId);if(other)active={key:selectedDirectKey,messages:[],otherId,name:other.display_name,last:null};}
  if(active){
   $("directRecipient").value=active.otherId;$("dmNewRecipient").value="";$("directView").querySelector(".dm-inbox").classList.add("mobile-thread-open");
-  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name)}</span><div><strong>${esc(active.name)}</strong><small>CTR team member · Private conversation</small></div>${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}`;
+  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name,active.otherId)}</span><div><strong>${esc(active.name)}</strong><small>CTR team member · Private conversation</small></div>${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}`;
   const box=$("directNotes"),near=box.scrollHeight-box.scrollTop-box.clientHeight<100;
   box.innerHTML=active.messages.map(m=>{
    const mine=m.sender_id===user.id,from=team.find(p=>p.user_id===m.sender_id)?.display_name||"CTR Member";
@@ -275,7 +282,7 @@ function realtime(){
  .subscribe(s=>{if(s==="SUBSCRIBED")status("Live sync connected · group updates appear automatically.");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")status("Live sync interrupted. Refresh to reconnect.")});
 }
 async function enter(u){
- user=u;$("authView").classList.add("hidden");$("appView").classList.remove("hidden");
+ user=u;$("authView").classList.add("hidden");$("appView").classList.remove("hidden");setupAccountSettings();
  const name=displayName(u.email);$("userEmail").textContent=name;updateNotificationButton();
  try{await loadAll();realtime();await loadDirect()}catch(e){status("Database error: "+(e.message||"Unable to load records."))}
 }
