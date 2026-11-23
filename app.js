@@ -289,7 +289,7 @@ async function enter(u){
 }
 async function ensureSupabaseLibrary(){
  if(window.supabase?.createClient)return true;
- const sources=["https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js","https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"];
+ const sources=["https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js","https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"];
  for(const src of sources){
   try{
    await new Promise((resolve,reject)=>{
