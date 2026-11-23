@@ -295,32 +295,32 @@ async function enter(u){
 }
 async function ensureSupabaseLibrary(){
  if(window.supabase?.createClient)return true;
- const sources=["https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js","https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"];
+ const esmSources=["https://esm.sh/@supabase/supabase-js@2","https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"];
+ for(const src of esmSources){
+  try{
+   const mod=await Promise.race([import(src),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Supabase module timed out")),12000))]);
+   if(typeof mod.createClient==="function"){window.supabase={createClient:mod.createClient};return true}
+  }catch(err){console.warn("Supabase ESM source failed",src,err)}
+ }
+ const sources=["https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js","https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"];
  for(const src of sources){
   try{
    await new Promise((resolve,reject)=>{
     const script=document.createElement("script");script.src=src;script.async=true;
     let settled=false;const finish=(fn,value)=>{if(settled)return;settled=true;clearTimeout(timer);fn(value)};
-    const timer=setTimeout(()=>finish(reject,new Error("Supabase library request timed out")),10000);
+    const timer=setTimeout(()=>finish(reject,new Error("Supabase library request timed out")),12000);
     script.onload=()=>window.supabase?.createClient?finish(resolve):finish(reject,new Error("Supabase createClient is unavailable"));
     script.onerror=()=>finish(reject,new Error("Could not load "+src));
     document.head.appendChild(script);
    });
    if(window.supabase?.createClient)return true;
-  }catch(err){console.warn("Supabase CDN attempt failed",err)}
+  }catch(err){console.warn("Supabase UMD source failed",src,err)}
  }
- try{
-  const mod=await Promise.race([
-   import("https://esm.sh/@supabase/supabase-js@2"),
-   new Promise((_,reject)=>setTimeout(()=>reject(new Error("Supabase ESM request timed out")),8000))
-  ]);
-  if(typeof mod.createClient==="function"){window.supabase={createClient:mod.createClient};return true}
- }catch(err){console.warn("Supabase ESM fallback failed",err)}
- return !!window.supabase?.createClient;
+ return false;
 }
 async function boot(){
- status("Connecting to sign-in service…",true);
- if(!await ensureSupabaseLibrary()){status("Sign-in service library could not load. Check your internet connection, then refresh.",true);return}
+ status("Connecting to sign-in service…",true);$("authRetry")?.classList.add("hidden");
+ if(!await ensureSupabaseLibrary()){status("Could not connect to the sign-in service. Check internet and tap Retry connection.",true);$("authRetry")?.classList.remove("hidden");return}
  db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
  const {data,error}=await db.auth.getSession();if(error){status("Session error: "+error.message,true);return}
  if(data.session)await enter(data.session.user);
