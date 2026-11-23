@@ -1077,3 +1077,58 @@ body::after{
 .sidebar-nav .top-nav-btn{margin-bottom:2px!important}
 .sidebar-nav .global-search-wrap{margin-top:5px!important}
 @media(max-width:760px){.sidebar-nav .top-nav{gap:8px!important}.sidebar-nav .top-nav-btn{margin-bottom:0!important}}
+
+/* Professional messaging inbox: compact Telegram-inspired list, simple composer, polished DM thread. */
+.direct-inbox-view{min-height:650px!important}
+.inbox-heading{display:flex;align-items:center;justify-content:space-between;padding:22px 0 16px;gap:14px}
+.inbox-heading h2{font:800 23px Manrope;margin:6px 0}.inbox-heading p{margin:0;color:var(--muted);font-size:12px}
+.dm-inbox{display:grid;grid-template-columns:minmax(245px,34%) minmax(0,1fr);gap:0;flex:1;min-height:550px;border-radius:18px;overflow:hidden;background:rgba(5,4,7,.25)}
+.dm-list-pane{min-width:0;border-right:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column}
+.dm-list-tools{padding:14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.dm-list-tools input{margin:0;background:rgba(255,255,255,.045);border-radius:12px}
+.dm-filter-row{display:flex;gap:7px;margin-top:11px}
+.dm-filter{padding:7px 12px;border-radius:20px;background:transparent;color:#a9919a;font-size:11px}
+.dm-filter.active{background:rgba(255,35,79,.15);color:#ff9bad}
+.dm-inbox-list{overflow:auto;min-height:0;flex:1}
+.dm-conversation{width:100%;display:flex;align-items:center;gap:11px;text-align:left;padding:13px 12px;background:transparent;color:var(--text);border-bottom:1px solid rgba(255,255,255,.035);border-radius:0}
+.dm-conversation:hover,.dm-conversation.selected{background:rgba(255,35,79,.075)}
+.dm-conversation.selected{box-shadow:inset 2px 0 #ff4269}
+.dm-avatar,.dm-empty-avatar{width:42px;height:42px;flex:0 0 42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#401421,#170b11);border:1px solid rgba(255,77,112,.2);color:#ffb3c1;font:800 13px Manrope;letter-spacing:.5px;box-shadow:0 0 14px rgba(255,35,79,.08)}
+.dm-convo-copy{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+.dm-convo-copy strong{font-size:12px;font-weight:750}
+.dm-convo-copy>span{font-size:11px;color:#a9919a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.dm-convo-meta{align-self:stretch;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px}
+.dm-convo-meta time{font-size:9px;color:#907983;white-space:nowrap}
+.dm-unread-count{min-width:17px;height:17px;border-radius:20px;background:#c91e48;color:#fff;font-size:9px;display:grid;place-items:center;padding:0 4px}
+.dm-thread-pane{min-width:0;display:flex;flex-direction:column;min-height:550px}
+.dm-thread-header{display:flex;align-items:center;gap:12px;padding:13px 17px;border-bottom:1px solid rgba(255,255,255,.06);min-height:70px}
+.dm-thread-header>div:nth-child(2){display:flex;flex-direction:column;gap:4px}
+.dm-thread-header strong{font-size:13px}.dm-thread-header small{font-size:10px;color:#a9919a}
+.dm-avatar-large{width:43px;height:43px;flex-basis:43px}
+.dm-admin-tag{margin-left:auto;font-size:9px;letter-spacing:1px;color:#ff9bad}
+.dm-thread-messages{padding:18px;display:flex;flex-direction:column;gap:11px;flex:1;min-height:320px;max-height:calc(100vh - 440px);overflow:auto;overscroll-behavior:contain}
+.dm-message{align-self:flex-start;max-width:min(78%,620px);padding:10px 13px;border-radius:15px 15px 15px 4px;background:rgba(255,255,255,.065);color:#f4e9ec;font-size:12px;line-height:1.55;overflow-wrap:anywhere;animation:rise .2s ease}
+.dm-message.mine{align-self:flex-end;background:linear-gradient(135deg,rgba(126,15,46,.7),rgba(64,9,27,.9));border-radius:15px 15px 4px 15px}
+.dm-message time{display:block;text-align:right;color:#b99aa4;font-size:9px;margin-top:5px}
+.dm-message-sender{display:block;color:#ff9bad;font-size:10px;font-weight:700;margin-bottom:4px}
+.dm-compose-wrap{padding:12px 14px 14px;border-top:1px solid rgba(255,255,255,.06)}
+.dm-compose-hint{font-size:9px;color:#9d858e;margin:0 0 8px 4px}
+.dm-composer{display:flex;align-items:flex-end;gap:9px;padding:7px;background:rgba(255,255,255,.045);border-radius:16px}
+.dm-composer select{display:none}
+.dm-composer textarea{flex:1;min-height:40px;max-height:120px;resize:vertical;margin:0;padding:10px 12px;background:transparent;border-radius:10px}
+.dm-composer textarea:disabled{opacity:.45}
+.dm-send-btn{width:40px;height:40px;flex:0 0 40px;border-radius:13px;background:linear-gradient(145deg,#ff8ca2,#f22a55);color:#26050e;font-size:18px;font-weight:800}
+.dm-send-btn:disabled{opacity:.35}
+@media(max-width:760px){
+ .direct-inbox-view{min-height:calc(100vh - 130px)!important}
+ .inbox-heading{padding:15px 0 12px}
+ .dm-inbox{display:block;min-height:calc(100vh - 260px);position:relative}
+ .dm-list-pane{border:0;min-height:calc(100vh - 270px)}
+ .dm-thread-pane{display:none;min-height:calc(100vh - 260px)}
+ .dm-inbox.mobile-thread-open .dm-list-pane{display:none}
+ .dm-inbox.mobile-thread-open .dm-thread-pane{display:flex}
+ .dm-thread-messages{max-height:none;min-height:0;flex:1}
+ .dm-thread-header:before{content:"‹";font-size:28px;color:#ff91a7;margin-right:2px;cursor:pointer}
+ .dm-conversation{padding:12px 10px}
+}
+@media(min-width:761px){.dm-inbox{min-height:570px}.dm-thread-messages{max-height:calc(100vh - 430px)}}
