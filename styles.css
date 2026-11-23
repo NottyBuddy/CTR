@@ -1132,3 +1132,5 @@ body::after{
  .dm-conversation{padding:12px 10px}
 }
 @media(min-width:761px){.dm-inbox{min-height:570px}.dm-thread-messages{max-height:calc(100vh - 430px)}}
+
+.dm-new-recipient{margin:0 0 10px!important;padding:10px 12px!important;background:rgba(255,35,79,.08)!important;color:#ffadbc!important;border-radius:11px!important;font-size:11px!important}.dm-new-recipient option{background:#160a10;color:#fff}
