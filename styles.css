@@ -1513,3 +1513,87 @@ html body #authView #authSubmit{cursor:pointer;touch-action:manipulation}
 @media(max-width:1180px){.topbar{grid-template-columns:auto minmax(0,1fr) auto;gap:7px}.top-nav{grid-column:auto;grid-row:auto;justify-content:center;overflow-x:auto;scrollbar-width:none}.top-meta{grid-column:auto;grid-row:auto}.top-nav-btn{padding:8px 7px}.top-nav-btn .nav-label{font-size:9px}}
 @media(max-width:760px){.topbar{grid-template-columns:auto 1fr;gap:6px;padding:7px 9px}.brand.compact .brand-sub{display:none}.brand.compact .brand-mark{width:31px;height:31px}.top-nav{grid-column:1/-1;grid-row:2;justify-content:flex-start;gap:3px;overflow-x:auto;scrollbar-width:none;padding:2px 0}.top-nav-btn{flex:0 0 auto;padding:8px 9px;gap:5px}.top-nav-btn .nav-label{display:inline;font-size:9px}.top-nav-btn svg{width:15px;height:15px;flex-basis:15px}.top-meta{grid-column:2;grid-row:1;gap:5px}.top-meta #userEmail,.top-meta .divider,.top-meta .live-label{display:none}.header-icon-btn{width:28px;height:28px}.global-search-wrap{min-width:92px;max-width:135px;padding:6px 8px}.workspace{margin-top:10px}}
 @media(max-width:390px){.top-nav-btn{padding:7px 7px}.top-nav-btn .nav-label{font-size:8px}.global-search-wrap{min-width:78px;max-width:110px}}
+
+
+/* CTR header + direct-message layout repair (2026-11-23) */
+.app-view .main-area{display:flex!important;flex-direction:column!important;min-width:0!important;width:100%!important}
+.app-view .main-area>.topbar{
+ display:grid!important;grid-template-columns:minmax(190px,auto) minmax(0,1fr) auto!important;
+ align-items:center!important;justify-content:stretch!important;gap:12px!important;
+ width:100%!important;min-width:0!important;min-height:62px!important;height:auto!important;
+ padding:7px 12px!important;margin:0 0 8px!important;overflow:visible!important;
+}
+.app-view .main-area>.topbar>.brand.compact{
+ display:flex!important;align-items:center!important;gap:9px!important;
+ min-width:0!important;max-width:100%!important;margin:0!important;flex:0 0 auto!important;
+}
+.app-view .main-area>.topbar>.brand.compact .brand-mark{
+ display:grid!important;place-items:center!important;flex:0 0 48px!important;
+ width:48px!important;height:48px!important;min-width:48px!important;max-width:48px!important;
+ overflow:visible!important;border-radius:0!important;
+}
+.app-view .main-area>.topbar>.brand.compact .ctr-emblem{
+ display:block!important;width:100%!important;height:100%!important;max-width:100%!important;
+ object-fit:contain!important;object-position:center!important;overflow:visible!important;
+}
+.app-view .main-area>.topbar>.brand.compact>div:last-child{min-width:0!important}
+.app-view .main-area>.topbar .brand-name{font-size:18px!important;line-height:1.1!important}
+.app-view .main-area>.topbar .brand-sub{font-size:8px!important;letter-spacing:1.25px!important;white-space:nowrap!important}
+.app-view .main-area>.topbar>.top-nav{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ flex-wrap:nowrap!important;gap:3px!important;min-width:0!important;width:100%!important;
+ overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin!important;
+ padding:2px 3px!important;white-space:nowrap!important;
+}
+.app-view .main-area>.topbar .top-nav-btn{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ flex:0 0 auto!important;gap:5px!important;min-height:36px!important;height:36px!important;
+ padding:6px 8px!important;border-radius:9px!important;font-size:10px!important;
+ white-space:nowrap!important;
+}
+.app-view .main-area>.topbar .top-nav-btn svg{width:15px!important;height:15px!important;flex:0 0 15px!important}
+.app-view .main-area>.topbar>.top-meta{
+ display:flex!important;align-items:center!important;justify-content:flex-end!important;
+ flex-wrap:nowrap!important;gap:7px!important;min-width:0!important;white-space:nowrap!important;
+}
+.app-view .main-area>.topbar>.top-meta #userEmail{max-width:95px!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.app-view .main-area>.topbar .header-icon-btn{
+ display:inline-grid!important;place-items:center!important;position:relative!important;
+ flex:0 0 34px!important;width:34px!important;min-width:34px!important;height:34px!important;
+ padding:0!important;margin:0!important;border-radius:9px!important;
+ background:rgba(255,255,255,.045)!important;color:#f5e9ed!important;
+}
+.app-view .main-area>.topbar .header-icon-btn svg{display:block!important;width:16px!important;height:16px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+.app-view .main-area>.topbar .header-icon-btn:hover{background:rgba(255,35,79,.14)!important}
+.app-view .main-area>.topbar .header-icon-btn.is-refreshing svg{animation:ctrRefreshSpin .8s linear infinite}
+@keyframes ctrRefreshSpin{to{transform:rotate(360deg)}}
+.app-view .main-area>.workspace{min-width:0!important;width:100%!important}
+.app-view .main-area .direct-inbox-view{min-width:0!important;width:100%!important;min-height:620px!important}
+.app-view .main-area .dm-inbox{width:100%!important;min-width:0!important;grid-template-columns:minmax(235px,32%) minmax(0,1fr)!important}
+.app-view .main-area .dm-list-pane,.app-view .main-area .dm-thread-pane{min-width:0!important}
+.app-view .main-area .dm-compose-wrap{flex:0 0 auto!important}
+.app-view .main-area .dm-thread-messages{min-height:260px!important}
+@media(max-width:1100px){
+ .app-view .main-area>.topbar{grid-template-columns:minmax(150px,auto) minmax(0,1fr)!important;gap:7px!important}
+ .app-view .main-area>.topbar>.top-meta{grid-column:2;grid-row:1;justify-self:end}
+ .app-view .main-area>.topbar>.top-nav{grid-column:1/-1;grid-row:2;justify-content:flex-start!important}
+}
+@media(max-width:760px){
+ .app-view .main-area>.topbar{
+  grid-template-columns:minmax(0,1fr) auto!important;gap:5px!important;
+  min-height:0!important;padding:6px 7px!important;
+ }
+ .app-view .main-area>.topbar>.brand.compact .brand-mark{flex-basis:40px!important;width:40px!important;height:40px!important;min-width:40px!important;max-width:40px!important}
+ .app-view .main-area>.topbar .brand-name{font-size:16px!important}
+ .app-view .main-area>.topbar>.top-meta{grid-column:2;grid-row:1;gap:5px!important}
+ .app-view .main-area>.topbar>.top-meta #userEmail,.app-view .main-area>.topbar>.top-meta .divider,.app-view .main-area>.topbar>.top-meta .live-label{display:none!important}
+ .app-view .main-area>.topbar>.top-nav{grid-column:1/-1;grid-row:2;justify-content:flex-start!important;gap:3px!important}
+ .app-view .main-area>.topbar .top-nav-btn{height:35px!important;min-height:35px!important;padding:5px 7px!important;font-size:9px!important}
+ .app-view .main-area .direct-inbox-view{min-height:calc(100vh - 145px)!important}
+ .app-view .main-area .dm-inbox{display:block!important;min-height:calc(100vh - 280px)!important}
+ .app-view .main-area .dm-list-pane{min-height:calc(100vh - 290px)!important}
+ .app-view .main-area .dm-thread-pane{min-height:calc(100vh - 280px)!important}
+ .app-view .main-area .dm-inbox.mobile-thread-open .dm-list-pane{display:none!important}
+ .app-view .main-area .dm-inbox.mobile-thread-open .dm-thread-pane{display:flex!important}
+}
+@media(prefers-reduced-motion:reduce){.app-view .main-area>.topbar .header-icon-btn.is-refreshing svg{animation:none!important}}
