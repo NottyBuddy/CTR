@@ -181,7 +181,7 @@ async function loadDirect(){
  direct=data||[];renderDirect();renderPersonal();updateUnread();renderAgentDashboard();
 }
 async function refreshMessages(){
- const btn=$("refreshData");btn.disabled=true;btn.textContent="↻ Refreshing…";
+ const btn=$("refreshData");btn.disabled=true;btn.classList.add("is-refreshing");btn.setAttribute("aria-label","Refreshing");
  try{
   const [g,p,c,profiles]=await Promise.all([
    db.from("ctr_group_notes").select("*").order("created_at").limit(500),
@@ -196,7 +196,7 @@ async function refreshMessages(){
   await loadDirect();renderAgentDashboard();
   status("Messages refreshed.");
  }catch(e){status("Refresh failed: "+e.message)}
- finally{btn.disabled=false;btn.textContent="↻ Refresh"}
+ finally{btn.disabled=false;btn.classList.remove("is-refreshing");btn.setAttribute("aria-label","Refresh")}
 }
 function renderPersonal(){
  const rows=personal.filter(n=>!personalFilter||[n.body,team.find(t=>t.user_id===n.user_id)?.display_name||displayName(user.email)].join(" ").toLowerCase().includes(personalFilter));
@@ -259,9 +259,11 @@ function notificationPermission(){return ("Notification" in window)?Notification
 function updateNotificationButton(){
  const b=$("enableNotifications");if(!b)return;
  const p=notificationPermission();
- b.textContent=p==="granted"?"🔔 Alerts on":p==="denied"?"Alerts blocked":p==="unsupported"?"Alerts unavailable":"🔔 Enable alerts";
+ const label=p==="granted"?"Alerts on":p==="denied"?"Alerts blocked":p==="unsupported"?"Alerts unavailable":"Alerts";
  b.title=p==="granted"?"Browser notifications are enabled":p==="denied"?"Allow notifications for this site in browser settings":"Enable new-message browser notifications";
+ b.setAttribute("aria-label",label);
  b.classList.toggle("notifications-on",p==="granted");
+ b.classList.toggle("notifications-blocked",p==="denied");
 }
 function sendMessageNotification(kind,row){
  if(!row||!user||notificationPermission()!=="granted")return;
@@ -351,7 +353,7 @@ $("refreshData").onclick=refreshMessages;$("enableNotifications")?.addEventListe
 $("directRecipient").onchange=renderDirect;
 $("dmNewRecipient").addEventListener("change",e=>{const id=e.target.value;if(!id)return;selectedDirectKey=directPairKey(user.id,id);mobileThreadOpen=true;$("directRecipient").value=id;renderDirect();$("directInput").focus()});
 $("dmThreadHeader").addEventListener("click",()=>{if(window.matchMedia("(max-width:760px)").matches){mobileThreadOpen=false;$("directView").querySelector(".dm-inbox").classList.remove("mobile-thread-open")}});
-$("directInboxList").addEventListener("click",e=>{const b=e.target.closest("[data-dm-key]");if(!b)return;selectedDirectKey=b.dataset.dmKey;mobileThreadOpen=true;$("directRecipient").value=b.dataset.dmOther;renderDirect();markSeen("direct")});
+$("directInboxList").addEventListener("click",e=>{const b=e.target.closest("[data-dm-key]");if(!b)return;selectedDirectKey=b.dataset.dmKey;directFilter="";directInboxFilter="all";$("directSearch").value="";document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x.dataset.dmFilter==="all"));mobileThreadOpen=window.matchMedia("(max-width:760px)").matches;$("directRecipient").value=b.dataset.dmOther;renderDirect();markSeen("direct")});
 document.querySelectorAll("[data-dm-filter]").forEach(b=>b.addEventListener("click",()=>{directInboxFilter=b.dataset.dmFilter;document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x===b));renderDirect()}));
  $("globalSearch")?.addEventListener("input",e=>globalSearch(e.target.value));
 $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value.toLowerCase().trim();renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
