@@ -1160,3 +1160,9 @@ body::after{
 @media(max-width:760px){
  .app-view:not(.hidden){display:flex!important;flex-direction:column;gap:10px}
 }
+
+/* Final login isolation: never render signed-in workspace or CRM tools before auth. */
+html body .shell>#appView.hidden,html body #appView.hidden,html body .auth-wrap.hidden{display:none!important;visibility:hidden!important;pointer-events:none!important}
+html body .shell>#authView:not(.hidden){display:flex!important;visibility:visible!important;pointer-events:auto!important}
+html body #authView .auth-card,html body #authView #authForm,html body #authView #authSubmit{position:relative;z-index:5;pointer-events:auto!important}
+html body #authView #authSubmit{cursor:pointer;touch-action:manipulation}
