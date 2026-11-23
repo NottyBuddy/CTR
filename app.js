@@ -127,9 +127,9 @@ function renderDirect(){
   const messages=pairs.get(selectedDirectKey)||[];
   if(messages.length){const last=messages[messages.length-1],otherId=last.sender_id===user.id?last.recipient_id:last.sender_id,other=team.find(p=>p.user_id===otherId);active={key:selectedDirectKey,messages,otherId,name:other?.display_name||"CTR Member",last};}
  }
- if(!active&&!admin&&conversations.length){active=conversations[0];selectedDirectKey=active.key;}
+ if(!active&&!admin&&conversations.length){active=conversations[0];selectedDirectKey=active.key;} if(!active&&selectedDirectKey){const otherId=selectedDirectKey.split("::").find(id=>id!==user.id)||selectedDirectKey.split("::")[0];const other=team.find(p=>p.user_id===otherId);if(other)active={key:selectedDirectKey,messages:[],otherId,name:other.display_name,last:null};}
  if(active){
-  $("directRecipient").value=active.otherId;
+  $("directRecipient").value=active.otherId;$("dmNewRecipient").value="";$("directView").querySelector(".dm-inbox").classList.add("mobile-thread-open");
   $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name)}</span><div><strong>${esc(active.name)}</strong><small>CTR team member · Private conversation</small></div>${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}`;
   const box=$("directNotes"),near=box.scrollHeight-box.scrollTop-box.clientHeight<100;
   box.innerHTML=active.messages.map(m=>{
@@ -152,10 +152,10 @@ async function loadDirect(){
  if(peopleError){status("Team directory unavailable. Run the direct-message SQL update in Supabase.");return}
  team=people||[];
  if(isAdmin()){const {data:logs}=await db.from("ctr_moderation_log").select("*").order("deleted_at",{ascending:false}).limit(100);$("moderationPanel")?.classList.remove("hidden");$("moderationLog").innerHTML=(logs||[]).map(x=>`<article class="note"><div class="note-top"><span class="note-author">${esc(x.deleted_by_email||"Admin")} · ${esc(x.table_name)}</span><span class="note-time">${esc(time(x.deleted_at))}</span></div><div class="note-body">${esc(x.original_body||"")}</div></article>`).join("")||'<div class="empty-state">No deletions recorded.</div>'}else $("moderationPanel")?.classList.add("hidden");
- const sel=$("directRecipient"),old=sel.value;
+ const sel=$("directRecipient"),old=sel.value; const newSel=$("dmNewRecipient"),newOld=newSel.value;
  sel.innerHTML='<option value="">'+(isAdmin()?'All conversations (admin view)':'Choose a team member…')+'</option>'+
   team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join("");
- if(old&&team.some(p=>p.user_id===old))sel.value=old;
+ if(old&&team.some(p=>p.user_id===old))sel.value=old; newSel.innerHTML='<option value="">＋ New message</option>'+team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join(""); if(newOld&&team.some(p=>p.user_id===newOld))newSel.value=newOld;
  const {data,error}=await db.from("ctr_direct_messages").select("*").order("created_at",{ascending:true}).limit(1000);
  if(error){status("Could not load direct messages: "+error.message);return}
  direct=data||[];renderDirect();renderPersonal();updateUnread();renderAgentDashboard();
@@ -326,7 +326,7 @@ $("colorChoices").onclick=e=>{const b=e.target.closest("[data-color]");if(b&&!b.
 $("generateAI").onclick=generateNotes;
 $("refreshData").onclick=refreshMessages;$("enableNotifications")?.addEventListener("click",enableNotifications);
 $("directRecipient").onchange=renderDirect;
-$("directInboxList").addEventListener("click",e=>{const b=e.target.closest("[data-dm-key]");if(!b)return;selectedDirectKey=b.dataset.dmKey;$("directRecipient").value=b.dataset.dmOther;renderDirect();markSeen("direct")});
+$("dmNewRecipient").addEventListener("change",e=>{const id=e.target.value;if(!id)return;selectedDirectKey=directPairKey(user.id,id);$("directRecipient").value=id;renderDirect();$("directInput").focus()});\n$("dmThreadHeader").addEventListener("click",()=>{if(window.matchMedia("(max-width:760px)").matches)$("directView").querySelector(".dm-inbox").classList.remove("mobile-thread-open")});\n$("directInboxList").addEventListener("click",e=>{const b=e.target.closest("[data-dm-key]");if(!b)return;selectedDirectKey=b.dataset.dmKey;$("directRecipient").value=b.dataset.dmOther;renderDirect();markSeen("direct")});
 document.querySelectorAll("[data-dm-filter]").forEach(b=>b.addEventListener("click",()=>{directInboxFilter=b.dataset.dmFilter;document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x===b));renderDirect()}));
  $("globalSearch")?.addEventListener("input",e=>globalSearch(e.target.value));
 $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value.toLowerCase().trim();renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
