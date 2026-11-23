@@ -320,14 +320,16 @@ async function boot(){
  if(data.session)await enter(data.session.user);
  db.auth.onAuthStateChange(async(_e,s)=>{if(s?.user){if(!user||user.id!==s.user.id)await enter(s.user)}else{user=null;$("appView").classList.add("hidden");$("authView").classList.remove("hidden")}});
 }
-$("authForm").onsubmit=async e=>{
- e.preventDefault();if(!db){status("App is still connecting to the sign-in service. Refresh the page and try again.",true);return;}
+$("authForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ if(!db){status("Sign-in service is still connecting. Wait a few seconds and try again.",true);return;}
  const email=$("email").value.trim().toLowerCase(),password=$("password").value;
  $("authSubmit").disabled=true;status("Signing in…",true);
  try{const r=await db.auth.signInWithPassword({email,password});if(r.error)status("Sign-in failed: "+r.error.message,true);else if(r.data.user)await enter(r.data.user)}
  catch(err){status("Sign-in error: "+(err.message||"Please try again."),true)}
  finally{$("authSubmit").disabled=false}
-};
+});
+$("authSubmit").addEventListener("click",()=>{if(!db)status("Connecting to sign-in service…",true)});
 $("forgotPassword").onclick=async()=>{if(!db)return;const email=$("email").value.trim().toLowerCase();if(!email){status("Enter your registered email address first.",true);$("email").focus();return}const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:"https://nottybuddy.github.io/CTR/"});status(error?error.message:"If this email belongs to a CTR account, a password reset link will be sent.",true)};
 document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>showView(b.dataset.view));
 $("colorChoices").onclick=e=>{const b=e.target.closest("[data-color]");if(b&&!b.disabled)chooseColor(b.dataset.color)};
