@@ -356,17 +356,18 @@ $("colorChoices").onclick=e=>{const b=e.target.closest("[data-color]");if(b&&!b.
 $("generateAI").onclick=generateNotes;
 $("refreshData").onclick=refreshMessages;$("enableNotifications")?.addEventListener("click",enableNotifications);
 $("directRecipient").onchange=renderDirect;
-$("dmNewRecipient").addEventListener("change",e=>{const id=e.target.value;if(!id)return;selectedDirectKey=directPairKey(user.id,id);mobileThreadOpen=true;$("directRecipient").value=id;renderDirect();$("directInput").focus()});
+$("dmNewRecipient").addEventListener("change",e=>{const id=e.target.value;if(!id)return;openDirectConversation(id);$("directInput").focus()});
 $("dmThreadHeader").addEventListener("click",()=>{if(window.matchMedia("(max-width:760px)").matches){mobileThreadOpen=false;$("directView").querySelector(".dm-inbox").classList.remove("mobile-thread-open")}});
-$("directInboxList").onclick=e=>{const b=e.target.closest("button[data-dm-other]");if(!b)return;const id=b.dataset.dmOther;if(!id)return;selectedDirectKey=directPairKey(user.id,id);$("directRecipient").value=id;directFilter="";directInboxFilter="all";$("directSearch").value="";document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x.dataset.dmFilter==="all"));mobileThreadOpen=window.matchMedia("(max-width:760px)").matches;renderDirect();markSeen("direct");$("directInput").focus()};
+function openDirectConversation(id){if(!id||!team.some(p=>p.user_id===id))return;selectedDirectKey=directPairKey(user.id,id);$("directRecipient").value=id;directFilter="";directInboxFilter="all";$("directSearch").value="";document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x.dataset.dmFilter==="all"));mobileThreadOpen=window.matchMedia("(max-width:760px)").matches;renderDirect();markSeen("direct");$("directInput").focus()}
+$("directInboxList").addEventListener("click",e=>{const b=e.target.closest("button[data-dm-other]");if(!b)return;e.preventDefault();openDirectConversation(b.dataset.dmOther)});
 document.querySelectorAll("[data-dm-filter]").forEach(b=>b.addEventListener("click",()=>{directInboxFilter=b.dataset.dmFilter;document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x===b));renderDirect()}));
  $("globalSearch")?.addEventListener("input",e=>globalSearch(e.target.value));
 $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value||"";renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
 $("directForm").onsubmit=async e=>{
  e.preventDefault();
  const body=$("directInput").value.trim();
- const recipient=$("directRecipient").value;
- if(!recipient){status("Select a contact from the chat list first.");return}
+ const recipient=$("directRecipient").value||selectedDirectKey.split("::").find(id=>id&&id!==user?.id)||"";
+ if(!user||!recipient||recipient===user.id){status("Open a team member chat before sending.");return}
  if(!body)return;
  const send=$("directForm").querySelector('button[type="submit"]');
  send.disabled=true;
