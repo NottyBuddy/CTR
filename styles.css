@@ -1640,3 +1640,26 @@ html body #authView #authSubmit{cursor:pointer;touch-action:manipulation}
  .app-view .main-area .dm-thread-pane{min-height:calc(100dvh - 220px)!important}
  .app-view .main-area .dm-inbox.mobile-thread-open .dm-thread-pane{display:flex!important}
 }
+
+
+/* Direct chat pane repair: keep both panes usable on medium desktop widths. */
+@media (min-width:761px) and (max-width:1100px){
+ .app-view .main-area .dm-inbox{
+  display:grid!important;
+  grid-template-columns:minmax(210px,34%) minmax(0,1fr)!important;
+  height:calc(100vh - 260px)!important;
+  min-height:480px!important;
+  overflow:hidden!important;
+ }
+ .app-view .main-area .dm-list-pane{
+  display:flex!important;min-height:0!important;height:100%!important;
+ }
+ .app-view .main-area .dm-thread-pane{
+  display:flex!important;min-height:0!important;height:100%!important;
+ }
+ .app-view .main-area .dm-thread-messages{
+  display:flex!important;min-height:0!important;max-height:none!important;
+  flex:1 1 auto!important;overflow-y:auto!important;
+ }
+ .app-view .main-area .dm-compose-wrap{display:block!important;flex:0 0 auto!important}
+}
