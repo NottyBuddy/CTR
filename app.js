@@ -3,7 +3,7 @@ const SUPABASE_URL="https://icootmtssyergamuxlxb.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_qgEIXxXXBq2TaNxLMZPkwg_fcwKcdGW";
 const $=id=>document.getElementById(id);
 let db,user,group=[],personal=[],direct=[],team=[],channel;
-let groupFilter="",dateFilter="",personalFilter="",directFilter="",followupSearchFilter="";
+let groupFilter="",dateFilter="",personalFilter="",directFilter="",followupSearchFilter="";\nlet selectedDirectKey="",directInboxFilter="all";
 const seenKey=k=>"ctr_seen_"+k+"_"+(user?.id||"");const markSeen=k=>{if(user)localStorage.setItem(seenKey(k),new Date().toISOString());updateUnread()};const countUnread=(a,k)=>a.filter(x=>new Date(x.created_at)>new Date(localStorage.getItem(seenKey(k))||0)).length;function updateUnread(){if(!user)return;for(const [id,n] of [["groupUnread",countUnread(group.filter(x=>x.user_id!==user.id),"group")],["directUnread",countUnread(direct.filter(x=>x.recipient_id===user.id),"direct")]]){const e=$(id);if(e){e.textContent=n;e.classList.toggle("hidden",!n)}}}
 const ADMIN_EMAIL="mahesh.s@hrhnext.com";
 const isAdmin=()=>String(user?.email||"").toLowerCase()===ADMIN_EMAIL;
@@ -93,18 +93,59 @@ function globalSearch(query){
  panel.innerHTML=limited.length?'<div class="global-search-head">'+hits.length+' matching record'+(hits.length===1?'':'s')+(hits.length>30?' · showing first 30':'')+'</div>'+limited.map(r=>`<button type="button" class="global-search-hit" data-search-view="${r.view}"><span><b>${esc(r.title)}</b><small>${esc(r.kind)} · ${esc(time(r.date))}</small></span><span class="global-hit-snippet">${esc(r.text.slice(0,150))}</span></button>`).join(""):'<div class="global-search-empty">No matching records found.</div>';
  panel.classList.remove("hidden");
 }
+function directPairKey(a,b){return [a,b].sort().join("::")}
+function directAvatar(name){const parts=String(name||"CTR Member").trim().split(/\\s+/);return esc((parts[0]?.[0]||"C")+(parts.length>1?parts[parts.length-1][0]:""))}
 function renderDirect(){
- const admin=isAdmin(),selected=$("directRecipient").value;
+ const admin=isAdmin(),people=team.filter(p=>p.user_id!==user.id);
  $("directAdminHint").classList.toggle("hidden",!admin);
  $("directCount").textContent=direct.length;
- const rows=direct.filter(m=>(!directFilter||[m.body,team.find(x=>x.user_id===m.sender_id)?.display_name,team.find(x=>x.user_id===m.recipient_id)?.display_name].join(" ").toLowerCase().includes(directFilter))&&(admin&&!selected?true:
-  (m.sender_id===user.id&&m.recipient_id===selected)||(m.sender_id===selected&&m.recipient_id===user.id)
-  ));
- $("directNotes").innerHTML=rows.length?rows.map(m=>{
-  const sender=team.find(x=>x.user_id===m.sender_id),recipient=team.find(x=>x.user_id===m.recipient_id);
-  const from=sender?.display_name||"CTR Member",to=recipient?.display_name||"CTR Member";
-  return `<article class="note direct-note"><div class="note-top"><span class="note-author">${esc(from)} <span class="direct-route">→ ${esc(to)}</span></span><span class="note-time">${esc(time(m.created_at))}</span>${admin?`<button class="delete-note" data-ddelete="${m.id}">Admin · Delete</button>`:""}</div><div class="note-body">${esc(m.body)}</div></article>`;
- }).join(""):'<div class="empty-state"><h3>No direct messages yet</h3><p>Choose a team member above to start a private conversation.</p></div>';
+ const pairs=new Map();
+ direct.forEach(m=>{
+  if(!admin&&m.sender_id!==user.id&&m.recipient_id!==user.id)return;
+  const key=directPairKey(m.sender_id,m.recipient_id);
+  if(!pairs.has(key))pairs.set(key,[]);
+  pairs.get(key).push(m);
+ });
+ let conversations=[...pairs.entries()].map(([key,messages])=>{
+  messages.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  const last=messages[messages.length-1];
+  const otherId=last.sender_id===user.id?last.recipient_id:last.sender_id;
+  const other=team.find(p=>p.user_id===otherId);
+  const name=other?.display_name||"CTR Member";
+  return {key,messages,last,otherId,name,unread:messages.filter(m=>m.recipient_id===user.id&&m.sender_id!==user.id&&new Date(m.created_at)>new Date(localStorage.getItem("ctr_seen_direct_"+user.id)||0)).length};
+ });
+ if(admin){
+  const chosen=$("directRecipient").value;
+  if(chosen&&!pairs.has(directPairKey(user.id,chosen))&&!selectedDirectKey)selectedDirectKey=directPairKey(user.id,chosen);
+ }
+ conversations.sort((a,b)=>new Date(b.last.created_at)-new Date(a.last.created_at));
+ const q=directFilter.toLowerCase();
+ conversations=conversations.filter(c=>(directInboxFilter!=="unread"||c.unread>0)&&(!q||[c.name,...c.messages.map(m=>m.body)].join(" ").toLowerCase().includes(q)));
+ $("directInboxList").innerHTML=conversations.length?conversations.map(c=>`<button type="button" class="dm-conversation ${selectedDirectKey===c.key?"selected":""}" data-dm-key="${esc(c.key)}" data-dm-other="${esc(c.otherId)}"><span class="dm-avatar">${directAvatar(c.name)}</span><span class="dm-convo-copy"><strong>${esc(c.name)}</strong><span>${esc(c.last.body||"")}</span></span><span class="dm-convo-meta"><time>${esc(time(c.last.created_at))}</time>${c.unread?`<b class="dm-unread-count">${c.unread}</b>`:""}</span></button>`).join(""):'<div class="empty-state"><h3>No conversations yet</h3><p>Choose a team member below to start a private chat.</p></div>';
+ let active=conversations.find(c=>c.key===selectedDirectKey);
+ if(!active&&selectedDirectKey){
+  const messages=pairs.get(selectedDirectKey)||[];
+  if(messages.length){const last=messages[messages.length-1],otherId=last.sender_id===user.id?last.recipient_id:last.sender_id,other=team.find(p=>p.user_id===otherId);active={key:selectedDirectKey,messages,otherId,name:other?.display_name||"CTR Member",last};}
+ }
+ if(!active&&!admin&&conversations.length){active=conversations[0];selectedDirectKey=active.key;}
+ if(active){
+  $("directRecipient").value=active.otherId;
+  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name)}</span><div><strong>${esc(active.name)}</strong><small>CTR team member · Private conversation</small></div>${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}`;
+  const box=$("directNotes"),near=box.scrollHeight-box.scrollTop-box.clientHeight<100;
+  box.innerHTML=active.messages.map(m=>{
+   const mine=m.sender_id===user.id,from=team.find(p=>p.user_id===m.sender_id)?.display_name||"CTR Member";
+   return `<article class="dm-message ${mine?"mine":""}">${admin&&!mine?`<span class="dm-message-sender">${esc(from)}</span>`:""}<div>${esc(m.body)}</div><time>${esc(time(m.created_at))}${mine?" · Sent":""}</time>${admin?`<button class="delete-note" data-ddelete="${m.id}">Delete</button>`:""}</article>`;
+  }).join("")||'<div class="empty-state">No messages yet. Say hello.</div>';
+  if(near)requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);
+  $("directInput").disabled=false;$("directForm").querySelector("button[type=submit]").disabled=false;
+  $("dmComposeHint").textContent="Messages are private to the conversation participants and CTR admin.";
+ }else{
+  $("directRecipient").value="";
+  $("dmThreadHeader").innerHTML='<div class="dm-empty-avatar">⚔</div><div><strong>Select a conversation</strong><small>Your private messages appear here</small></div>';
+  $("directNotes").innerHTML='<div class="empty-state"><h3>Your messages</h3><p>Select a team member to open a conversation.</p></div>';
+  $("directInput").disabled=true;$("directForm").querySelector("button[type=submit]").disabled=true;
+  $("dmComposeHint").textContent="Choose a conversation to start messaging.";
+ }
 }
 async function loadDirect(){
  const {data:people,error:peopleError}=await db.from("ctr_team_directory").select("user_id,email,display_name").order("display_name");
@@ -285,6 +326,8 @@ $("colorChoices").onclick=e=>{const b=e.target.closest("[data-color]");if(b&&!b.
 $("generateAI").onclick=generateNotes;
 $("refreshData").onclick=refreshMessages;$("enableNotifications")?.addEventListener("click",enableNotifications);
 $("directRecipient").onchange=renderDirect;
+$("directInboxList").addEventListener("click",e=>{const b=e.target.closest("[data-dm-key]");if(!b)return;selectedDirectKey=b.dataset.dmKey;$("directRecipient").value=b.dataset.dmOther;renderDirect();markSeen("direct")});
+document.querySelectorAll("[data-dm-filter]").forEach(b=>b.addEventListener("click",()=>{directInboxFilter=b.dataset.dmFilter;document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x===b));renderDirect()}));
  $("globalSearch")?.addEventListener("input",e=>globalSearch(e.target.value));
 $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value.toLowerCase().trim();renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
 $("directForm").onsubmit=async e=>{
