@@ -1166,3 +1166,17 @@ html body .shell>#appView.hidden,html body #appView.hidden,html body .auth-wrap.
 html body .shell>#authView:not(.hidden){display:flex!important;visibility:visible!important;pointer-events:auto!important}
 html body #authView .auth-card,html body #authView #authForm,html body #authView #authSubmit{position:relative;z-index:5;pointer-events:auto!important}
 html body #authView #authSubmit{cursor:pointer;touch-action:manipulation}
+
+
+/* Conversation polish: chronological separators and discreet per-message copy controls. */
+.dm-date-separator{align-self:center;margin:8px 0 5px;padding:5px 11px;border-radius:30px;background:rgba(255,255,255,.055);color:#b99da6;font-size:9px;letter-spacing:.35px}
+.dm-copy-btn{display:block;margin:5px 0 0 auto;padding:3px 7px;border-radius:7px;background:rgba(255,255,255,.07);color:#d7bfc7;font-size:9px;opacity:.7}
+.dm-copy-btn:hover{opacity:1;background:rgba(255,65,100,.15);color:#fff}
+.dm-thread-header:before{content:"‹";font-size:28px;color:#ff91a7;margin-right:2px;cursor:pointer}
+@media(min-width:761px){.dm-thread-header:before{display:none}}
+@media(max-width:760px){
+ .dm-inbox:not(.mobile-thread-open) .dm-list-pane{display:flex!important}
+ .dm-inbox:not(.mobile-thread-open) .dm-thread-pane{display:none!important}
+ .dm-inbox.mobile-thread-open .dm-list-pane{display:none!important}
+ .dm-inbox.mobile-thread-open .dm-thread-pane{display:flex!important}
+}
