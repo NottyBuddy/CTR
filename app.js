@@ -4,7 +4,7 @@ const SUPABASE_ANON_KEY="sb_publishable_qgEIXxXXBq2TaNxLMZPkwg_fcwKcdGW";
 const $=id=>document.getElementById(id);
 let db,user,group=[],personal=[],direct=[],team=[],channel;
 let groupFilter="",dateFilter="",personalFilter="",directFilter="",followupSearchFilter="";
-let selectedDirectKey="",directInboxFilter="all",mobileThreadOpen=false;
+let selectedDirectKey="",selectedDirectRecipient="",directInboxFilter="all",mobileThreadOpen=false;
 const seenKey=k=>"ctr_seen_"+k+"_"+(user?.id||"");const markSeen=k=>{if(user)localStorage.setItem(seenKey(k),new Date().toISOString());updateUnread()};const countUnread=(a,k)=>a.filter(x=>new Date(x.created_at)>new Date(localStorage.getItem(seenKey(k))||0)).length;function updateUnread(){if(!user)return;for(const [id,n] of [["groupUnread",countUnread(group.filter(x=>x.user_id!==user.id),"group")],["directUnread",countUnread(direct.filter(x=>x.recipient_id===user.id),"direct")]]){const e=$(id);if(e){e.textContent=n;e.classList.toggle("hidden",!n)}}}
 const ADMIN_EMAIL="mahesh.s@hrhnext.com";
 const isAdmin=()=>String(user?.email||"").toLowerCase()===ADMIN_EMAIL;
@@ -103,6 +103,26 @@ function setupAccountSettings(){
  renderAccountAvatars()
 }
 function renderAccountAvatars(){if(!user)return;const selected=localStorage.getItem("ctr_avatar_"+user.id)||"";const grid=$("accountAvatarChoices");if(grid)grid.innerHTML=CTR_AVATARS.map(a=>'<button type="button" class="account-avatar-choice '+(a===selected?"selected":"")+'" data-avatar="'+esc(a)+'" aria-label="Choose avatar">'+a+'</button>').join("");const current=document.querySelector(".account-current-avatar");if(current)current.textContent=selected||directAvatar(displayName(user.email),user.id)}
+function openDirectConversation(id){
+ if(!id||!user)return;
+ const person=team.find(p=>String(p.user_id)===String(id));
+ if(!person){status("This contact is not available in the team directory. Refresh and try again.");return}
+ selectedDirectRecipient=String(person.user_id);
+ selectedDirectKey=directPairKey(user.id,person.user_id);
+ $("directRecipient").value=person.user_id;
+ directFilter="";
+ directInboxFilter="all";
+ $("directSearch").value="";
+ document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x.dataset.dmFilter==="all"));
+ mobileThreadOpen=window.matchMedia("(max-width:760px)").matches;
+ renderDirect();
+ markSeen("direct");
+ $("directInput").disabled=false;
+ $("directForm").querySelector('button[type="submit"]').disabled=false;
+ $("dmComposeHint").textContent="Private conversation";
+ $("directInput").focus();
+ status("Chat opened: "+(person.display_name||"team member"));
+}
 function renderDirect(){
  const admin=isAdmin(),people=team.filter(p=>p.user_id!==user.id);
  $("directAdminHint").classList.toggle("hidden",!admin);
@@ -128,7 +148,7 @@ function renderDirect(){
   }
  });
  const allConversations=[...byPerson.values()].sort((x,y)=>(new Date(y.last?.created_at||0)-new Date(x.last?.created_at||0))||x.name.localeCompare(y.name));
- const selectedId=$("directRecipient").value||((selectedDirectKey||"").split("::").find(id=>id&&id!==user.id))||"";
+ const selectedId=selectedDirectRecipient||$("directRecipient").value||((selectedDirectKey||"").split("::").find(id=>id&&id!==user.id))||"";
  const query=directFilter.trim().toLowerCase();
  const visible=allConversations.filter(c=>{
   if(directInboxFilter==="unread"&&!c.unread)return false;
@@ -177,10 +197,10 @@ async function loadDirect(){
  if(peopleError){status("Team directory unavailable. Run the direct-message SQL update in Supabase.");return}
  team=people||[];
  if(isAdmin()){const {data:logs}=await db.from("ctr_moderation_log").select("*").order("deleted_at",{ascending:false}).limit(100);$("moderationPanel")?.classList.remove("hidden");$("moderationLog").innerHTML=(logs||[]).map(x=>`<article class="note"><div class="note-top"><span class="note-author">${esc(x.deleted_by_email||"Admin")} · ${esc(x.table_name)}</span><span class="note-time">${esc(time(x.deleted_at))}</span></div><div class="note-body">${esc(x.original_body||"")}</div></article>`).join("")||'<div class="empty-state">No deletions recorded.</div>'}else $("moderationPanel")?.classList.add("hidden");
- const sel=$("directRecipient"),old=sel.value; const newSel=$("dmNewRecipient"),newOld=newSel.value;
+ const sel=$("directRecipient"),old=selectedDirectRecipient||sel.value; const newSel=$("dmNewRecipient"),newOld=newSel.value;
  sel.innerHTML='<option value="">'+(isAdmin()?'All conversations (admin view)':'Choose a team member…')+'</option>'+
   team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join("");
- if(old&&team.some(p=>p.user_id===old))sel.value=old; newSel.innerHTML='<option value="">＋ New message</option>'+team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join(""); if(newOld&&team.some(p=>p.user_id===newOld))newSel.value=newOld;
+ if(old&&team.some(p=>p.user_id===old)){sel.value=old;selectedDirectRecipient=old;} newSel.innerHTML='<option value="">＋ New message</option>'+team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join(""); if(newOld&&team.some(p=>p.user_id===newOld))newSel.value=newOld;
  const {data,error}=await db.from("ctr_direct_messages").select("*").order("created_at",{ascending:true}).limit(1000);
  if(error){status("Could not load direct messages: "+error.message);return}
  direct=data||[];renderDirect();renderPersonal();updateUnread();renderAgentDashboard();
@@ -366,7 +386,7 @@ $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();ren
 $("directForm").onsubmit=async e=>{
  e.preventDefault();
  const body=$("directInput").value.trim();
- const recipient=$("directRecipient").value||(team.find(p=>directPairKey(user.id,p.user_id)===selectedDirectKey)?.user_id)||"";
+ const recipient=selectedDirectRecipient||$("directRecipient").value||(team.find(p=>directPairKey(user.id,p.user_id)===selectedDirectKey)?.user_id)||"";
  if(!user||!recipient||recipient===user.id){status("Open a team member chat before sending.");return}
  if(!body)return;
  const send=$("directForm").querySelector('button[type="submit"]');
