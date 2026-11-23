@@ -371,7 +371,7 @@ $("directForm").onsubmit=async e=>{
  const send=$("directForm").querySelector('button[type="submit"]');
  send.disabled=true;
  try{
-  const {data,error}=await db.from("ctr_direct_messages").insert({sender_id:user.id,recipient_id:recipient,sender_email:user.email,body}).select().single();
+  const {error}=await db.from("ctr_direct_messages").insert({sender_id:user.id,recipient_id:recipient,sender_email:user.email,body});
   if(error){status("Message could not be sent: "+error.message);return}
   $("directInput").value="";
   selectedDirectKey=directPairKey(user.id,recipient);
