@@ -114,59 +114,63 @@ function renderDirect(){
   if(!pairs.has(key))pairs.set(key,[]);
   pairs.get(key).push(m);
  });
- let conversations=[...pairs.entries()].map(([key,messages])=>{
-  messages.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+ const conversations=[...pairs.entries()].map(([key,messages])=>{
+  messages.sort((x,y)=>new Date(x.created_at)-new Date(y.created_at));
   const last=messages[messages.length-1];
   const otherId=last.sender_id===user.id?last.recipient_id:last.sender_id;
   const other=team.find(p=>p.user_id===otherId);
-  return {key,messages,last,otherId,name:other?.display_name||"CTR Member",unread:messages.filter(m=>m.recipient_id===user.id&&m.sender_id!==user.id&&new Date(m.created_at)>new Date(localStorage.getItem("ctr_seen_direct_"+user.id)||0)).length};
+  return {key,messages,last,otherId,name:other?.display_name||"CTR Member",email:other?.email||"",unread:messages.filter(m=>m.recipient_id===user.id&&m.sender_id!==user.id&&new Date(m.created_at)>new Date(localStorage.getItem("ctr_seen_direct_"+user.id)||0)).length};
  });
- // WhatsApp-style contact list: show every team member, including people with no previous messages.
- const listedIds=new Set(conversations.map(c=>c.otherId));
+ const byPerson=new Map(conversations.map(c=>[c.otherId,c]));
  people.forEach(person=>{
-  if(!listedIds.has(person.user_id)){
-   conversations.push({key:directPairKey(user.id,person.user_id),messages:[],last:null,otherId:person.user_id,name:person.display_name||"CTR Member",unread:0});
+  if(!byPerson.has(person.user_id)){
+   byPerson.set(person.user_id,{key:directPairKey(user.id,person.user_id),messages:[],last:null,otherId:person.user_id,name:person.display_name||"CTR Member",email:person.email||"",unread:0});
   }
  });
- conversations.sort((a,b)=>(new Date(b.last?.created_at||0)-new Date(a.last?.created_at||0))||a.name.localeCompare(b.name));
- const allConversations=conversations;
- const q=directFilter.toLowerCase();
- conversations=allConversations.filter(c=>(directInboxFilter!=="unread"||c.unread>0)&&(!q||[c.name,...c.messages.map(m=>m.body)].join(" ").toLowerCase().includes(q)));
- $("directInboxList").innerHTML=conversations.length?conversations.map(c=>{
-  const preview=c.last?(c.last.sender_id===user.id?"You: ":"")+c.last.body:"Start a conversation";
-  return `<button type="button" class="dm-conversation ${selectedDirectKey===c.key?"selected":""}" data-dm-key="${esc(c.key)}" data-dm-other="${esc(c.otherId)}"><span class="dm-avatar">${directAvatar(c.name,c.otherId)}</span><span class="dm-convo-copy"><strong>${esc(c.name)}</strong><span>${esc(preview)}</span></span><span class="dm-convo-meta"><time>${c.last?esc(time(c.last.created_at)):""}</time>${c.unread?`<b class="dm-unread-count">${c.unread}</b>`:""}</span></button>`;
- }).join(""):'<div class="empty-state"><h3>No matching contacts</h3><p>Try another search or select All.</p></div>';
- let active=allConversations.find(c=>c.key===selectedDirectKey);
- if(!active&&selectedDirectKey){
-  const otherId=selectedDirectKey.split("::").find(id=>id!==user.id)||selectedDirectKey.split("::")[0];
-  const other=team.find(p=>p.user_id===otherId);
-  if(other)active={key:selectedDirectKey,messages:pairs.get(selectedDirectKey)||[],otherId,name:other.display_name||"CTR Member",last:null};
- }
- $("directView").querySelector(".dm-inbox").classList.toggle("mobile-thread-open",mobileThreadOpen&&!!active);
+ const allConversations=[...byPerson.values()].sort((x,y)=>(new Date(y.last?.created_at||0)-new Date(x.last?.created_at||0))||x.name.localeCompare(y.name));
+ const selectedId=$("directRecipient").value||((selectedDirectKey||"").split("::").find(id=>id&&id!==user.id))||"";
+ const query=directFilter.trim().toLowerCase();
+ const visible=allConversations.filter(c=>{
+  if(directInboxFilter==="unread"&&!c.unread)return false;
+  if(!query)return true;
+  const searchable=[c.name,c.email,c.otherId,...c.messages.map(m=>m.body||"")].join(" ").toLowerCase();
+  return searchable.includes(query);
+ });
+ $("directInboxList").innerHTML=visible.length?visible.map(c=>{
+  const preview=c.last?(c.last.sender_id===user.id?"You: ":"")+(c.last.body||""):"Start a conversation";
+  return `<button type="button" class="dm-conversation ${selectedId===c.otherId?"selected":""}" data-dm-key="${esc(c.key)}" data-dm-other="${esc(c.otherId)}"><span class="dm-avatar">${directAvatar(c.name,c.otherId)}</span><span class="dm-convo-copy"><strong>${esc(c.name)}</strong><span>${esc(preview)}</span></span><span class="dm-convo-meta"><time>${c.last?esc(time(c.last.created_at)):""}</time>${c.unread?`<b class="dm-unread-count">${c.unread}</b>`:""}</span></button>`;
+ }).join(""):'<div class="empty-state"><h3>No matching contacts</h3><p>Try another name or message keyword.</p></div>';
+ let active=allConversations.find(c=>c.otherId===selectedId);
  if(active){
-  $("directRecipient").value=active.otherId;$("dmNewRecipient").value="";
-  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name,active.otherId)}</span><div><strong>${esc(active.name)}</strong><small><span class="dm-online-dot"></span> CTR team member · Private conversation</small></div><div class="dm-thread-actions">${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}</div>`;
-  const box=$("directNotes"),near=box.scrollHeight-box.scrollTop-box.clientHeight<100;
+  selectedDirectKey=active.key;
+  $("directRecipient").value=active.otherId;
+  $("dmNewRecipient").value="";
+  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name,active.otherId)}</span><div><strong>${esc(active.name)}</strong><small>Private conversation · CTR team member</small></div><div class="dm-thread-actions">${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}</div>`;
+  const box=$("directNotes"),near=box.scrollHeight-box.scrollTop-box.clientHeight<120;
   box.innerHTML=active.messages.map(m=>{
    const mine=m.sender_id===user.id,from=team.find(p=>p.user_id===m.sender_id)?.display_name||"CTR Member";
-   return `<article class="dm-message ${mine?"mine":""}">${admin&&!mine?`<span class="dm-message-sender">${esc(from)}</span>`:""}<div>${esc(m.body)}</div><time>${esc(time(m.created_at))}${mine?" · ✓✓":""}</time>${admin?`<button class="delete-note" data-ddelete="${m.id}">Delete</button>`:""}</article>`;
-  }).join("")||'<div class="dm-empty-thread"><div class="dm-empty-mark">⚔</div><strong>Start a private conversation</strong><span>Messages sent here are visible to the selected member and CTR admin.</span></div>';
-  let previousMessageDay="";
+   return `<article class="dm-message ${mine?"mine":""}">${admin&&!mine?`<span class="dm-message-sender">${esc(from)}</span>`:""}<div>${esc(m.body||"")}</div><time>${esc(time(m.created_at))}${mine?" · ✓✓":""}</time>${admin?`<button class="delete-note" data-ddelete="${m.id}">Delete</button>`:""}</article>`;
+  }).join("")||'<div class="dm-empty-thread"><div class="dm-empty-mark">✉</div><strong>Start a private conversation</strong><span>Write a message below to begin chatting.</span></div>';
+  let lastDay="";
   [...box.querySelectorAll(".dm-message")].forEach((card,index)=>{
-   const message=active.messages[index],label=dayLabel(message.created_at);
-   if(label!==previousMessageDay){const divider=document.createElement("div");divider.className="dm-date-separator";divider.textContent=label;card.before(divider);previousMessageDay=label}
-   const copy=document.createElement("button");copy.type="button";copy.className="dm-copy-btn";copy.dataset.copyDm=message.id;copy.textContent="Copy";card.append(copy);
+   const msg=active.messages[index],label=dayLabel(msg.created_at);
+   if(label!==lastDay){const divider=document.createElement("div");divider.className="dm-date-separator";divider.textContent=label;card.before(divider);lastDay=label}
+   const copy=document.createElement("button");copy.type="button";copy.className="dm-copy-btn";copy.dataset.copyDm=msg.id;copy.textContent="Copy";card.append(copy);
   });
   if(near)requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);
-  $("directInput").disabled=false;$("directForm").querySelector("button[type=submit]").disabled=false;
+  $("directInput").disabled=false;
+  $("directForm").querySelector('button[type="submit"]').disabled=false;
   $("dmComposeHint").textContent="Private conversation";
  }else{
+  selectedDirectKey="";
   $("directRecipient").value="";
-  $("dmThreadHeader").innerHTML='<div class="dm-empty-avatar">⚔</div><div><strong>CTR Messages</strong><small>Select a contact to view your conversation</small></div>';
-  $("directNotes").innerHTML='<div class="dm-empty-thread"><div class="dm-empty-mark">⚔</div><strong>Your conversations</strong><span>Select a team member from the contact list to open the chat.</span></div>';
-  $("directInput").disabled=true;$("directForm").querySelector("button[type=submit]").disabled=true;
+  $("dmThreadHeader").innerHTML='<div class="dm-empty-avatar">✉</div><div><strong>CTR Messages</strong><small>Select a contact to view your conversation</small></div>';
+  $("directNotes").innerHTML='<div class="dm-empty-thread"><div class="dm-empty-mark">✉</div><strong>Your conversations</strong><span>Select a team member from the contact list to open the chat.</span></div>';
+  $("directInput").disabled=true;
+  $("directForm").querySelector('button[type="submit"]').disabled=true;
   $("dmComposeHint").textContent="Choose a contact to start messaging.";
  }
+ $("directView").querySelector(".dm-inbox")?.classList.toggle("mobile-thread-open",mobileThreadOpen&&!!active);
 }
 async function loadDirect(){
  const {data:people,error:peopleError}=await db.from("ctr_team_directory").select("user_id,email,display_name").order("display_name");
@@ -354,28 +358,29 @@ $("refreshData").onclick=refreshMessages;$("enableNotifications")?.addEventListe
 $("directRecipient").onchange=renderDirect;
 $("dmNewRecipient").addEventListener("change",e=>{const id=e.target.value;if(!id)return;selectedDirectKey=directPairKey(user.id,id);mobileThreadOpen=true;$("directRecipient").value=id;renderDirect();$("directInput").focus()});
 $("dmThreadHeader").addEventListener("click",()=>{if(window.matchMedia("(max-width:760px)").matches){mobileThreadOpen=false;$("directView").querySelector(".dm-inbox").classList.remove("mobile-thread-open")}});
-$("directInboxList").addEventListener("click",e=>{const b=e.target.closest("[data-dm-key]");if(!b)return;selectedDirectKey=b.dataset.dmKey;directFilter="";directInboxFilter="all";$("directSearch").value="";document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x.dataset.dmFilter==="all"));mobileThreadOpen=window.matchMedia("(max-width:760px)").matches;$("directRecipient").value=b.dataset.dmOther;renderDirect();markSeen("direct")});
+$("directInboxList").onclick=e=>{const b=e.target.closest("button[data-dm-other]");if(!b)return;const id=b.dataset.dmOther;if(!id)return;selectedDirectKey=directPairKey(user.id,id);$("directRecipient").value=id;directFilter="";directInboxFilter="all";$("directSearch").value="";document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x.dataset.dmFilter==="all"));mobileThreadOpen=window.matchMedia("(max-width:760px)").matches;renderDirect();markSeen("direct");$("directInput").focus()};
 document.querySelectorAll("[data-dm-filter]").forEach(b=>b.addEventListener("click",()=>{directInboxFilter=b.dataset.dmFilter;document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x===b));renderDirect()}));
  $("globalSearch")?.addEventListener("input",e=>globalSearch(e.target.value));
-$("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value.toLowerCase().trim();renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
+$("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value||"";renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
 $("directForm").onsubmit=async e=>{
  e.preventDefault();
  const body=$("directInput").value.trim();
- const selectedIds=(selectedDirectKey||"").split("::");
- const recipient=$("directRecipient").value||selectedIds.find(id=>id&&id!==user.id)||"";
- if(!recipient){status("Open a team member's conversation before sending.");return}
+ const recipient=$("directRecipient").value;
+ if(!recipient){status("Select a contact from the chat list first.");return}
  if(!body)return;
  const send=$("directForm").querySelector('button[type="submit"]');
  send.disabled=true;
  try{
-  const {error}=await db.from("ctr_direct_messages").insert({sender_id:user.id,recipient_id:recipient,sender_email:user.email,body});
-  if(error){status("Message not sent: "+error.message);return}
+  const {data,error}=await db.from("ctr_direct_messages").insert({sender_id:user.id,recipient_id:recipient,sender_email:user.email,body}).select().single();
+  if(error){status("Message could not be sent: "+error.message);return}
   $("directInput").value="";
   selectedDirectKey=directPairKey(user.id,recipient);
   await loadDirect();
+  $("directRecipient").value=recipient;
+  renderDirect();
   markSeen("direct");
   status("Message sent.");
- }catch(err){status("Message not sent: "+(err.message||"Please retry."))}
+ }catch(err){status("Message failed: "+(err?.message||"Please try again."))}
  finally{send.disabled=false}
 };
 document.addEventListener("click",async e=>{
