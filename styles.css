@@ -1663,3 +1663,9 @@ html body #authView #authSubmit{cursor:pointer;touch-action:manipulation}
  }
  .app-view .main-area .dm-compose-wrap{display:block!important;flex:0 0 auto!important}
 }
+
+
+/* Keep a single inbox search; the contact picker remains available to app logic but is not shown. */
+#dmNewRecipient{display:none!important}
+.dm-list-tools #directSearch{display:block!important;width:100%;margin:0!important}
+.dm-list-tools{gap:0}
