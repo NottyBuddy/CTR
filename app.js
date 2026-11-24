@@ -234,7 +234,7 @@ async function loadDirect(){
   const {data:people,error:peopleError}=await db.from("ctr_team_directory").select("user_id,email,display_name").order("display_name");
   if(sequence!==directLoadSequence)return;
   if(peopleError)throw new Error("Team contacts: "+peopleError.message);
-  team=people||[];
+  team=Array.isArray(people)?people.filter(p=>p&&p.user_id):[];
   if(isAdmin()){
    const logs=await fetchAllRows(()=>db.from("ctr_moderation_log").select("*").order("deleted_at",{ascending:false}).order("id",{ascending:false}));
    if(sequence!==directLoadSequence)return;
@@ -248,7 +248,7 @@ async function loadDirect(){
   if(newOld&&team.some(p=>p.user_id===newOld))newSel.value=newOld;
   let query=db.from("ctr_direct_messages").select("*").order("created_at",{ascending:true}).order("id",{ascending:true});
   if(!isAdmin())query=query.or("sender_id.eq."+user.id+",recipient_id.eq."+user.id);
-  direct=await fetchAllRows(()=>query);
+  direct=(await fetchAllRows(()=>query)).filter(m=>m&&m.sender_id&&m.recipient_id);
   if(sequence!==directLoadSequence)return;
   renderDirect();renderPersonal();updateUnread();if(isAdmin())renderAgentDashboard();
   if(inbox)inbox.setAttribute("aria-busy","false");
@@ -286,42 +286,31 @@ function showView(v){
 let generatedDrafts={group:"",crm:""};
 function smartDrafts(raw){
  const source=String(raw||"").replace(/[,;]+/g," ").replace(/\s+/g," ").trim();
- const lower=source.toLowerCase();
- const expand={
-  "cx":"customer","cust":"customer","cust.":"customer","req":"requested","bck":"back","cb":"callback","callbck":"callback",
-  "new constru":"new construction","constru":"construction","loc":"location","mum":"Mumbai","bom":"Mumbai","mh":"Maharashtra",
-  "del":"Delhi","blr":"Bengaluru","bangalore":"Bengaluru","hyd":"Hyderabad","chn":"Chennai","kol":"Kolkata","pune":"Pune",
-  "res":"residential","comm":"commercial","site":"site","int":"interested","not int":"not interested",
-  "w":"weeks","wk":"week","wks":"weeks","d":"days","dy":"day","m":"months","mo":"months","mos":"months"
- };
- const notes=[];
- const duration=[...source.matchAll(/\b(\d+)\s*(w|wk|wks|d|dy|m|mo|mos)\b/gi)].map(m=>({n:m[1],unit:m[2].toLowerCase()}));
- if(duration.length){
-  const parts=duration.map(x=>x.n+" "+({w:"weeks",wk:"weeks",wks:"weeks",d:"days",dy:"days",m:"months",mo:"months",mos:"months"}[x.unit]));
-  notes.push("Customer timeline: "+parts.join(" and ")+".");
- }
- const hasConstruction=/\b(constru|construction|new constru)\b/i.test(source);
- if(hasConstruction)notes.push("Requirement: New construction.");
- const locMatch=source.match(/\bloc\s+([a-z]+)(?:\s+([a-z]{2}))?/i);
- if(locMatch){
-  const city=expand[locMatch[1].toLowerCase()]||locMatch[1].replace(/^\w/,c=>c.toUpperCase());
-  const state=locMatch[2]?expand[locMatch[2].toLowerCase()]||locMatch[2].toUpperCase():"";
-  notes.push("Location: "+[city,state].filter(Boolean).join(", ")+".");
- }
- const callback=/\b(call\s*bck|call\s*back|callback|cb)\b/i.test(source)||/\breq\s+call\s*bck\b/i.test(source);
- if(callback)notes.push("Customer requested a callback. Next action: Call the customer back and discuss the requirement.");
- const knownTokens=/\b(clr|cx|req|bck|loc|constru|new|call|callback|cb|\d+\s*(?:w|wk|wks|d|dy|m|mo|mos)|mum|bom|mh)\b/gi;
- const remainder=source.replace(knownTokens," ").replace(/\s+/g," ").trim();
- if(remainder)notes.push("Additional details provided: "+remainder+".");
- if(!notes.length){
-  const polished=source.charAt(0).toUpperCase()+source.slice(1);
-  notes.push(polished.endsWith(".")?polished:polished+".");
- }
- const ambiguous=/\bclr\b/i.test(source);
- if(ambiguous)notes.push('Clarification required: "CLR" is retained as entered because its meaning is not clear from the shorthand.');
- const crmNote=["CUSTOMER CALL NOTE",...notes,"","Status: Follow-up required."].join("\n");
- const groupNote=["CRM UPDATE | "+(notes.find(x=>x.startsWith("Requirement:"))||"Customer follow-up"),...notes,"","Assigned to: Not specified"].join("\n");
- return {group:groupNote,crm:crmNote};
+ const notes=[],missing=[],alias={mum:"Mumbai",bom:"Mumbai",mh:"Maharashtra",ap:"Andhra Pradesh",hyd:"Hyderabad",blr:"Bengaluru",bangalore:"Bengaluru",chn:"Chennai",kol:"Kolkata",pune:"Pune",del:"Delhi",ts:"Telangana",ka:"Karnataka",tn:"Tamil Nadu",rj:"Rajasthan",up:"Uttar Pradesh",mp:"Madhya Pradesh",gj:"Gujarat"};
+ const loc=/\bloc(?:ation)?\s+([a-z]+)(?:\s+([a-z]{2,3}))?/i.exec(source),pin=/\b(?:pin(?:\s*code)?\s*)?(\d{6})\b/i.exec(source),phone=/\b(?:\+91[-\s]?)?[6-9]\d{9}\b/.exec(source);
+ const customer=/\b(?:customer|cx|cust)\s*[:=-]\s*([A-Za-z][A-Za-z .'-]{1,50}?)(?=\s+(?:phone|mob|mobile|contact|loc|location|req|requirement)\b|$)/i.exec(source);
+ const name=customer?.[1]?.trim()||"",duration=[...source.matchAll(/\b(\d+)\s*(weeks?|wks?|w|days?|d|months?|mos?|mo)\b/gi)];
+ if(duration.length)notes.push("Customer timeline: "+duration.map(m=>m[1]+" "+(m[2].toLowerCase().startsWith("w")?"weeks":m[2].toLowerCase().startsWith("d")?"days":"months")).join(" and ")+".");
+ const construction=/\b(new\s*)?(constru|construction)\b/i.test(source),restaurant=/\b(restaurant|restro|hotel|cafe|café|food outlet)\b/i.test(source),commercial=/\b(commercial|comm(?:ercial)? property)\b/i.test(source),residential=/\b(residential|res property)\b/i.test(source);
+ if(construction)notes.push("Project stage: New construction.");
+ if(restaurant)notes.push("Project type: Restaurant.");
+ if(commercial)notes.push("Property category: Commercial property.");else if(residential)notes.push("Property category: Residential property.");
+ if(loc){const city=alias[loc[1].toLowerCase()]||loc[1].replace(/^\w/,c=>c.toUpperCase()),state=loc[2]?(alias[loc[2].toLowerCase()]||loc[2].toUpperCase()):"";notes.push("Location: "+[city,state].filter(Boolean).join(", ")+(pin?", PIN Code "+pin[1]:"")+".");}else if(pin)notes.push("PIN Code: "+pin[1]+".");
+ const callback=/\b(call\s*back|callback|call\s*bck|cb)\b/i.test(source),after=/\b(?:after|in)\s+(one|1|two|2|three|3|four|4|a)\s+(day|week|month)s?\b/i.exec(source),dateMatch=/\b(\d{1,2})\s+(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{4})\b/i.exec(source);
+ let followDate="";
+ if(dateMatch){const parsed=new Date(dateMatch[1]+" "+dateMatch[2]+" "+dateMatch[3]+" 12:00:00");if(!Number.isNaN(parsed.getTime()))followDate=parsed.toLocaleDateString("en-IN",{day:"2-digit",month:"long",year:"numeric"});}
+ else if(after){const amount=({one:1,a:1,two:2,three:3,four:4})[after[1].toLowerCase()]||Number(after[1]),d=new Date();d.setHours(12,0,0,0);if(after[2].toLowerCase().startsWith("day"))d.setDate(d.getDate()+amount);else if(after[2].toLowerCase().startsWith("week"))d.setDate(d.getDate()+7*amount);else d.setMonth(d.getMonth()+amount);followDate=d.toLocaleDateString("en-IN",{day:"2-digit",month:"long",year:"numeric"});}
+ if(callback){notes.push("Customer requested a callback"+(after?" "+after[0]:"")+".");notes.push(followDate?"Follow-up required: "+followDate+".":"Follow-up required: Schedule a callback; exact date was not specified.");}
+ if(name)notes.unshift("Customer Name: "+name+".");if(phone)notes.push("Contact Number: "+phone[0]+".");
+ if(/\bclr\b/i.test(source))missing.push('"CLR" is unclear; its meaning has not been assumed.');
+ if(!name)missing.push("Customer name was not provided.");if(!phone)missing.push("Contact number was not provided.");
+ if(!loc&&!pin)missing.push("Specific city/state or PIN Code was not provided.");
+ if(!restaurant&&!commercial&&!residential&&!construction)missing.push("Project type/category needs confirmation.");
+ if(!callback)missing.push("Call outcome and next action need confirmation.");
+ if(!notes.length)notes.push("Call details received: "+source+".");
+ const crm=["CUSTOMER CALL NOTE","Customer Name | Contact Number",(name||"Not provided")+" | "+(phone?.[0]||"Not provided"),"","Call Summary:",...notes,"","Clarifications / Missing Information:",...missing.map(x=>"• "+x),"","Next Action: "+(callback?(followDate?"Reconnect with the customer on "+followDate+" and confirm the complete requirement.":"Schedule a callback and confirm the complete requirement."):"Confirm the call outcome and agree on the next action.")].join("\n");
+ const group=["CRM UPDATE | "+(restaurant?"Restaurant project":commercial?"Commercial property":construction?"New construction":"Customer call update"),...notes,"","Pending information: "+(missing.length?missing.join(" "):"No key details flagged."),"Assigned to: Not specified"].join("\n");
+ return {group,crm};
 }
 async function generateNotes(){
  const raw=$("aiInput").value.trim();
