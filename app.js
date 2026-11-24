@@ -330,19 +330,28 @@ function smartDrafts(raw){
 async function generateNotes(){
  const raw=$("aiInput").value.trim();
  if(!raw){$("aiStatus").textContent="Paste customer call details first.";return}
- $("generateAI").disabled=true;$("aiStatus").textContent="Understanding shorthand and organizing the call details…";
+ $("generateAI").disabled=true;$("aiStatus").textContent="Gemini is understanding the call and preparing both drafts…";
  try{
-  generatedDrafts=smartDrafts(raw);
+  const {data:{session},error:sessionError}=await db.auth.getSession();
+  if(sessionError||!session?.access_token)throw new Error("Please sign in to CTR again.");
+  const response=await fetch("https://ctr-ai-assistant-notty-buddy.vercel.app/api/gemini-crm",{
+   method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
+   body:JSON.stringify({input:raw})
+  });
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(result.error||"Gemini request failed.");
+  generatedDrafts={group:result.group||"",crm:result.crm||""};
   $("aiGroup").innerHTML=formatNoteHtml(generatedDrafts.group);
   $("aiCrm").innerHTML=formatNoteHtml(generatedDrafts.crm);
-  const box=$("aiQuestions");
-  const flags=generatedDrafts.clarifications||[];
-  box.innerHTML=flags.length?'<strong>Please confirm before sharing</strong><ul>'+flags.map(q=>'<li>'+esc(q)+'</li>').join("")+'</ul>':'<strong>Review</strong><p>Draft prepared from the details provided. Check names, quantities and dates before sharing.</p>';
+  const box=$("aiQuestions"),questions=Array.isArray(result.questions)?result.questions:[];
+  const flags=Array.isArray(result.uncertainties)?result.uncertainties:[];
+  box.innerHTML=(questions.length||flags.length)?'<strong>Gemini clarification</strong><ul>'+questions.concat(flags).map(q=>'<li>'+esc(q)+'</li>').join("")+'</ul>':'<strong>AI review</strong><p>Draft prepared. Verify customer details before sharing.</p>';
   box.classList.remove("hidden");$("aiResults").classList.remove("hidden");
-  $("aiStatus").textContent="Free draft ready · Review for accuracy before sharing.";
- }catch(e){$("aiStatus").textContent="Could not prepare notes: "+(e?.message||"Please retry.");}
+  $("aiStatus").textContent="Gemini free tier · "+(result.confidence||"medium")+" confidence · Review before sharing.";
+ }catch(e){$("aiStatus").textContent="Gemini assistant: "+(e?.message||"Could not prepare notes.");}
  finally{$("generateAI").disabled=false}
 }
+
 async function loadAll(){
  const [g,p,c,profiles]=await Promise.all([fetchAllRows(()=>db.from("ctr_group_notes").select("*").order("created_at",{ascending:true}).order("id",{ascending:true})),fetchAllRows(()=>db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false})),db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),db.from("ctr_profiles").select("user_id,chat_color")]);
  if(c.error||profiles.error)throw(c.error||profiles.error);
