@@ -1673,3 +1673,129 @@ html body #authView #authSubmit{cursor:pointer;touch-action:manipulation}
 
 /* Ensure the Direct Messages view respects view switching. */
 .app-view .main-area .direct-inbox-view.hidden{display:none!important}
+
+
+/* CTR unified messenger layout — familiar WhatsApp Web structure, original CTR identity. */
+.app-view{min-height:100vh}
+.app-view .main-area{min-height:100vh;display:flex;flex-direction:column}
+.app-view .topbar{
+ position:sticky;top:0;z-index:100;min-height:66px;height:auto;
+ grid-template-columns:minmax(170px,auto) minmax(0,1fr) auto;
+ gap:clamp(8px,1.4vw,22px);padding:8px 16px;border-radius:0 0 16px 16px;
+ border:0;border-bottom:1px solid rgba(255,255,255,.12);
+ background:rgba(13,10,13,.72);backdrop-filter:blur(18px) saturate(125%);
+ -webkit-backdrop-filter:blur(18px) saturate(125%);box-shadow:0 8px 26px rgba(0,0,0,.18)
+}
+.app-view .brand.compact{gap:9px;min-width:0}
+.app-view .compact .brand-mark{width:43px;height:43px;flex:0 0 43px;border-radius:50%;overflow:hidden}
+.app-view .compact .brand-name{font-size:18px;letter-spacing:2px}
+.app-view .compact .brand-sub{font-size:8px;letter-spacing:1.2px}
+.app-view .top-nav{justify-content:center;gap:clamp(2px,.55vw,9px);min-width:0}
+.app-view .top-nav-btn{position:relative;justify-content:center;gap:7px;padding:9px 11px;border-radius:12px;font-size:11px;color:#e0d4d8}
+.app-view .top-nav-btn svg{width:19px;height:19px;flex:0 0 19px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.app-view .top-nav-btn.active{background:rgba(255,45,91,.17);color:#ff91a7;box-shadow:inset 0 -2px #ff426c,0 0 14px rgba(255,35,79,.09)}
+.app-view .top-nav-btn:hover{background:rgba(255,255,255,.075);transform:none}
+.app-view .top-nav .global-search-wrap{height:36px;max-width:150px;min-width:94px;margin-left:5px}
+.app-view .top-meta{gap:7px;font-size:10px}
+.app-view .top-meta #userEmail{max-width:105px;overflow:hidden;text-overflow:ellipsis}
+.app-view .header-icon-btn{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.06);color:#f4e8eb}
+.app-view .header-icon-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.app-view .header-icon-btn:hover{background:rgba(255,35,79,.2);color:#ff9bad}
+.app-view .workspace{flex:1;min-height:0;grid-template-columns:minmax(0,1fr) 310px;gap:14px;margin:14px 0 10px}
+.app-view .chat,.app-view .right-panel{border-radius:16px;background:rgba(12,9,12,.38);border:1px solid rgba(255,255,255,.11);box-shadow:0 12px 36px rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.app-view .chat{min-height:calc(100vh - 112px);padding:0 20px 18px}
+.app-view .right-panel{position:sticky;top:80px;max-height:calc(100vh - 95px);overflow:auto}
+.app-view .app-footer{margin-top:auto;padding:10px 4px;font-size:9px;opacity:.75}
+
+/* Messenger inbox: persistent contact rail and conversation canvas. */
+.app-view .main-area .workspace:has(#directView:not(.hidden)){display:block;margin:0;min-height:0}
+.app-view .main-area .workspace:has(#directView:not(.hidden))>.chat{
+ min-height:calc(100vh - 66px);height:calc(100vh - 66px);padding:0 12px 12px;
+ border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none
+}
+.app-view #directView{height:100%;min-height:0}
+.app-view .inbox-heading{display:none!important}
+.app-view .dm-inbox{
+ display:grid;grid-template-columns:minmax(290px,34%) minmax(0,1fr);gap:0;
+ height:calc(100vh - 82px);min-height:480px;max-height:none;
+ border-radius:15px;overflow:hidden;background:rgba(12,9,12,.45);
+ border:1px solid rgba(255,255,255,.13);box-shadow:0 12px 35px rgba(0,0,0,.2);
+ backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)
+}
+.app-view .dm-list-pane{border-right:1px solid rgba(255,255,255,.13);background:rgba(10,8,11,.36)}
+.app-view .dm-list-tools{padding:14px 14px 12px;border-bottom:1px solid rgba(255,255,255,.1)}
+.app-view .dm-new-recipient{width:100%;height:38px;margin:0 0 10px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#f5e9ed;font-size:11px}
+.app-view .dm-list-tools input{height:39px;padding:0 14px 0 38px;border-radius:22px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.1);font-size:11px}
+.app-view .dm-filter-row{gap:6px;margin-top:10px}
+.app-view .dm-filter{padding:7px 14px;border-radius:20px;font-size:10px}
+.app-view .dm-filter.active{background:#b91f49;color:#fff}
+.app-view .dm-conversation{min-height:70px;padding:11px 14px;gap:12px;border-bottom:1px solid rgba(255,255,255,.075)}
+.app-view .dm-conversation:hover,.app-view .dm-conversation.selected{background:rgba(255,255,255,.085);box-shadow:inset 3px 0 #f14b70}
+.app-view .dm-avatar,.app-view .dm-empty-avatar{width:46px;height:46px;flex-basis:46px;border-radius:50%;background:linear-gradient(145deg,rgba(203,47,91,.75),rgba(67,17,36,.92));border:1px solid rgba(255,255,255,.15);box-shadow:none;color:#fff;font-size:14px}
+.app-view .dm-convo-copy strong{font-size:12px;color:#fff}
+.app-view .dm-convo-copy>span{font-size:10px;color:rgba(245,232,237,.7)}
+.app-view .dm-convo-meta time{font-size:9px;color:rgba(245,232,237,.6)}
+.app-view .dm-unread-count{background:#d72b58}
+.app-view .dm-thread-pane{min-height:0;background:rgba(8,7,10,.16)}
+.app-view .dm-thread-header{min-height:67px;padding:10px 18px;background:rgba(10,8,11,.45);border-bottom:1px solid rgba(255,255,255,.12)}
+.app-view .dm-thread-header strong{font-size:13px}
+.app-view .dm-thread-header small{font-size:10px}
+.app-view .dm-thread-messages{min-height:0;max-height:none;padding:22px clamp(14px,3vw,38px);gap:12px}
+.app-view .dm-message{max-width:min(76%,680px);padding:10px 14px;border-radius:13px 13px 13px 4px;background:rgba(42,35,40,.88);border:1px solid rgba(255,255,255,.07);font-size:12px}
+.app-view .dm-message.mine{background:linear-gradient(140deg,rgba(127,24,55,.92),rgba(77,14,36,.94));border-radius:13px 13px 4px 13px}
+.app-view .dm-message time{color:rgba(255,255,255,.58)}
+.app-view .dm-compose-wrap{padding:12px 18px 16px;background:rgba(10,8,11,.4);border-top:1px solid rgba(255,255,255,.12)}
+.app-view .dm-compose-hint{display:none}
+.app-view .dm-composer{max-width:100%;padding:6px 7px 6px 13px;border-radius:24px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.13)}
+.app-view .dm-composer textarea{min-height:40px;padding:10px 8px;font-size:12px}
+.app-view .dm-send-btn{width:38px;height:38px;flex-basis:38px;border-radius:50%;background:#c92b55;color:#fff}
+.app-view .dm-thread-header .dm-admin-tag{color:#ff9bad}
+
+/* Consistent messaging-inspired treatment for group notes, private notes and follow-ups. */
+.app-view .chat-head{padding:18px 0 14px}
+.app-view .chat-head h2{font-size:20px}
+.app-view .search-toolbar input,.app-view .composer textarea,.app-view .followup-form input{border-radius:12px;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.12)}
+.app-view .composer{border-radius:14px;background:rgba(9,7,10,.45);border:1px solid rgba(255,255,255,.12)}
+.app-view .note,.app-view .followup-item{border-radius:13px}
+.app-view .primary,.app-view .send-btn{border-radius:11px}
+.app-view .account-settings-modal{z-index:500}
+.app-view .account-settings-card{border:1px solid rgba(255,255,255,.14);border-radius:18px;background:rgba(18,10,14,.96);backdrop-filter:blur(22px)}
+
+/* Desktop and tablet keep the same header; small screens switch to a single chat pane. */
+@media(max-width:1050px){
+ .app-view .topbar{grid-template-columns:auto minmax(0,1fr);gap:8px}
+ .app-view .top-nav{grid-column:1/-1;grid-row:2;justify-content:flex-start;overflow-x:auto;padding:2px 0 4px}
+ .app-view .top-meta{grid-column:2;grid-row:1;justify-content:flex-end}
+ .app-view .top-nav-btn{padding:8px 10px}
+ .app-view .top-nav .global-search-wrap{flex:0 0 120px}
+}
+@media(max-width:760px){
+ .app-view .topbar{position:sticky;top:0;grid-template-columns:minmax(0,1fr) auto;min-height:58px;padding:7px 10px;border-radius:0 0 13px 13px}
+ .app-view .brand.compact .brand-mark{width:38px;height:38px;flex-basis:38px}
+ .app-view .compact .brand-name{font-size:15px}
+ .app-view .top-meta{grid-column:2;grid-row:1;gap:5px}
+ .app-view .top-meta #userEmail,.app-view .top-meta .divider,.app-view .top-meta .live-label,.app-view .top-meta .live-dot{display:none}
+ .app-view .header-icon-btn{width:31px;height:31px}
+ .app-view .top-nav{grid-column:1/-1;grid-row:2;gap:3px;justify-content:space-between;overflow-x:auto}
+ .app-view .top-nav-btn{flex:0 0 auto;min-width:43px;padding:8px 9px;gap:5px;font-size:9px}
+ .app-view .top-nav-btn svg{width:17px;height:17px;flex-basis:17px}
+ .app-view .top-nav .global-search-wrap{flex:0 0 92px;height:32px;min-width:92px}
+ .app-view .workspace{display:flex;flex-direction:column;gap:10px;margin:10px 0}
+ .app-view .chat{width:100%;min-height:calc(100dvh - 150px);padding:0 12px 12px}
+ .app-view .right-panel{position:static;max-height:none;width:100%}
+ .app-view .main-area .workspace:has(#directView:not(.hidden)){margin:0}
+ .app-view .main-area .workspace:has(#directView:not(.hidden))>.chat{height:calc(100dvh - 112px);min-height:0;padding:0 7px 7px}
+ .app-view .dm-inbox{height:calc(100dvh - 121px);min-height:0;display:block;border-radius:12px}
+ .app-view .dm-list-pane{height:100%;min-height:0;border:0}
+ .app-view .dm-thread-pane{height:100%;min-height:0;display:none}
+ .app-view .dm-inbox.mobile-thread-open .dm-list-pane{display:none!important}
+ .app-view .dm-inbox.mobile-thread-open .dm-thread-pane{display:flex!important}
+ .app-view .dm-conversation{min-height:66px;padding:10px 12px}
+ .app-view .dm-thread-messages{padding:14px 11px}
+ .app-view .dm-message{max-width:88%;font-size:11px}
+ .app-view .dm-compose-wrap{padding:9px}
+ .app-view .app-footer{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .app-view .top-nav-btn,.app-view .dm-conversation{transition:none!important}
+}
