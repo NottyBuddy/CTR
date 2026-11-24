@@ -2053,3 +2053,17 @@ html,body{height:100%;min-height:100%;overflow:hidden!important}
 #groupView>#crmGenerator #aiInput{min-height:120px}
 #groupView>#crmGenerator .ai-actions{display:flex;flex-direction:row;align-items:center;justify-content:space-between}
 #groupView>#crmGenerator .ai-actions .send-btn{width:auto;min-width:145px}
+
+
+/* CRM note generator belongs on Group Notes only. Keep it visible below the group composer. */
+#groupView #crmGenerator{
+ display:block!important;
+ position:static!important;
+ width:100%!important;
+ max-height:none!important;
+ overflow:visible!important;
+ margin:18px 0 0!important;
+}
+@media(max-width:760px){
+ #groupView #crmGenerator{width:100%!important;margin:14px 0 0!important;padding:17px 14px!important}
+}
