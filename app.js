@@ -161,6 +161,7 @@ function renderDirect(){
  $("directCount").textContent=direct.length;
  let allConversations=[];
  {  const pairs=new Map();
+  direct.forEach(m=>{
    if(m.sender_id!==user.id&&m.recipient_id!==user.id)return;
    const key=directPairKey(m.sender_id,m.recipient_id);
    if(!pairs.has(key))pairs.set(key,[]);
