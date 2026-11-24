@@ -289,8 +289,23 @@ function smartDrafts(raw){
  const notes=[],missing=[],alias={mum:"Mumbai",bom:"Mumbai",mh:"Maharashtra",ap:"Andhra Pradesh",hyd:"Hyderabad",blr:"Bengaluru",bangalore:"Bengaluru",chn:"Chennai",kol:"Kolkata",pune:"Pune",del:"Delhi",ts:"Telangana",ka:"Karnataka",tn:"Tamil Nadu",rj:"Rajasthan",up:"Uttar Pradesh",mp:"Madhya Pradesh",gj:"Gujarat"};
  const loc=/\bloc(?:ation)?\s+([a-z]+)(?:\s+([a-z]{2,3}))?/i.exec(source),pin=/\b(?:pin(?:\s*code)?\s*)?(\d{6})\b/i.exec(source),phone=/\b(?:\+91[-\s]?)?[6-9]\d{9}\b/.exec(source);
  const customer=/\b(?:customer|cx|cust)\s*[:=-]\s*([A-Za-z][A-Za-z .'-]{1,50}?)(?=\s+(?:phone|mob|mobile|contact|loc|location|req|requirement)\b|$)/i.exec(source);
- const name=customer?.[1]?.trim()||"",duration=[...source.matchAll(/\b(\d+)\s*(weeks?|wks?|w|days?|d|months?|mos?|mo)\b/gi)];
- if(duration.length)notes.push("Customer timeline: "+duration.map(m=>m[1]+" "+(m[2].toLowerCase().startsWith("w")?"weeks":m[2].toLowerCase().startsWith("d")?"days":"months")).join(" and ")+".");
+ const name=customer?.[1]?.trim()||"";
+ const windowContext=/\b(window|windows|sliding|casement|uPVC|upvc|aluminium|aluminum|glass|frame|sash)\b/i.test(source);
+ const wifiContext=/\b(wi[\s-]?fi|wireless|router|internet|network|broadband|hotspot|signal)\b/i.test(source);
+ const weekContext=/\b(week|weeks|weekly|callback|call\s*back|follow.?up|after|within|timeline|delivery|working days?)\b/i.test(source);
+ const shorthandW=/\b(\d+)\s*w\b/gi;
+ const wMatches=[...source.matchAll(shorthandW)];
+ const ambiguousW=[];
+ const durations=[...source.matchAll(/\b(\d+)\s*(weeks?|wks?|days?|d|months?|mos?|mo)\b/gi)];
+ for(const m of wMatches){
+  const count=m[1];
+  if(windowContext){notes.push("Window quantity: "+count+" windows.");}
+  else if(wifiContext){notes.push("Wi-Fi-related quantity/reference: "+count+" (exact meaning should be confirmed).");}
+  else if(weekContext||/\b\d+\s*w\s*\d+\s*d\b/i.test(source)){durations.push(m); }
+  else ambiguousW.push(count+"w");
+ }
+ if(durations.length)notes.push("Customer timeline: "+durations.map(m=>m[1]+" "+(m[2].toLowerCase().startsWith("w")?"weeks":m[2].toLowerCase().startsWith("d")?"days":"months")).join(" and ")+".");
+ if(ambiguousW.length)missing.push("Ambiguous shorthand "+ambiguousW.join(", ")+": could mean weeks, windows, Wi-Fi, or another term. Confirm the intended meaning before finalizing.");
  const construction=/\b(new\s*)?(constru|construction)\b/i.test(source),restaurant=/\b(restaurant|restro|hotel|cafe|café|food outlet)\b/i.test(source),commercial=/\b(commercial|comm(?:ercial)? property)\b/i.test(source),residential=/\b(residential|res property)\b/i.test(source);
  if(construction)notes.push("Project stage: New construction.");
  if(restaurant)notes.push("Project type: Restaurant.");
