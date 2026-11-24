@@ -2237,3 +2237,39 @@ body.theme-light .app-footer{color:#806e77}
 body.theme-light .auth-foot{color:#806e77}
 body.theme-light .empty-state{color:#75666e}
 @media(prefers-reduced-motion:reduce){.notification-item,.older-page-btn{transition:none}}
+
+/* Ensure page-specific grid/flex display never overrides hidden views. */
+.app-view .main-area #groupView.hidden,
+.app-view .main-area #personalView.hidden,
+.app-view .main-area #directView.hidden,
+.app-view .main-area #followupsView.hidden,
+.app-view .main-area #dashboardView.hidden,
+.app-view .main-area .notes-view.hidden{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#groupView>#crmGenerator .right-panel-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+#groupView>#crmGenerator .right-panel-head .ai-panel-toggle{flex:0 0 30px}
+#groupView>#crmGenerator .right-panel-head .ai-panel-title{flex:1 1 180px;min-width:0}
+#groupView>#crmGenerator .right-panel-head>p{flex:1 0 100%;width:100%;max-width:none;margin:2px 0 0;line-height:1.55;overflow-wrap:anywhere}
+#groupView>#crmGenerator #aiInput{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;resize:vertical}
+#groupView>#crmGenerator .ai-actions{display:flex;flex-wrap:wrap;gap:10px;min-width:0}
+#groupView>#crmGenerator .ai-actions #aiStatus{flex:1 1 150px;min-width:0;overflow-wrap:anywhere}
+@media(max-width:760px){
+ .app-view .main-area>.workspace{width:100%;max-width:100%;min-width:0}
+ .app-view .main-area>.workspace>.chat{width:100%;max-width:100%;min-width:0}
+ #groupView{width:100%;max-width:100%;box-sizing:border-box;gap:0}
+ #groupView>#crmGenerator{box-sizing:border-box;width:100%;max-width:100%;min-width:0;padding:15px 13px!important}
+ #groupView>#crmGenerator .right-panel-head{align-items:flex-start}
+ #groupView>#crmGenerator .right-panel-head>p{font-size:11px}
+ #groupView>#crmGenerator .ai-actions .send-btn{min-width:110px}
+ #groupView .chat-head,#groupView .search-toolbar,#groupView .color-picker-wrap,#groupView #notes,#groupView #noteForm{min-width:0;max-width:100%;box-sizing:border-box}
+ #groupView .search-toolbar{display:flex;flex-wrap:wrap;gap:8px}
+ #groupView .search-toolbar input{min-width:0;max-width:100%;flex:1 1 140px}
+ #groupView .composer-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+ #groupView .composer-foot>span{flex:1 1 150px;min-width:0}
+ .app-view .main-area>.topbar .top-nav{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+ .app-view .main-area>.topbar .top-nav::-webkit-scrollbar{display:none}
+}
+@media(max-width:380px){
+ .app-view .main-area>.topbar .global-search-wrap{flex:0 0 82px!important;min-width:82px!important}
+ .app-view .main-area>.topbar .top-nav-btn{padding:5px 6px!important;font-size:8px!important}
+}
+@media(hover:none),(pointer:coarse){button:active:not(:disabled){transform:none}}
