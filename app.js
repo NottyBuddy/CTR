@@ -285,7 +285,7 @@ function showView(v){
 }
 let generatedDrafts={group:"",crm:""};
 function smartDrafts(raw){
- const source=String(raw||"").replace(/[,;]+/g," ").replace(/\\s+/g," ").trim();
+ const source=String(raw||"").replace(/[,;]+/g," ").replace(/\s+/g," ").trim();
  const lower=source.toLowerCase();
  const expand={
   "cx":"customer","cust":"customer","cust.":"customer","req":"requested","bck":"back","cb":"callback","callbck":"callback",
@@ -295,32 +295,32 @@ function smartDrafts(raw){
   "w":"weeks","wk":"week","wks":"weeks","d":"days","dy":"day","m":"months","mo":"months","mos":"months"
  };
  const notes=[];
- const duration=[...source.matchAll(/\\b(\\d+)\\s*(w|wk|wks|d|dy|m|mo|mos)\\b/gi)].map(m=>({n:m[1],unit:m[2].toLowerCase()}));
+ const duration=[...source.matchAll(/\b(\d+)\s*(w|wk|wks|d|dy|m|mo|mos)\b/gi)].map(m=>({n:m[1],unit:m[2].toLowerCase()}));
  if(duration.length){
   const parts=duration.map(x=>x.n+" "+({w:"weeks",wk:"weeks",wks:"weeks",d:"days",dy:"days",m:"months",mo:"months",mos:"months"}[x.unit]));
   notes.push("Customer timeline: "+parts.join(" and ")+".");
  }
- const hasConstruction=/\\b(constru|construction|new constru)\\b/i.test(source);
+ const hasConstruction=/\b(constru|construction|new constru)\b/i.test(source);
  if(hasConstruction)notes.push("Requirement: New construction.");
- const locMatch=source.match(/\\bloc\\s+([a-z]+)(?:\\s+([a-z]{2}))?/i);
+ const locMatch=source.match(/\bloc\s+([a-z]+)(?:\s+([a-z]{2}))?/i);
  if(locMatch){
-  const city=expand[locMatch[1].toLowerCase()]||locMatch[1].replace(/^\\w/,c=>c.toUpperCase());
+  const city=expand[locMatch[1].toLowerCase()]||locMatch[1].replace(/^\w/,c=>c.toUpperCase());
   const state=locMatch[2]?expand[locMatch[2].toLowerCase()]||locMatch[2].toUpperCase():"";
   notes.push("Location: "+[city,state].filter(Boolean).join(", ")+".");
  }
- const callback=/\\b(call\\s*bck|call\\s*back|callback|cb)\\b/i.test(source)||/\\breq\\s+call\\s*bck\\b/i.test(source);
+ const callback=/\b(call\s*bck|call\s*back|callback|cb)\b/i.test(source)||/\breq\s+call\s*bck\b/i.test(source);
  if(callback)notes.push("Customer requested a callback. Next action: Call the customer back and discuss the requirement.");
- const knownTokens=/\\b(clr|cx|req|bck|loc|constru|new|call|callback|cb|\\d+\\s*(?:w|wk|wks|d|dy|m|mo|mos)|mum|bom|mh)\\b/gi;
- const remainder=source.replace(knownTokens," ").replace(/\\s+/g," ").trim();
+ const knownTokens=/\b(clr|cx|req|bck|loc|constru|new|call|callback|cb|\d+\s*(?:w|wk|wks|d|dy|m|mo|mos)|mum|bom|mh)\b/gi;
+ const remainder=source.replace(knownTokens," ").replace(/\s+/g," ").trim();
  if(remainder)notes.push("Additional details provided: "+remainder+".");
  if(!notes.length){
   const polished=source.charAt(0).toUpperCase()+source.slice(1);
   notes.push(polished.endsWith(".")?polished:polished+".");
  }
- const ambiguous=/\\bclr\\b/i.test(source);
+ const ambiguous=/\bclr\b/i.test(source);
  if(ambiguous)notes.push('Clarification required: "CLR" is retained as entered because its meaning is not clear from the shorthand.');
- const crmNote=["CUSTOMER CALL NOTE",...notes,"","Status: Follow-up required."].join("\\n");
- const groupNote=["CRM UPDATE | "+(notes.find(x=>x.startsWith("Requirement:"))||"Customer follow-up"),...notes,"","Assigned to: Not specified"].join("\\n");
+ const crmNote=["CUSTOMER CALL NOTE",...notes,"","Status: Follow-up required."].join("\n");
+ const groupNote=["CRM UPDATE | "+(notes.find(x=>x.startsWith("Requirement:"))||"Customer follow-up"),...notes,"","Assigned to: Not specified"].join("\n");
  return {group:groupNote,crm:crmNote};
 }
 async function generateNotes(){
