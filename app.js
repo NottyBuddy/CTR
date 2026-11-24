@@ -127,27 +127,38 @@ function renderDirect(){
  const admin=isAdmin(),people=team.filter(p=>p.user_id!==user.id);
  $("directAdminHint").classList.toggle("hidden",!admin);
  $("directCount").textContent=direct.length;
- const pairs=new Map();
- direct.forEach(m=>{
-  if(!admin&&m.sender_id!==user.id&&m.recipient_id!==user.id)return;
-  const key=directPairKey(m.sender_id,m.recipient_id);
-  if(!pairs.has(key))pairs.set(key,[]);
-  pairs.get(key).push(m);
- });
- const conversations=[...pairs.entries()].map(([key,messages])=>{
-  messages.sort((x,y)=>new Date(x.created_at)-new Date(y.created_at));
-  const last=messages[messages.length-1];
-  const otherId=last.sender_id===user.id?last.recipient_id:last.sender_id;
-  const other=team.find(p=>p.user_id===otherId);
-  return {key,messages,last,otherId,name:other?.display_name||"CTR Member",email:other?.email||"",unread:messages.filter(m=>m.recipient_id===user.id&&m.sender_id!==user.id&&new Date(m.created_at)>new Date(localStorage.getItem("ctr_seen_direct_"+user.id)||0)).length};
- });
- const byPerson=new Map(conversations.map(c=>[c.otherId,c]));
- people.forEach(person=>{
-  if(!byPerson.has(person.user_id)){
-   byPerson.set(person.user_id,{key:directPairKey(user.id,person.user_id),messages:[],last:null,otherId:person.user_id,name:person.display_name||"CTR Member",email:person.email||"",unread:0});
-  }
- });
- const allConversations=[...byPerson.values()].sort((x,y)=>(new Date(y.last?.created_at||0)-new Date(x.last?.created_at||0))||x.name.localeCompare(y.name));
+ let allConversations=[];
+ if(admin){
+  // Admin inbox is contact-based: include every message involving the selected
+  // team member, even when the other participant is a different agent.
+  allConversations=people.map(person=>{
+   const messages=direct.filter(m=>m.sender_id===person.user_id||m.recipient_id===person.user_id)
+    .sort((x,y)=>new Date(x.created_at)-new Date(y.created_at));
+   const last=messages[messages.length-1]||null;
+   return {key:directPairKey(user.id,person.user_id),messages,last,otherId:person.user_id,
+    name:person.display_name||"CTR Member",email:person.email||"",unread:0};
+  }).sort((x,y)=>(new Date(y.last?.created_at||0)-new Date(x.last?.created_at||0))||x.name.localeCompare(y.name));
+ }else{
+  const pairs=new Map();
+  direct.forEach(m=>{
+   if(m.sender_id!==user.id&&m.recipient_id!==user.id)return;
+   const key=directPairKey(m.sender_id,m.recipient_id);
+   if(!pairs.has(key))pairs.set(key,[]);
+   pairs.get(key).push(m);
+  });
+  const byPerson=new Map([...pairs.entries()].map(([key,messages])=>{
+   messages.sort((x,y)=>new Date(x.created_at)-new Date(y.created_at));
+   const last=messages[messages.length-1];
+   const otherId=last.sender_id===user.id?last.recipient_id:last.sender_id;
+   const other=team.find(p=>p.user_id===otherId);
+   return [otherId,{key,messages,last,otherId,name:other?.display_name||"CTR Member",email:other?.email||"",
+    unread:messages.filter(m=>m.recipient_id===user.id&&m.sender_id!==user.id&&new Date(m.created_at)>new Date(localStorage.getItem("ctr_seen_direct_"+user.id)||0)).length}];
+  }));
+  people.forEach(person=>{
+   if(!byPerson.has(person.user_id))byPerson.set(person.user_id,{key:directPairKey(user.id,person.user_id),messages:[],last:null,otherId:person.user_id,name:person.display_name||"CTR Member",email:person.email||"",unread:0});
+  });
+  allConversations=[...byPerson.values()].sort((x,y)=>(new Date(y.last?.created_at||0)-new Date(x.last?.created_at||0))||x.name.localeCompare(y.name));
+ }
  const selectedId=selectedDirectRecipient||$("directRecipient").value||((selectedDirectKey||"").split("::").find(id=>id&&id!==user.id))||"";
  const query=directFilter.trim().toLowerCase();
  const visible=allConversations.filter(c=>{
