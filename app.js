@@ -53,7 +53,7 @@ function enhanceGroupMessages(rows){
   const body=n.body||"",m=body.match(/(?:\+?91[\s-]?)?[6-9]\d{9}/);
   const top=card.querySelector(".note-top");
   if(m&&top){const phone=m[0].replace(/\D/g,"");const cp=document.createElement("button");cp.className="message-action";cp.type="button";cp.dataset.copyPhone=phone;cp.textContent="Copy number";top.append(cp)}
-  const tools=document.createElement("div");tools.className="note-tools";const copy=document.createElement("button");copy.type="button";copy.className="message-action";copy.dataset.copyNote=n.id;copy.textContent="Copy note";tools.append(copy);card.append(tools);
+  const tools=document.createElement("div");tools.className="note-tools";const reply=document.createElement("button");reply.type="button";reply.className="message-action";reply.dataset.replyNote=n.id;reply.textContent="Reply";const copy=document.createElement("button");copy.type="button";copy.className="message-action";copy.dataset.copyNote=n.id;copy.textContent="Copy note";tools.append(reply,copy);card.append(tools);
  });
 }
 let followups=[];
@@ -211,7 +211,7 @@ function renderDirect(){
   const box=$("directNotes"),near=box.scrollHeight-box.scrollTop-box.clientHeight<120;
   box.innerHTML=active.messages.map(m=>{
    const mine=m.sender_id===user.id,from=team.find(p=>p.user_id===m.sender_id)?.display_name||"CTR Member";
-   return `<article class="dm-message ${mine?"mine":""}" data-dm-message="${m.id}">${admin&&!mine?`<span class="dm-message-sender">${esc(from)}</span>`:""}<div>${esc(m.body||"")}</div><time>${esc(time(m.created_at))}${m.edited_at?" · edited":mine?" · ✓✓":""}</time>${mine?`<button type="button" class="message-action" data-dm-edit="${m.id}">Edit</button>`:""}${admin?`<button class="delete-note" data-ddelete="${m.id}">Delete</button>`:""}</article>`;
+   return `<article class="dm-message ${mine?"mine":""}" data-dm-message="${m.id}">${admin&&!mine?`<span class="dm-message-sender">${esc(from)}</span>`:""}<div>${esc(m.body||"")}</div><time>${esc(time(m.created_at))}${m.edited_at?" · edited":mine?" · ✓✓":""}</time>${mine?`<button type="button" class="message-action" data-dm-edit="${m.id}">Edit</button>`:""}<button type="button" class="message-action" data-dm-reply="${m.id}">Reply</button>${admin?`<button class="delete-note" data-ddelete="${m.id}">Delete</button>`:""}</article>`;
   }).join("")||'<div class="dm-empty-thread"><div class="dm-empty-mark">✉</div><strong>Start a private conversation</strong><span>Write a message below to begin chatting.</span></div>';
   let lastDay="";
   [...box.querySelectorAll(".dm-message")].forEach((card,index)=>{
@@ -567,7 +567,7 @@ $("directForm").onsubmit=async e=>{
  }catch(err){status("Message failed: "+(err?.message||"Please try again."))}
  finally{send.disabled=false}
 };
-$("directNotes").addEventListener("click",async e=>{const edit=e.target.closest("[data-dm-edit]");if(edit){const msg=direct.find(m=>String(m.id)===String(edit.dataset.dmEdit));if(!msg||msg.sender_id!==user.id)return;const body=prompt("Edit your message",msg.body||"");if(body===null)return;if(!body.trim()){status("Message cannot be empty.");return}edit.disabled=true;const {error}=await db.from("ctr_direct_messages").update({body:body.trim(),edited_at:new Date().toISOString()}).eq("id",msg.id).eq("sender_id",user.id);edit.disabled=false;if(error){status("Edit failed. Apply the direct-message edit permission migration in Supabase: "+error.message);return}await loadDirect();renderDirect();status("Message updated.");}});
+$("directNotes").addEventListener("click",async e=>{const reply=e.target.closest("[data-dm-reply]");if(reply){const msg=direct.find(m=>String(m.id)===String(reply.dataset.dmReply));if(msg){const sender=team.find(p=>p.user_id===msg.sender_id)?.display_name||"CTR Member";$("directInput").value="↪ "+sender+": "+msg.body+"\\n\\n";$("directInput").focus()}return}const edit=e.target.closest("[data-dm-edit]");if(edit){const msg=direct.find(m=>String(m.id)===String(edit.dataset.dmEdit));if(!msg||msg.sender_id!==user.id)return;const body=prompt("Edit your message",msg.body||"");if(body===null)return;if(!body.trim()){status("Message cannot be empty.");return}edit.disabled=true;const {error}=await db.from("ctr_direct_messages").update({body:body.trim(),edited_at:new Date().toISOString()}).eq("id",msg.id).eq("sender_id",user.id);edit.disabled=false;if(error){status("Edit failed. Apply the direct-message edit permission migration in Supabase: "+error.message);return}await loadDirect();renderDirect();status("Message updated.");}});
 $("directInboxList").addEventListener("click",e=>{
  const target=e.target instanceof Element?e.target:null;if(!target)return;
  if(target.closest("[data-direct-retry]")){loadDirect();return}
@@ -579,6 +579,7 @@ $("directInboxList").addEventListener("click",e=>{
  openDirectConversation(id);
 });
 document.addEventListener("click",async e=>{
+ const replyNote=e.target.closest("[data-reply-note]");if(replyNote){const n=group.find(x=>x.id===replyNote.dataset.replyNote);if(n){$("noteInput").value="↪ "+displayName(n.author_email)+": "+n.body+"\\n\\n";$("noteInput").focus()}return}
  const cp=e.target.closest("[data-copy-phone]");if(cp){try{await navigator.clipboard.writeText(cp.dataset.copyPhone);status("Phone copied.")}catch{status("Clipboard unavailable.")}return}
  const cn=e.target.closest("[data-copy-note]");if(cn){const n=group.find(x=>x.id===cn.dataset.copyNote);if(n){try{await navigator.clipboard.writeText(n.body);status("CRM note copied.")}catch{status("Clipboard unavailable.")}}return}
  const dmCopy=e.target.closest("[data-copy-dm]");if(dmCopy){const m=direct.find(x=>x.id===dmCopy.dataset.copyDm);if(m){try{await navigator.clipboard.writeText(m.body);status("Message copied.")}catch{status("Clipboard unavailable.")}}return}
