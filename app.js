@@ -3,6 +3,13 @@ const SUPABASE_URL="https://icootmtssyergamuxlxb.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_qgEIXxXXBq2TaNxLMZPkwg_fcwKcdGW";
 const $=id=>document.getElementById(id);
 async function fetchAllRows(queryFactory,pageSize=500){const rows=[];for(let from=0;;from+=pageSize){const {data,error}=await queryFactory().range(from,from+pageSize-1);if(error)throw error;const page=data||[];rows.push(...page);if(page.length<pageSize)break;}return rows;}
+const PAGE_SIZE=50;let groupOffset=0,groupHasMore=false,personalOffset=0,personalHasMore=false,directOffset=0,directHasMore=false;let notifications=[],notificationUnread=0,notificationLoading=false;
+function csvCell(v){return '"'+String(v??"").replace(/"/g,'""')+'"'}
+function downloadCsv(name,rows){if(!rows.length){status("No records available to export.");return}const keys=[...new Set(rows.flatMap(r=>Object.keys(r)))],csv=[keys.map(csvCell).join(","),...rows.map(r=>keys.map(k=>csvCell(r[k])).join(","))].join("\r\n"),blob=new Blob(["\\uFEFF",csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function setTheme(theme){const light=theme==="light";document.body.classList.toggle("theme-light",light);const b=$("themeToggle");if(b){b.setAttribute("aria-pressed",String(light));b.title=light?"Switch to dark theme":"Switch to light theme";b.setAttribute("aria-label",b.title);b.textContent=light?"☾":"☼"}if(user)try{localStorage.setItem("ctr_theme_"+user.id,light?"light":"dark")}catch{}}
+async function loadGroupPage(reset=false){if(reset){groupOffset=0;group=[]}const {data,error}=await db.from("ctr_group_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false}).range(groupOffset,groupOffset+PAGE_SIZE-1);if(error)throw error;const page=data||[];groupOffset+=page.length;groupHasMore=page.length===PAGE_SIZE;const {data:profiles,error:pe}=await db.from("ctr_profiles").select("user_id,chat_color");if(pe)throw pe;const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color])),mapped=page.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"})).reverse();group=reset?mapped:[...mapped,...group];return page.length}
+async function loadPersonalPage(reset=false){if(reset){personalOffset=0;personal=[]}const {data,error}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false}).range(personalOffset,personalOffset+PAGE_SIZE-1);if(error)throw error;const page=data||[];personalOffset+=page.length;personalHasMore=page.length===PAGE_SIZE;personal=reset?page:[...personal,...page];return page.length}
+
 let db,user,group=[],personal=[],direct=[],team=[],channel;
 let groupFilter="",dateFilter="",personalFilter="",directFilter="",followupSearchFilter="";
 let selectedDirectKey="",selectedDirectRecipient="",directInboxFilter="all",mobileThreadOpen=false;
@@ -38,7 +45,7 @@ function renderGroup(forceBottom=false){
  let rows=group.filter(n=>(!groupFilter||[n.body,displayName(n.author_email),n.author_email].join(" ").toLowerCase().includes(groupFilter))&&(!dateFilter||new Date(n.created_at).toISOString().slice(0,10)===dateFilter));
  rows.sort((x,y)=>Number(!!y.is_pinned)-Number(!!x.is_pinned)||new Date(x.created_at)-new Date(y.created_at));$("noteCount").textContent=rows.length;let last="";
  $("notes").innerHTML=rows.length?rows.map(n=>{const day=new Date(n.created_at).toDateString(),sep=day!==last?(last=day,`<div class="date-separator">${esc(dayLabel(n.created_at))}</div>`):"";return sep+`<article class="note ${n.user_id===user.id?"mine":""}" data-note-id="${n.id}"><div class="note-top"><div class="note-avatar" style="background:${esc(n.chat_color)}">${esc(initials(displayName(n.author_email)))}</div><span class="note-author">${esc(displayName(n.author_email))}${n.user_id===user.id?" · You":""}</span><span class="note-time">${esc(time(n.created_at))}${n.edited_at?" · edited":""}</span>${n.is_pinned?'<span class="pin-label">Pinned</span>':""}${n.user_id===user.id||isAdmin()?`<button class="message-action" data-edit="${n.id}">Edit</button>`:""}${isAdmin()?`<button class="delete-note" data-gdelete="${n.id}">Admin · Delete</button>`:""}${isAdmin()?`<button class="message-action" data-pin="${n.id}">${n.is_pinned?"Unpin":"Pin"}</button>`:""}</div><div class="note-body">${formatNoteHtml(n.body)}</div><div class="reaction-row">${["👍","✅","👀"].map(e=>{const users=(n.reactions||{})[e]||[];return `<button class="reaction-btn ${users.includes(user.id)?"reacted":""}" data-react="${n.id}" data-emoji="${e}" type="button" aria-pressed="${users.includes(user.id)}">${e} ${users.length}</button>`}).join("")}</div></article>`}).join(""):'<div class="empty-state"><h3>No matching updates</h3><p>Try clearing the filters.</p></div>';
- enhanceGroupMessages(rows);if(forceBottom||near)requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);updateUnread();
+ enhanceGroupMessages(rows);if(groupHasMore)box.insertAdjacentHTML("afterbegin",'<button type="button" class="older-page-btn" data-load-older-group>Load older group notes</button>');if(forceBottom||near)requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);updateUnread();
 }
 
 function enhanceGroupMessages(rows){
@@ -219,6 +226,7 @@ function renderDirect(){
    if(label!==lastDay){const divider=document.createElement("div");divider.className="dm-date-separator";divider.textContent=label;card.before(divider);lastDay=label}
    const copy=document.createElement("button");copy.type="button";copy.className="dm-copy-btn";copy.dataset.copyDm=msg.id;copy.textContent="Copy";card.append(copy);
   });
+  if(directHasMore)box.insertAdjacentHTML("afterbegin",'<button type="button" class="older-page-btn direct-older-page" data-load-older-direct>Load older messages</button>');
   if(near)requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);
   $("directInput").disabled=false;
   $("directForm").querySelector('button[type="submit"]').disabled=false;
@@ -255,9 +263,9 @@ async function loadDirect(){
   if(old&&team.some(p=>p.user_id===old)){sel.value=old;selectedDirectRecipient=old}else{selectedDirectRecipient="";sel.value=""}
   newSel.innerHTML='<option value="">＋ New message</option>'+team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join("");
   if(newOld&&team.some(p=>p.user_id===newOld))newSel.value=newOld;
-  let query=db.from("ctr_direct_messages").select("*").order("created_at",{ascending:true}).order("id",{ascending:true});
+  let query=db.from("ctr_direct_messages").select("*").order("created_at",{ascending:false}).order("id",{ascending:false});
   if(!isAdmin())query=query.or("sender_id.eq."+user.id+",recipient_id.eq."+user.id);
-  direct=(await fetchAllRows(()=>query)).filter(m=>m&&m.sender_id&&m.recipient_id);
+  const first=await query.range(0,PAGE_SIZE-1);if(first.error)throw first.error;direct=(first.data||[]).filter(m=>m&&m.sender_id&&m.recipient_id).reverse();directOffset=first.data?.length||0;directHasMore=directOffset===PAGE_SIZE;
   if(sequence!==directLoadSequence)return;
   renderDirect();renderPersonal();updateUnread();if(isAdmin())renderAgentDashboard();
   if(inbox)inbox.setAttribute("aria-busy","false");
@@ -269,6 +277,9 @@ async function loadDirect(){
  }
 }
 
+async function loadOlderDirect(){if(!directHasMore||!user)return;const box=$("directNotes"),h=box.scrollHeight,t=box.scrollTop;let q=db.from("ctr_direct_messages").select("*").order("created_at",{ascending:false}).order("id",{ascending:false});if(!isAdmin())q=q.or("sender_id.eq."+user.id+",recipient_id.eq."+user.id);const {data,error}=await q.range(directOffset,directOffset+PAGE_SIZE-1);if(error){status("Could not load older messages: "+error.message);return}const page=data||[];directOffset+=page.length;directHasMore=page.length===PAGE_SIZE;direct=[...page.reverse(),...direct];renderDirect();box.scrollTop=box.scrollHeight-h+t}
+async function loadOlderGroup(){if(!groupHasMore)return;const box=$("notes"),h=box.scrollHeight,t=box.scrollTop;try{await loadGroupPage(false);renderGroup();box.scrollTop=box.scrollHeight-h+t}catch(e){status("Could not load older group notes: "+e.message)}}
+async function loadOlderPersonal(){if(!personalHasMore)return;try{await loadPersonalPage(false);renderPersonal()}catch(e){status("Could not load older personal notes: "+e.message)}}
 async function refreshMessages(){
  const btn=$("refreshData");btn.disabled=true;btn.classList.add("is-refreshing");btn.setAttribute("aria-label","Refreshing");
  try{await loadAll();await loadDirect();renderAgentDashboard();status("All records refreshed.")}
@@ -280,6 +291,7 @@ function renderPersonal(){
  const rows=personal.filter(n=>!personalFilter||[n.body,team.find(t=>t.user_id===n.user_id)?.display_name||displayName(user.email)].join(" ").toLowerCase().includes(personalFilter));
  $("personalCount").textContent=rows.length;
  $("personalNotes").innerHTML=rows.length?rows.map(n=>{const owner=team.find(t=>t.user_id===n.user_id)?.display_name||(n.user_id===user.id?displayName(user.email):"CTR Member");return `<article class="note personal-note"><div class="note-top"><span class="note-author">${isAdmin()?esc(owner)+" · PERSONAL NOTE":"PRIVATE NOTE"}</span><span class="note-time">${esc(time(n.created_at))}${n.edited_at?" · edited":""}</span><button class="message-action" data-pedit="${n.id}">Edit</button>${isAdmin()? `<button class="delete-note" data-pdelete="${n.id}">Admin · Delete</button>`:""}</div><div class="note-body">${esc(n.body)}</div></article>`}).join(""):'<div class="empty-state"><h3>No matching personal notes</h3><p>Try clearing your search.</p></div>';
+ if(personalHasMore)$("personalNotes").insertAdjacentHTML("beforeend",'<button type="button" class="older-page-btn" data-load-older-personal>Load older personal notes</button>');
 }
 $("newFollowupBtn")?.addEventListener("click",()=>{const form=$("followupForm");form.classList.toggle("hidden");if(!form.classList.contains("hidden"))$("followupCustomer").focus();$("newFollowupBtn").textContent=form.classList.contains("hidden")?"＋ Create Follow-up":"− Close form";});
 function setAIPanelCollapsed(collapsed){
@@ -402,10 +414,8 @@ async function generateNotes(){
  finally{$("generateAI").disabled=false}
 }
 async function loadAll(){
- const [g,p,c,profiles]=await Promise.all([fetchAllRows(()=>db.from("ctr_group_notes").select("*").order("created_at",{ascending:true}).order("id",{ascending:true})),fetchAllRows(()=>db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false})),db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),db.from("ctr_profiles").select("user_id,chat_color")]);
- if(c.error||profiles.error)throw(c.error||profiles.error);
- const colors=Object.fromEntries((profiles.data||[]).map(x=>[x.user_id,x.chat_color]));group=g.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));personal=p;
- renderGroup(true);renderPersonal();renderColors(c.data?.chat_color||null);await loadFollowups();
+ const [c]=await Promise.all([db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),loadGroupPage(true),loadPersonalPage(true)]);
+ if(c.error)throw c.error;renderGroup(true);renderPersonal();renderColors(c.data?.chat_color||null);await loadFollowups();
 }
 
 function renderColors(chosen){
@@ -451,9 +461,9 @@ async function enableNotifications(){
 function realtime(){
  if(channel)db.removeChannel(channel);
  channel=db.channel("ctr-live-"+user.id)
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_group_notes"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("group",payload.new);try{const [data,profiles]=await Promise.all([fetchAllRows(()=>db.from("ctr_group_notes").select("*").order("created_at",{ascending:true}).order("id",{ascending:true})),db.from("ctr_profiles").select("user_id,chat_color")]);const colors=Object.fromEntries((profiles.data||[]).map(x=>[x.user_id,x.chat_color]));group=data.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup();renderAgentDashboard()}catch(e){status("Group history refresh failed: "+e.message)}})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_group_notes"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("group",payload.new);try{await loadGroupPage(true);renderGroup();renderAgentDashboard()}catch(e){status("Group history refresh failed: "+e.message)}})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_profiles"},async()=>{const [{data:mine},{data:profiles}]=await Promise.all([db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),db.from("ctr_profiles").select("user_id,chat_color")]);renderColors(mine?.chat_color||null);const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=group.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()})
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes"},async()=>{try{personal=await fetchAllRows(()=>db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false}));renderPersonal();renderAgentDashboard()}catch(e){status("Personal notes refresh failed: "+e.message)}})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes"},async()=>{try{await loadPersonalPage(true);renderPersonal();renderAgentDashboard()}catch(e){status("Personal notes refresh failed: "+e.message)}})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("direct",payload.new);await loadDirect()})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_followups"},loadFollowups)
  .subscribe(s=>{if(s==="SUBSCRIBED")status("Live sync connected · group updates appear automatically.");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")status("Live sync interrupted. Refresh to reconnect.")});
@@ -567,6 +577,9 @@ $("directForm").onsubmit=async e=>{
  }catch(err){status("Message failed: "+(err?.message||"Please try again."))}
  finally{send.disabled=false}
 };
+$("directNotes").addEventListener("click",e=>{if(e.target.closest("[data-load-older-direct]")){loadOlderDirect();return}});
+$("notes").addEventListener("click",e=>{if(e.target.closest("[data-load-older-group]"))loadOlderGroup()});
+$("personalNotes").addEventListener("click",e=>{if(e.target.closest("[data-load-older-personal]"))loadOlderPersonal()});
 $("directNotes").addEventListener("click",async e=>{const reply=e.target.closest("[data-dm-reply]");if(reply){const msg=direct.find(m=>String(m.id)===String(reply.dataset.dmReply));if(msg){const sender=team.find(p=>p.user_id===msg.sender_id)?.display_name||"CTR Member";$("directInput").value="↪ "+sender+": "+msg.body+"\n\n";$("directInput").focus()}return}const edit=e.target.closest("[data-dm-edit]");if(edit){const msg=direct.find(m=>String(m.id)===String(edit.dataset.dmEdit));if(!msg||msg.sender_id!==user.id)return;const body=prompt("Edit your message",msg.body||"");if(body===null)return;if(!body.trim()){status("Message cannot be empty.");return}edit.disabled=true;const {error}=await db.from("ctr_direct_messages").update({body:body.trim(),edited_at:new Date().toISOString()}).eq("id",msg.id).eq("sender_id",user.id);edit.disabled=false;if(error){status("Edit failed. Apply the direct-message edit permission migration in Supabase: "+error.message);return}await loadDirect();renderDirect();status("Message updated.");}});
 $("directInboxList").addEventListener("click",e=>{
  const target=e.target instanceof Element?e.target:null;if(!target)return;
@@ -616,7 +629,7 @@ $("personalForm").onsubmit=async e=>{
   if(error){status("Could not save personal note: "+error.message);return}
   $("personalInput").value="";
   let refreshFailed=false;
-  try{personal=await fetchAllRows(()=>db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false}))}
+  try{await loadPersonalPage(true)}
   catch(readError){refreshFailed=true;status("Note saved, but refresh failed: "+readError.message)}
   renderPersonal();
   if(!refreshFailed)status("Personal note saved.");
