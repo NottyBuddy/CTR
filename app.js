@@ -114,8 +114,8 @@ function globalSearch(query){
  add("Personal note","personal",personal,n=>[n.body,team.find(t=>t.user_id===n.user_id)?.display_name].join(" "),n=>team.find(t=>t.user_id===n.user_id)?.display_name||"Personal note",n=>n.created_at);
  add("Direct message","direct",direct,n=>[n.body,team.find(t=>t.user_id===n.sender_id)?.display_name,team.find(t=>t.user_id===n.recipient_id)?.display_name].join(" "),n=>team.find(t=>t.user_id===n.sender_id)?.display_name||"Direct message",n=>n.created_at);
  add("Follow-up","followups",followups,n=>[n.customer_name,n.phone,n.details,team.find(t=>t.user_id===n.user_id)?.display_name||displayName(team.find(t=>t.user_id===n.user_id)?.email)].join(" "),n=>n.customer_name,n=>n.callback_at);
- const limited=hits.slice(0,30);
- panel.innerHTML=limited.length?'<div class="global-search-head">'+hits.length+' matching record'+(hits.length===1?'':'s')+(hits.length>30?' · showing first 30':'')+'</div>'+limited.map(r=>`<button type="button" class="global-search-hit" data-search-view="${r.view}"><span><b>${esc(r.title)}</b><small>${esc(r.kind)} · ${esc(time(r.date))}</small></span><span class="global-hit-snippet">${esc(r.text.slice(0,150))}</span></button>`).join(""):'<div class="global-search-empty">No matching records found.</div>';
+ const limited=hits;
+ panel.innerHTML=limited.length?'<div class="global-search-head">'+hits.length+' matching record'+(hits.length===1?'':'s')+''+'</div>'+limited.map(r=>`<button type="button" class="global-search-hit" data-search-view="${r.view}"><span><b>${esc(r.title)}</b><small>${esc(r.kind)} · ${esc(time(r.date))}</small></span><span class="global-hit-snippet">${esc(r.text.slice(0,150))}</span></button>`).join(""):'<div class="global-search-empty">No matching records found.</div>';
  panel.classList.remove("hidden");
 }
 function directPairKey(a,b){return [a,b].sort().join("::")}
