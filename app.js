@@ -329,15 +329,26 @@ function smartDrafts(raw){
 }
 async function generateNotes(){
  const raw=$("aiInput").value.trim();
- if(!raw){$("aiStatus").textContent="Paste customer details first.";return}
- $("generateAI").disabled=true;$("aiStatus").textContent="Preparing both note formats…";
+ if(!raw){$("aiStatus").textContent="Paste customer call details first.";return}
+ $("generateAI").disabled=true;$("aiStatus").textContent="AI is understanding the call and preparing professional notes…";
  try{
-  generatedDrafts=smartDrafts(raw);
+  const {data:{session},error:sessionError}=await db.auth.getSession();
+  if(sessionError||!session?.access_token)throw new Error("Please sign in to CTR again.");
+  const response=await fetch("https://ctr-ai-assistant-notty-buddy.vercel.app/api/crm-assistant",{
+   method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
+   body:JSON.stringify({input:raw})
+  });
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(result.error||"AI assistant request failed.");
+  generatedDrafts={group:result.group||"",crm:result.crm||""};
   $("aiGroup").innerHTML=formatNoteHtml(generatedDrafts.group);
   $("aiCrm").innerHTML=formatNoteHtml(generatedDrafts.crm);
-  $("aiResults").classList.remove("hidden");
-  $("aiStatus").textContent="Both formats are ready. Review before sharing.";
- }catch(e){$("aiStatus").textContent="Could not prepare notes: "+e.message}
+  const questions=Array.isArray(result.questions)?result.questions:[];
+  const box=$("aiQuestions");
+  box.innerHTML=questions.length?'<strong>AI needs clarification</strong><ul>'+questions.map(q=>'<li>'+esc(q)+'</li>').join("")+'</ul>':'<strong>AI review</strong><p>No clarification required from the details provided.</p>';
+  box.classList.remove("hidden");$("aiResults").classList.remove("hidden");
+  $("aiStatus").textContent="AI drafts ready · Confidence: "+(result.confidence||"medium")+". Review before sharing.";
+ }catch(e){$("aiStatus").textContent="AI assistant: "+(e?.message||"Could not prepare notes.");}
  finally{$("generateAI").disabled=false}
 }
 async function loadAll(){
