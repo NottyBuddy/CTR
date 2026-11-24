@@ -1931,3 +1931,18 @@ html,body{height:100%;min-height:100%;overflow:hidden!important}
  .app-view .main-area>.workspace{margin:5px 0!important}
  .app-view .main-area>.app-footer{min-height:24px!important;padding:4px 7px!important;font-size:8px!important}
 }
+
+/* Admin-only agent-to-agent message audit in Agent Dashboard. */
+.agent-chat-audit{margin-top:22px;padding:18px 0;border-top:1px solid rgba(255,255,255,.14);min-width:0}
+.agent-audit-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
+.agent-audit-head h3{margin:0 0 5px;font-size:16px;color:#fff}
+.agent-audit-head p{margin:0;color:rgba(255,255,255,.62);font-size:11px}
+.agent-audit-head>span{font-size:11px;color:#ff9ab1;white-space:nowrap}
+#agentChatAuditSearch{width:100%;max-width:420px;margin:0 0 12px;padding:10px 14px;border-radius:20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#fff}
+.agent-audit-list{display:flex;flex-direction:column;gap:8px;max-height:560px;overflow-y:auto;overscroll-behavior:contain;padding-right:5px}
+.agent-audit-row{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.09);background:rgba(15,12,18,.34);border-radius:10px}
+.agent-audit-route{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.agent-audit-route strong{font-size:11px;color:#fff}
+.agent-audit-route>span{color:#f27b9b}
+.agent-audit-route time{margin-left:auto;font-size:10px;color:rgba(255,255,255,.52)}
+.agent-audit-row p{margin:9px 0 0;color:rgba(255,255,255,.82);font-size:12px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
