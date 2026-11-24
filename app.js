@@ -157,7 +157,7 @@ function openDirectConversation(id){
 }
 function renderDirect(){
  const admin=isAdmin(),people=team.filter(p=>p.user_id!==user.id);
- $("directAdminHint").classList.add("hidden");
+ $("directAdminHint")?.classList.add("hidden"); // The header is re-rendered; this optional element may no longer exist.
  $("directCount").textContent=direct.length;
  let allConversations=[];
  {  const pairs=new Map();
@@ -285,14 +285,42 @@ function showView(v){
 }
 let generatedDrafts={group:"",crm:""};
 function smartDrafts(raw){
- const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
- const heading=lines.find(x=>x.includes("|"))||"Customer Name | Contact Number";
- const assignedLine=lines.find(x=>/^assigned\s*to\s*[:|-]/i.test(x));
- const assigned=assignedLine?assignedLine.replace(/^assigned\s*to\s*[:|-]\s*/i,"").trim():"Not specified";
- const narrative=lines.filter(x=>x!==heading&&x!==assignedLine&&!/^customer\s*name\s*[:|-]/i.test(x)).join(" ");
- const text=narrative||"Connected with the customer. Further discussion and requirement details are yet to be updated.";
- const groupNote=heading+"\n\n"+text+"\n\nAssigned to: "+assigned;
- const crmNote=text+"\n\nAssigned to: "+assigned;
+ const source=String(raw||"").replace(/[,;]+/g," ").replace(/\\s+/g," ").trim();
+ const lower=source.toLowerCase();
+ const expand={
+  "cx":"customer","cust":"customer","cust.":"customer","req":"requested","bck":"back","cb":"callback","callbck":"callback",
+  "new constru":"new construction","constru":"construction","loc":"location","mum":"Mumbai","bom":"Mumbai","mh":"Maharashtra",
+  "del":"Delhi","blr":"Bengaluru","bangalore":"Bengaluru","hyd":"Hyderabad","chn":"Chennai","kol":"Kolkata","pune":"Pune",
+  "res":"residential","comm":"commercial","site":"site","int":"interested","not int":"not interested",
+  "w":"weeks","wk":"week","wks":"weeks","d":"days","dy":"day","m":"months","mo":"months","mos":"months"
+ };
+ const notes=[];
+ const duration=[...source.matchAll(/\\b(\\d+)\\s*(w|wk|wks|d|dy|m|mo|mos)\\b/gi)].map(m=>({n:m[1],unit:m[2].toLowerCase()}));
+ if(duration.length){
+  const parts=duration.map(x=>x.n+" "+({w:"weeks",wk:"weeks",wks:"weeks",d:"days",dy:"days",m:"months",mo:"months",mos:"months"}[x.unit]));
+  notes.push("Customer timeline: "+parts.join(" and ")+".");
+ }
+ const hasConstruction=/\\b(constru|construction|new constru)\\b/i.test(source);
+ if(hasConstruction)notes.push("Requirement: New construction.");
+ const locMatch=source.match(/\\bloc\\s+([a-z]+)(?:\\s+([a-z]{2}))?/i);
+ if(locMatch){
+  const city=expand[locMatch[1].toLowerCase()]||locMatch[1].replace(/^\\w/,c=>c.toUpperCase());
+  const state=locMatch[2]?expand[locMatch[2].toLowerCase()]||locMatch[2].toUpperCase():"";
+  notes.push("Location: "+[city,state].filter(Boolean).join(", ")+".");
+ }
+ const callback=/\\b(call\\s*bck|call\\s*back|callback|cb)\\b/i.test(source)||/\\breq\\s+call\\s*bck\\b/i.test(source);
+ if(callback)notes.push("Customer requested a callback. Next action: Call the customer back and discuss the requirement.");
+ const knownTokens=/\\b(clr|cx|req|bck|loc|constru|new|call|callback|cb|\\d+\\s*(?:w|wk|wks|d|dy|m|mo|mos)|mum|bom|mh)\\b/gi;
+ const remainder=source.replace(knownTokens," ").replace(/\\s+/g," ").trim();
+ if(remainder)notes.push("Additional details provided: "+remainder+".");
+ if(!notes.length){
+  const polished=source.charAt(0).toUpperCase()+source.slice(1);
+  notes.push(polished.endsWith(".")?polished:polished+".");
+ }
+ const ambiguous=/\\bclr\\b/i.test(source);
+ if(ambiguous)notes.push('Clarification required: "CLR" is retained as entered because its meaning is not clear from the shorthand.');
+ const crmNote=["CUSTOMER CALL NOTE",...notes,"","Status: Follow-up required."].join("\\n");
+ const groupNote=["CRM UPDATE | "+(notes.find(x=>x.startsWith("Requirement:"))||"Customer follow-up"),...notes,"","Assigned to: Not specified"].join("\\n");
  return {group:groupNote,crm:crmNote};
 }
 async function generateNotes(){
