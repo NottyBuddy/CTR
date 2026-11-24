@@ -171,7 +171,7 @@ function renderDirect(){
   const preview=c.last?(c.last.sender_id===user.id?"You: ":"")+(c.last.body||""):"Start a conversation";
   return `<button type="button" class="dm-conversation ${selectedId===c.otherId?"selected":""}" data-dm-key="${esc(c.key)}" data-dm-other="${esc(c.otherId)}"><span class="dm-avatar">${directAvatar(c.name,c.otherId)}</span><span class="dm-convo-copy"><strong>${esc(c.name)}</strong><span>${esc(preview)}</span></span><span class="dm-convo-meta"><time>${c.last?esc(time(c.last.created_at)):""}</time>${c.unread?`<b class="dm-unread-count">${c.unread}</b>`:""}</span></button>`;
  }).join(""):'<div class="empty-state"><h3>No matching contacts</h3><p>Try another name or message keyword.</p></div>';
- $("directInboxList").querySelectorAll(".dm-conversation[data-dm-other]").forEach(row=>row.addEventListener("click",e=>{e.preventDefault();openDirectConversation(row.dataset.dmOther)}));
+ // Conversation selection is handled by one stable delegated listener below.
  let active=allConversations.find(c=>c.otherId===selectedId);
  if(active){
   selectedDirectKey=active.key;
@@ -414,6 +414,12 @@ $("directForm").onsubmit=async e=>{
  }catch(err){status("Message failed: "+(err?.message||"Please try again."))}
  finally{send.disabled=false}
 };
+document.addEventListener("click",e=>{
+ const row=e.target.closest(".dm-conversation[data-dm-other]");
+ if(!row)return;
+ e.preventDefault();e.stopPropagation();
+ try{openDirectConversation(row.dataset.dmOther)}catch(err){console.error("Could not open direct conversation",err);status("Could not open this conversation: "+(err?.message||"Please refresh and try again."))}
+},true);
 document.addEventListener("click",async e=>{
  const cp=e.target.closest("[data-copy-phone]");if(cp){try{await navigator.clipboard.writeText(cp.dataset.copyPhone);status("Phone copied.")}catch{status("Clipboard unavailable.")}return}
  const cn=e.target.closest("[data-copy-note]");if(cn){const n=group.find(x=>x.id===cn.dataset.copyNote);if(n){try{await navigator.clipboard.writeText(n.body);status("CRM note copied.")}catch{status("Clipboard unavailable.")}}return}
