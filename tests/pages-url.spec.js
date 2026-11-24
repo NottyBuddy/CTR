@@ -12,7 +12,7 @@ test("GitHub Pages project URL responds on the canonical path", async ({ request
     try {
       const response = await request.get(url, { timeout: 20000 });
       const body = await response.text();
-      const title = (body.match(/<title[^>]*>(.*?)<\\/title>/i) || [])[1] || "";
+      const title = (body.match(new RegExp("<title[^>]*>(.*?)" + "</title>", "i")) || [])[1] || "";
       results.push({ url, status: response.status(), title });
     } catch (error) {
       results.push({ url, error: String(error) });
