@@ -2123,3 +2123,6 @@ html,body{height:100%;min-height:100%;overflow:hidden!important}
 .dm-thread-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .dm-message [data-dm-edit]{margin-top:6px}
 @media(max-width:760px){.dm-thread-actions .message-action{font-size:11px;padding:6px 8px}.dm-message [data-dm-edit]{min-height:32px}}
+
+/* AI history controls */
+.ai-history-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border-radius:11px;background:rgba(255,255,255,.035);margin:6px 0}.ai-history-open{display:flex;flex:1;min-width:0;flex-direction:column;align-items:flex-start;text-align:left;gap:4px;background:transparent;color:var(--text);padding:0}.ai-history-open strong{font-size:11px;overflow-wrap:anywhere}.ai-history-open small{font-size:9px;color:var(--muted)}.ai-history-actions{display:flex;gap:5px;flex-shrink:0}.ai-history-actions button{font-size:10px;padding:6px 8px;border-radius:8px}
