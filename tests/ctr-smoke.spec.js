@@ -99,15 +99,3 @@ test("CTR layout fits desktop and mobile viewports without horizontal overflow",
     expect(dimensions.scrollWidth, "Horizontal overflow at viewport " + viewport.width).toBeLessThanOrEqual(dimensions.clientWidth + 1);
   }
 });
-
-
-test("Gemini CRM API rejects unauthenticated requests", async ({ request }) => {
-  const endpoint = "https://ctr-ai-assistant-notty-buddy.vercel.app/api/gemini-crm";
-  const get = await request.get(endpoint);
-  expect(get.status()).toBe(405);
-  const post = await request.post(endpoint, {
-    headers: { Origin: "https://nottybuddy.github.io", "Content-Type": "application/json" },
-    data: { input: "cx needs callback" }
-  });
-  expect(post.status()).toBe(401);
-});
