@@ -64,7 +64,7 @@ function renderFollowups(){
 }
 async function loadFollowups(){const box=$("followupList");const r=await db.from("ctr_followups").select("*").order("callback_at").limit(500);if(r.error){followups=[];$("followupCount").textContent="!";box.innerHTML=`<div class="empty-state">Follow-ups are unavailable: ${esc(r.error.message)}. Run the CTR follow-up SQL in Supabase, then refresh.</div>`;return}followups=r.data||[];renderFollowups();renderAgentDashboard()}
 
-async function renderAgentDashboard(){
+async async function renderAgentDashboard(){
  const box=$("agentDashboard");if(!box||!user)return;
  const agents=(isAdmin()?team.filter(t=>String(t.email||"").toLowerCase()!==ADMIN_EMAIL):team.filter(t=>t.user_id===user.id));
  if(!isAdmin()&&!agents.length)agents.push({user_id:user.id,email:user.email,display_name:displayName(user.email)});
@@ -80,6 +80,14 @@ async function renderAgentDashboard(){
   return {name:t.display_name||displayName(t.email),notes:(g.count||0)+(p.count||0),pending:pending.count||0,completed:completed.count||0,error:g.error||p.error||pending.error||completed.error};
  }));
  box.innerHTML=rows.map(r=>`<article class="agent-card"><div class="agent-card-head"><strong>${esc(r.name)}</strong><span class="agent-card-label">AGENT ACTIVITY</span></div><div class="agent-metrics"><div><strong>${r.error?"—":r.notes}</strong><span>Total notes</span></div><div><strong>${r.error?"—":r.pending}</strong><span>Pending follow-ups</span></div><div><strong>${r.error?"—":r.completed}</strong><span>Completed callbacks</span></div></div>${r.error?'<small class="agent-metric-error">Some counts could not be loaded.</small>':""}</article>`).join("");
+ if(isAdmin()){
+  const {data:messages,error}=await db.from("ctr_direct_messages").select("id,sender_id,recipient_id,body,created_at").order("created_at",{ascending:false}).limit(500);
+  const logs=messages||[],name=id=>team.find(t=>t.user_id===id)?.display_name||"Unknown agent",panel=$("agentChatAudit");
+  if(panel){
+   panel.innerHTML=`<div class="agent-audit-head"><div><h3>Agent message activity</h3><p>Admin-only record of who messaged whom and what was sent.</p></div><span>${logs.length} messages</span></div><input id="agentChatAuditSearch" type="search" placeholder="Search agent, recipient or message…"><div class="agent-audit-list">${error?'<div class="empty-state">Could not load message activity: '+esc(error.message)+'</div>':logs.length?logs.map(m=>`<article class="agent-audit-row"><div class="agent-audit-route"><strong>${esc(name(m.sender_id))}</strong><span>→</span><strong>${esc(name(m.recipient_id))}</strong><time>${esc(time(m.created_at))}</time></div><p>${esc(m.body||"")}</p></article>`).join(""):'<div class="empty-state">No agent messages found.</div>'}</div>`;
+   panel.classList.remove("hidden");
+  }
+ }else $("agentChatAudit")?.classList.add("hidden");
 }
 function globalSearch(query){
  const panel=$("globalSearchResults");if(!panel)return;
@@ -125,20 +133,10 @@ function openDirectConversation(id){
 }
 function renderDirect(){
  const admin=isAdmin(),people=team.filter(p=>p.user_id!==user.id);
- $("directAdminHint").classList.toggle("hidden",!admin);
+ $("directAdminHint").classList.add("hidden");
  $("directCount").textContent=direct.length;
  let allConversations=[];
- if(admin){
-  // Admin inbox is contact-based: include every message involving the selected
-  // team member, even when the other participant is a different agent.
-  allConversations=people.map(person=>{
-   const messages=direct.filter(m=>m.sender_id===person.user_id||m.recipient_id===person.user_id)
-    .sort((x,y)=>new Date(x.created_at)-new Date(y.created_at));
-   const last=messages[messages.length-1]||null;
-   return {key:directPairKey(user.id,person.user_id),messages,last,otherId:person.user_id,
-    name:person.display_name||"CTR Member",email:person.email||"",unread:0};
-  }).sort((x,y)=>(new Date(y.last?.created_at||0)-new Date(x.last?.created_at||0))||x.name.localeCompare(y.name));
- }else{
+ if(false){/* Admin-wide monitoring is now in Agent Dashboard. */ }else{
   const pairs=new Map();
   direct.forEach(m=>{
    if(m.sender_id!==user.id&&m.recipient_id!==user.id)return;
