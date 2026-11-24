@@ -2018,3 +2018,24 @@ html,body{height:100%;min-height:100%;overflow:hidden!important}
     -webkit-backdrop-filter: blur(16px) !important;
   }
 }
+
+
+/* Restore the one-time unique chat-colour picker for members who have not chosen yet. */
+#groupView .color-picker-wrap {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 10px 14px !important;
+  margin: 10px 0 14px !important;
+  padding: 10px 12px !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,.025) !important;
+}
+#groupView .color-picker-wrap > span {
+  color: rgba(255,255,255,.78) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+#groupView .color-picker-wrap small {
+  flex-basis: 100% !important;
+}
