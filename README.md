@@ -32,3 +32,9 @@ Use dedicated test accounts. Do not put passwords in source files or commit them
 
 ## CRM drafting (zero-cost mode)
 The Group Notes page includes a browser-side shorthand organizer for preparing a group update and CRM entry. It does not call a paid AI API or require an API key. It is a deterministic helper, not a hosted ChatGPT model; ambiguous shorthand is flagged for human confirmation. The CRM drafting panel is shown only in Group Notes.
+
+
+## Gemini free-tier CRM assistant
+The Group Notes CRM assistant calls the authenticated Vercel API route `/api/gemini-crm`, which verifies the caller's Supabase session and calls Google's Gemini Developer API using `gemini-3.8-flash`. Configure `GEMINI_API_KEY` as an encrypted Vercel Production environment variable for project `ctr-ai-assistant`. Create the key in Google AI Studio using its Free tier only; do not enable Cloud Billing or upgrade the project. The application has no paid-provider fallback: HTTP 429 quota exhaustion is reported to the user and no paid request is made. Keep the key server-side and never put it in GitHub or browser JavaScript.
+
+Important data notice: Google's published Gemini API pricing page says Free-tier submitted content may be used to improve Google's products. Do not submit sensitive personal/customer information unless this data handling is acceptable to your organization. Free-tier availability and quotas can change; the app stops rather than billing when the free quota is exhausted.
