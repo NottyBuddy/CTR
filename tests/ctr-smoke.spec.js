@@ -10,7 +10,7 @@ test("CTR public page, assets and sign-in form load without JavaScript errors", 
   await expect(page.locator("#email")).toBeVisible();
   await expect(page.locator("#password")).toBeVisible();
   await expect(page.locator("#authSubmit")).toBeEnabled();
-  const assets = await Promise.all(["./styles.css?v=ctr-agent-activity-20261124-3", "./app.js?v=ctr-direct-stability-20261124-6"].map(url => request.get(new URL(url, "https://nottybuddy.github.io/CTR/").toString())));
+  const assets = await Promise.all(["./styles.css?v=ctr-agent-activity-20261124-3", "./app.js?v=ctr-direct-stability-20261124-7"].map(url => request.get(new URL(url, "https://nottybuddy.github.io/CTR/").toString())));
   expect(assets.map(x => x.status())).toEqual([200, 200]);
   expect(pageErrors, "Uncaught JavaScript errors").toEqual([]);
 });
