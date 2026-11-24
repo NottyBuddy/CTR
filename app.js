@@ -14,6 +14,7 @@ let db,user,group=[],personal=[],direct=[],team=[],channel;
 let groupFilter="",dateFilter="",personalFilter="",directFilter="",followupSearchFilter="";
 let selectedDirectKey="",selectedDirectRecipient="",directInboxFilter="all",mobileThreadOpen=false;
 let adminAuditAgentId="",adminAuditPairKey="",adminAuditSearch="",adminAuditDate="";
+let adminAuditData=null,adminAuditRequest=0;
 let dashboardFrom="",dashboardTo="";
 const seenKey=k=>"ctr_seen_"+k+"_"+(user?.id||"");const markSeen=k=>{if(user)localStorage.setItem(seenKey(k),new Date().toISOString());updateUnread()};let unreadSeq=0;function updateUnread(){if(!user||!db)return;const seq=++unreadSeq,gSeen=localStorage.getItem(seenKey("group"))||"1970-01-01T00:00:00.000Z",dSeen=localStorage.getItem(seenKey("direct"))||"1970-01-01T00:00:00.000Z";Promise.all([db.from("ctr_group_notes").select("id",{count:"exact",head:true}).neq("user_id",user.id).gt("created_at",gSeen),db.from("ctr_direct_messages").select("id",{count:"exact",head:true}).eq("recipient_id",user.id).gt("created_at",dSeen)]).then(([g,d])=>{if(seq!==unreadSeq)return;for(const [id,n] of [["groupUnread",g.count||0],["directUnread",d.count||0]]){const e=$(id);if(e){e.textContent=n;e.classList.toggle("hidden",!n)}}}).catch(()=>{})}
 const ADMIN_EMAIL="mahesh.s@hrhnext.com";
@@ -102,13 +103,26 @@ async function renderAgentDashboard(){
  }
  if(isAdmin())renderAdminChatExplorer();else $("agentChatAudit")?.classList.add("hidden");
 }
+async function loadAdminAuditData(agentId){
+ const request=++adminAuditRequest;
+ const [directRows,groupRows,personalRows,followupRows]=await Promise.all([
+  fetchAllRows(()=>db.from("ctr_direct_messages").select("*").or("sender_id.eq."+agentId+",recipient_id.eq."+agentId).order("created_at",{ascending:true}).order("id",{ascending:true})),
+  fetchAllRows(()=>db.from("ctr_group_notes").select("*").eq("user_id",agentId).order("created_at",{ascending:false})),
+  fetchAllRows(()=>db.from("ctr_personal_notes").select("*").eq("user_id",agentId).order("created_at",{ascending:false})),
+  fetchAllRows(()=>db.from("ctr_followups").select("*").eq("user_id",agentId).order("callback_at",{ascending:false}))
+ ]);
+ if(request!==adminAuditRequest)return;
+ adminAuditData={agentId,direct:directRows,group:groupRows,personal:personalRows,followups:followupRows};
+}
 function renderAdminChatExplorer(){
  const panel=$("agentChatAudit");if(!panel||!isAdmin())return;
  panel.classList.remove("hidden");
  const name=id=>team.find(t=>t.user_id===id)?.display_name||"CTR Member";
  const active=team.find(t=>t.user_id===adminAuditAgentId&&String(t.email||"").toLowerCase()!==ADMIN_EMAIL);
  if(!active){panel.innerHTML='<div class="agent-audit-empty">Select an agent card above to inspect their conversations and activity.</div>';return}
- const agentMessages=direct.filter(m=>m.sender_id===active.user_id||m.recipient_id===active.user_id);
+ const audit=adminAuditData?.agentId===active.user_id?adminAuditData:null;
+ if(!audit){panel.innerHTML='<div class="empty-state">Loading complete conversation history…</div>';loadAdminAuditData(active.user_id).then(()=>renderAdminChatExplorer()).catch(e=>{panel.innerHTML='<div class="empty-state">Admin history could not be loaded: '+esc(e.message)+'</div>'});return}
+ const agentMessages=audit.direct;
  const pairs=new Map();
  agentMessages.forEach(m=>{const other=m.sender_id===active.user_id?m.recipient_id:m.sender_id;const key=directPairKey(active.user_id,other);if(!pairs.has(key))pairs.set(key,{key,other,messages:[]});pairs.get(key).messages.push(m)});
  const conversations=[...pairs.values()].map(c=>{c.messages.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));c.last=c.messages[c.messages.length-1];return c}).sort((a,b)=>new Date(b.last.created_at)-new Date(a.last.created_at));
@@ -116,9 +130,9 @@ function renderAdminChatExplorer(){
  const filtered=conversations.filter(c=>[name(c.other),...c.messages.map(m=>m.body)].join(" ").toLowerCase().includes(q));
  const chosen=conversations.find(c=>c.key===adminAuditPairKey);
  const activities=[
-  ...group.filter(x=>x.user_id===active.user_id).map(x=>({kind:"Group Chat",body:x.body,created_at:x.created_at,status:x.is_pinned?"Pinned":""})),
-  ...personal.filter(x=>x.user_id===active.user_id).map(x=>({kind:"Personal Note",body:x.body,created_at:x.created_at,status:"Private note"})),
-  ...followups.filter(x=>x.user_id===active.user_id).map(x=>({kind:"Follow-up",body:[x.customer_name,x.phone,x.details].filter(Boolean).join(" · "),created_at:x.created_at||x.callback_at,status:x.status==="completed"?"Completed":"Pending"}))
+  ...audit.group.map(x=>({kind:"Group Chat",body:x.body,created_at:x.created_at,status:x.is_pinned?"Pinned":""})),
+  ...audit.personal.map(x=>({kind:"Personal Note",body:x.body,created_at:x.created_at,status:"Private note"})),
+  ...audit.followups.map(x=>({kind:"Follow-up",body:[x.customer_name,x.phone,x.details].filter(Boolean).join(" · "),created_at:x.created_at||x.callback_at,status:x.status==="completed"?"Completed":"Pending"}))
  ].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
  const activityRows=activities.filter(x=>!q||[x.kind,x.body,x.status].join(" ").toLowerCase().includes(q)).filter(x=>!adminAuditDate||new Date(x.created_at).toLocaleDateString("en-CA")===adminAuditDate);
  panel.innerHTML=`<div class="agent-audit-head"><div><div class="eyebrow">ADMIN ONLY · COMPLETE TEAM RECORDS</div><h3>${esc(active.display_name||name(active.user_id))} — Activity & conversations</h3><p>${agentMessages.length} direct messages · ${conversations.length} conversations · ${activities.length} activity records. Full history is loaded from the database.</p></div><button type="button" class="message-action" data-audit-back-agents>All agents</button></div>
@@ -504,11 +518,11 @@ async function exportAllCrmData(){
 function realtime(){
  if(channel)db.removeChannel(channel);
  channel=db.channel("ctr-live-"+user.id)
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_group_notes"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("group",payload.new);try{await loadGroupPage(true);renderGroup();renderAgentDashboard()}catch(e){status("Group history refresh failed: "+e.message)}})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_group_notes"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("group",payload.new);adminAuditData=null;try{await loadGroupPage(true);renderGroup();renderAgentDashboard()}catch(e){status("Group history refresh failed: "+e.message)}})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_profiles"},async()=>{const [{data:mine},{data:profiles}]=await Promise.all([db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),db.from("ctr_profiles").select("user_id,chat_color")]);renderColors(mine?.chat_color||null);const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=group.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()})
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes"},async()=>{try{await loadPersonalPage(true);renderPersonal();renderAgentDashboard()}catch(e){status("Personal notes refresh failed: "+e.message)}})
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("direct",payload.new);await loadDirect()})
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_followups"},loadFollowups)
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes"},async()=>{adminAuditData=null;try{await loadPersonalPage(true);renderPersonal();renderAgentDashboard()}catch(e){status("Personal notes refresh failed: "+e.message)}})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async(payload)=>{adminAuditData=null;if(payload.eventType==="INSERT")sendMessageNotification("direct",payload.new);await loadDirect()})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_followups"},async()=>{adminAuditData=null;await loadFollowups();if(isAdmin()&&adminAuditAgentId)renderAdminChatExplorer()})
  .on("postgres_changes",{event:"INSERT",schema:"public",table:"ctr_notifications",filter:"recipient_id=eq."+user.id},async(payload)=>{notifications=[payload.new,...notifications.filter(n=>n.id!==payload.new.id)].slice(0,50);notificationUnread=notifications.filter(n=>!n.read_at).length;renderNotificationCentre()})
  .on("postgres_changes",{event:"UPDATE",schema:"public",table:"ctr_notifications",filter:"recipient_id=eq."+user.id},loadNotifications)
  .subscribe(s=>{if(s==="SUBSCRIBED")status("Live sync connected · group updates appear automatically.");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")status("Live sync interrupted. Refresh to reconnect.")});
