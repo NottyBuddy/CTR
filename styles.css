@@ -2039,3 +2039,10 @@ html,body{height:100%;min-height:100%;overflow:hidden!important}
 #groupView .color-picker-wrap small {
   flex-basis: 100% !important;
 }
+
+/* AI assistant clarification panel */
+.ai-questions{margin:12px 0;padding:14px 16px;border:1px solid rgba(244,95,122,.24);border-radius:14px;background:rgba(26,18,31,.72);color:var(--text,#f5edf4);font-size:13px;line-height:1.55}
+.ai-questions strong{display:block;margin-bottom:6px;color:#ff9db2}
+.ai-questions p{margin:0;color:var(--muted,#b9aeb9)}
+.ai-questions ul{margin:6px 0 0;padding-left:20px}
+.ai-questions li+li{margin-top:5px}
