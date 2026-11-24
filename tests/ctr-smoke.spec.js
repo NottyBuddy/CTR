@@ -32,6 +32,11 @@ test("authenticated agent can open the Direct Chat workspace", async ({ page }) 
   await expect(page.locator("#directInput")).toBeDisabled();
   await expect(page.locator("#dmNewRecipient")).toBeVisible();
   await expect(page.locator("#directInboxList")).not.toContainText("Chats could not be loaded", { timeout: 20000 });
+  const firstContact = page.locator("#directInboxList button.dm-conversation").first();
+  await expect(firstContact).toBeVisible({ timeout: 20000 });
+  await firstContact.click();
+  await expect(page.locator("#directInput")).toBeEnabled();
+  await expect(page.locator("#directForm button[type=submit]")).toBeEnabled();
 });
 
 test("authenticated admin can open the Agents Dashboard", async ({ page }) => {
@@ -48,4 +53,12 @@ test("authenticated admin can open the Agents Dashboard", async ({ page }) => {
   await page.locator('[data-view="dashboard"]').click();
   await expect(page.locator("#dashboardView")).toBeVisible();
   await expect(page.locator("#agentDashboard")).toBeVisible();
+});
+
+test("CTR layout fits a mobile viewport without horizontal overflow", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await expect(page.locator("#authView")).toBeVisible();
+  const dimensions = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }));
+  expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1);
 });
