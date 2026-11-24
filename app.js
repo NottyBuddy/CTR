@@ -469,8 +469,7 @@ $("personalForm").onsubmit=async e=>{
   const {error}=await db.from("ctr_personal_notes").insert({user_id:user.id,body});
   if(error){status("Could not save personal note: "+error.message);return}
   $("personalInput").value="";
-  const {data, error:readError}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500);
-  if(!readError)personal=data||[];
+  try{personal=await fetchAllRows(()=>db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false}))}catch(readError){status("Note saved, but refresh failed: "+readError.message)}
   renderPersonal();
   status(readError?"Personal note saved. Refresh if it does not appear yet.":"Personal note saved.");
  }catch(err){status("Could not save personal note: "+(err?.message||"Please try again."))}
