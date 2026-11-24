@@ -1669,3 +1669,7 @@ html body #authView #authSubmit{cursor:pointer;touch-action:manipulation}
 #dmNewRecipient{display:none!important}
 .dm-list-tools #directSearch{display:block!important;width:100%;margin:0!important}
 .dm-list-tools{gap:0}
+
+
+/* Ensure the Direct Messages view respects view switching. */
+.app-view .main-area .direct-inbox-view.hidden{display:none!important}
