@@ -2210,7 +2210,7 @@ button:active:not(:disabled){transform:scale(.975)}
 #themeToggle{font-size:17px;line-height:1}
 @media(max-width:760px){.notification-panel{right:8px;top:calc(100% + 7px);width:min(390px,calc(100vw - 16px))}.dashboard-filters #exportCrmData{margin-left:0}}
 /* Optional light workspace theme. The Samurai logo and existing page background asset remain unchanged. */
-body.theme-light{color-scheme:light;--text:#251b20;--muted:#766b72;--panel:rgba(255,255,255,.92);--panel2:rgba(248,243,246,.96);--bg:#f5f1f3;background:radial-gradient(ellipse at 8% 0%,rgba(210,65,101,.12),transparent 38%),radial-gradient(ellipse at 96% 68%,rgba(255,25,75,.07),transparent 34%),linear-gradient(145deg,#f7f4f5,#eee7eb 55%,#f8f3f5);color:#251b20}
+body.theme-light{color-scheme:light;--text:#251b20;--muted:#766b72;--panel:rgba(255,255,255,.92);--panel2:rgba(248,243,246,.96);--bg:#f5f1f3;color:#251b20}
 body.theme-light:before{opacity:.25}
 body.theme-light .glass,body.theme-light .chat,body.theme-light .topbar,body.theme-light .right-panel,body.theme-light .auth-card{background:rgba(255,255,255,.83);border-color:rgba(80,45,58,.12);box-shadow:0 18px 50px rgba(65,35,48,.09)}
 body.theme-light .brand-name,body.theme-light h1,body.theme-light h2,body.theme-light h3,body.theme-light strong,body.theme-light .note-author,body.theme-light .dm-thread-header strong{color:#2b2025}
