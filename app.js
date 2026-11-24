@@ -458,6 +458,49 @@ async function enableNotifications(){
  const p=await Notification.requestPermission();updateNotificationButton();
  status(p==="granted"?"New-message notifications enabled.":"Notification permission was not granted.");
 }
+function renderNotificationCentre(){
+ const list=$("notificationList");if(!list)return;
+ const badge=$("notificationBadge");if(badge){badge.textContent=notificationUnread>99?"99+":String(notificationUnread);badge.classList.toggle("hidden",!notificationUnread)}
+ $("notificationSummary").textContent=notificationUnread?notificationUnread+" unread updates":"You're all caught up";
+ list.innerHTML=notifications.length?notifications.map(n=>'<button type="button" class="notification-item '+(!n.read_at?"unread":"")+'" data-notification-id="'+esc(n.id)+'" data-notification-kind="'+esc(n.kind)+'" data-notification-actor="'+esc(n.actor_id||"")+'"><span class="notification-item-dot"></span><span class="notification-item-copy"><strong>'+esc(n.title||"New update")+'</strong><small>'+esc(n.body||"You have a new CTR update.")+'</small><time>'+esc(time(n.created_at))+'</time></span></button>').join(""):'<div class="empty-state">No notifications yet. New group updates and direct messages will appear here.</div>';
+}
+async function loadNotifications(){
+ if(!user||notificationLoading)return;notificationLoading=true;
+ try{const {data,error}=await db.from("ctr_notifications").select("*").order("created_at",{ascending:false}).limit(50);if(error)throw error;notifications=data||[];notificationUnread=notifications.filter(n=>!n.read_at).length;renderNotificationCentre()}
+ catch(e){const list=$("notificationList");if(list)list.innerHTML='<div class="empty-state">Notification centre needs its database migration. '+esc(e.message)+'</div>';console.warn("CTR notification centre unavailable",e)}
+ finally{notificationLoading=false}
+}
+async function markAllNotificationsRead(){
+ if(!user||!notificationUnread)return;
+ const {error}=await db.from("ctr_notifications").update({read_at:new Date().toISOString()}).eq("recipient_id",user.id).is("read_at",null);
+ if(error){status("Could not mark notifications read: "+error.message);return}
+ notifications=notifications.map(n=>({...n,read_at:n.read_at||new Date().toISOString()}));notificationUnread=0;renderNotificationCentre();
+}
+async function openNotification(item){
+ if(!item)return;
+ if(!item.read_at){const {error}=await db.from("ctr_notifications").update({read_at:new Date().toISOString()}).eq("id",item.id).eq("recipient_id",user.id);if(!error){item.read_at=new Date().toISOString();notificationUnread=Math.max(0,notificationUnread-1);renderNotificationCentre()}}
+ $("notificationPanel").classList.add("hidden");$("toggleNotificationPanel").setAttribute("aria-expanded","false");
+ if(item.kind==="direct"&&item.actor_id){await loadDirect();openDirectConversation(item.actor_id);showView("direct")}
+ else if(item.kind==="followup"){showView("followups")}
+ else{showView("group");if(item.reference_id){const card=document.querySelector('[data-note-id="'+CSS.escape(item.reference_id)+'"]');card?.scrollIntoView({behavior:"smooth",block:"center"})}}
+}
+async function exportAllCrmData(){
+ if(!isAdmin()){status("Only CTR Admin can export CRM data.");return}
+ const button=$("exportCrmData");button.disabled=true;button.textContent="Preparing export…";
+ try{
+  const [g,p,d,f]=await Promise.all([
+   fetchAllRows(()=>db.from("ctr_group_notes").select("*").order("created_at",{ascending:true})),
+   fetchAllRows(()=>db.from("ctr_personal_notes").select("*").order("created_at",{ascending:true})),
+   fetchAllRows(()=>db.from("ctr_direct_messages").select("*").order("created_at",{ascending:true})),
+   fetchAllRows(()=>db.from("ctr_followups").select("*").order("callback_at",{ascending:true}))
+  ]);
+  const rows=[...g.map(x=>({record_type:"group_note",...x})),...p.map(x=>({record_type:"personal_note",...x})),...d.map(x=>({record_type:"direct_message",...x})),...f.map(x=>({record_type:"followup",...x}))];
+  downloadCsv("CTR-admin-export-"+new Date().toISOString().slice(0,10)+".csv",rows);
+  status("Admin export prepared: "+rows.length+" CRM records.");
+ }catch(e){status("Export failed. Check Admin database permissions: "+e.message)}
+ finally{button.disabled=false;button.textContent="Export CRM data (Admin)"}
+}
+
 function realtime(){
  if(channel)db.removeChannel(channel);
  channel=db.channel("ctr-live-"+user.id)
@@ -466,12 +509,16 @@ function realtime(){
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes"},async()=>{try{await loadPersonalPage(true);renderPersonal();renderAgentDashboard()}catch(e){status("Personal notes refresh failed: "+e.message)}})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("direct",payload.new);await loadDirect()})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_followups"},loadFollowups)
+ .on("postgres_changes",{event:"INSERT",schema:"public",table:"ctr_notifications",filter:"recipient_id=eq."+user.id},async(payload)=>{notifications=[payload.new,...notifications.filter(n=>n.id!==payload.new.id)].slice(0,50);notificationUnread=notifications.filter(n=>!n.read_at).length;renderNotificationCentre();sendMessageNotification(payload.new.kind==="group"?"group":"direct",{id:payload.new.id,body:payload.new.body,created_at:payload.new.created_at,recipient_id:user.id,sender_id:payload.new.actor_id,author_email:team.find(t=>t.user_id===payload.new.actor_id)?.email})})
+ .on("postgres_changes",{event:"UPDATE",schema:"public",table:"ctr_notifications",filter:"recipient_id=eq."+user.id},loadNotifications)
  .subscribe(s=>{if(s==="SUBSCRIBED")status("Live sync connected · group updates appear automatically.");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")status("Live sync interrupted. Refresh to reconnect.")});
 }
 async function enter(u){
  user=u;$("authView").classList.add("hidden");$("appView").classList.remove("hidden");setupAccountSettings();
+ setTheme(localStorage.getItem("ctr_theme_"+u.id)||"dark");
+ $("exportCrmData")?.classList.toggle("hidden",!isAdmin());
  const name=displayName(u.email);$("userEmail").textContent=name;updateNotificationButton();
- try{await loadAll();realtime();await loadDirect()}catch(e){status("Database error: "+(e.message||"Unable to load records."))}
+ try{await loadAll();realtime();await loadDirect();await loadNotifications()}catch(e){status("Database error: "+(e.message||"Unable to load records."))}
 }
 async function ensureSupabaseLibrary(){
  if(window.supabase?.createClient)return true;
@@ -535,7 +582,13 @@ $("aiHistoryList")?.addEventListener("click",e=>{const edit=e.target.closest("[d
   if(item)restoreAIHistory(item.dataset.aiHistory)
  });
 $("clearAIHistory")?.addEventListener("click",()=>{if(!user)return;if(!confirm("Clear saved CRM assistant history from this browser for this account?"))return;localStorage.removeItem(aiHistoryKey());renderAIHistory();$("aiStatus").textContent="Saved draft history cleared from this device."});
-$("refreshData").onclick=refreshMessages;$("enableNotifications")?.addEventListener("click",enableNotifications);
+$("refreshData").onclick=refreshMessages;
+$("enableNotifications")?.addEventListener("click",enableNotifications);
+$("toggleNotificationPanel")?.addEventListener("click",async()=>{const panel=$("notificationPanel"),opening=panel.classList.contains("hidden");panel.classList.toggle("hidden",!opening);$("toggleNotificationPanel").setAttribute("aria-expanded",String(opening));if(opening)await loadNotifications()});
+$("markAllNotifications")?.addEventListener("click",markAllNotificationsRead);
+$("notificationList")?.addEventListener("click",e=>{const row=e.target.closest("[data-notification-id]");if(row){const item=notifications.find(n=>n.id===row.dataset.notificationId);openNotification(item)}});
+$("themeToggle")?.addEventListener("click",()=>setTheme(document.body.classList.contains("theme-light")?"dark":"light"));
+$("exportCrmData")?.addEventListener("click",()=>{if(isAdmin()&&confirm("Export all CRM records, including personal notes, direct messages and customer contact details, to a CSV file on this device? Keep the file private."))exportAllCrmData()});
 $("directRecipient").onchange=()=>{selectedDirectRecipient=$("directRecipient").value||"";selectedDirectKey=selectedDirectRecipient?directPairKey(user.id,selectedDirectRecipient):"";renderDirect()};
 $("dmNewRecipient").addEventListener("change",e=>{const id=e.target.value;if(!id)return;openDirectConversation(id);$("directInput").focus()});
 $("dmThreadHeader").addEventListener("click",()=>{if(window.matchMedia("(max-width:760px)").matches){mobileThreadOpen=false;$("directView").querySelector(".dm-inbox").classList.remove("mobile-thread-open")}});
