@@ -60,6 +60,7 @@ test("authenticated agent can use all workspace sections and open Direct Chat", 
     await expect(page.locator(selector)).toBeVisible();
   }
 
+  await page.locator('[data-view="direct"]').click();
   await expect(page.locator("#directInboxList")).toBeVisible();
   await expect(page.locator("#directForm")).toBeVisible();
   await expect(page.locator("#dmNewRecipient")).toBeAttached();
@@ -69,7 +70,9 @@ test("authenticated agent can use all workspace sections and open Direct Chat", 
   await firstContact.click();
   await expect(page.locator("#directInput")).toBeEnabled();
   await expect(page.locator("#directForm button[type=submit]")).toBeEnabled();
+  await page.locator('[data-view="dashboard"]').click();
   await expect(page.locator("#exportCrmData")).toBeHidden();
+  await page.locator('[data-view="direct"]').click();
   await page.locator("#themeToggle").click();
   await expect(page.locator("body")).toHaveClass(/theme-light/);
   await page.locator("#themeToggle").click();
