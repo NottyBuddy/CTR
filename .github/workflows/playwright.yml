@@ -1,7 +1,9 @@
 name: CTR Playwright checks
 
 on:
-  push:
+  workflow_run:
+    workflows: ["pages build and deployment"]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -9,20 +11,35 @@ permissions:
   contents: read
 
 concurrency:
-  group: ctr-playwright-${{ github.ref }}
+  group: ctr-playwright-main
   cancel-in-progress: true
 
 jobs:
   browser-tests:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
-      - name: Check out repository
+      - name: Check out deployed commit
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Wait for GitHub Pages to serve this build
+        run: |
+          for attempt in $(seq 1 24); do
+            if curl --fail --silent --show-error https://nottybuddy.github.io/CTR/ -o /tmp/ctr-home.html 2>/dev/null && grep -q "CTR — Calling Team Records" /tmp/ctr-home.html; then
+              echo "CTR page is live."
+              exit 0
+            fi
+            echo "Pages not ready yet (attempt $attempt/24); retrying in 15 seconds."
+            sleep 15
+          done
+          echo "::error::GitHub Pages did not serve the expected CTR index.html after 6 minutes."
+          exit 1
       - name: Install Playwright
         run: npm install --no-save @playwright/test
       - name: Install Chromium
