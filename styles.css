@@ -1971,3 +1971,17 @@ html,body{height:100%;min-height:100%;overflow:hidden!important}
 .agent-audit-message-meta{display:flex;align-items:center;gap:12px;justify-content:space-between}.agent-audit-message-meta strong{font-size:10px;color:#ffb2c3}.agent-audit-message-meta time{font-size:9px;color:rgba(255,255,255,.48)}
 .agent-audit-message p{margin:7px 0 0;font-size:12px;line-height:1.55;color:rgba(255,255,255,.88);white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:600px){.agent-audit-controls{flex-direction:column}.agent-audit-thread-head{align-items:flex-start;flex-wrap:wrap}.agent-audit-message{max-width:94%}.agent-audit-conversation-meta{font-size:8px}.agent-audit-card-foot{font-size:9px}}
+
+/* Agent activity archive: notes, private notes and follow-up records. */
+.agent-audit-section,.agent-audit-activity{margin-top:16px}
+.agent-audit-section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
+.agent-audit-section-title h4{margin:0;color:#fff;font-size:13px;font-weight:650}
+.agent-audit-section-title span{font-size:10px;color:rgba(255,255,255,.58)}
+.agent-audit-activity-list{display:flex;flex-direction:column;gap:8px;max-height:520px;overflow:auto;overscroll-behavior:contain}
+.agent-audit-activity-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:12px 14px;border:1px solid rgba(255,255,255,.09);border-radius:11px;background:rgba(16,14,20,.4)}
+.agent-audit-activity-item>div{display:flex;align-items:center;gap:8px;min-width:0}
+.agent-audit-activity-item strong{font-size:11px;color:#ffb2c3}
+.agent-audit-activity-item small{font-size:9px;color:rgba(255,255,255,.56)}
+.agent-audit-activity-item time{font-size:9px;color:rgba(255,255,255,.5);white-space:nowrap}
+.agent-audit-activity-item p{grid-column:1/-1;margin:2px 0 0;color:rgba(255,255,255,.84);font-size:11px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:600px){.agent-audit-activity-item{grid-template-columns:1fr}.agent-audit-activity-item time{grid-row:2}.agent-audit-activity-item p{grid-column:1}}
