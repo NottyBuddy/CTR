@@ -139,6 +139,7 @@ function openDirectConversation(id){
  if(!person){status("This contact is not available in the team directory. Refresh and try again.");return}
  selectedDirectRecipient=String(person.user_id);
  selectedDirectKey=directPairKey(user.id,person.user_id);
+ $("directRecipient").value=selectedDirectRecipient;
  $("directRecipient").value=person.user_id;
  directFilter="";
  directInboxFilter="all";
@@ -223,17 +224,39 @@ function renderDirect(){
  }
  $("directView").querySelector(".dm-inbox")?.classList.toggle("mobile-thread-open",mobileThreadOpen&&!!active);
 }
+let directLoadSequence=0;
 async function loadDirect(){
- const {data:people,error:peopleError}=await db.from("ctr_team_directory").select("user_id,email,display_name").order("display_name");
- if(peopleError){status("Could not load team contacts: "+peopleError.message);return}
- team=people||[];
- if(isAdmin()){const logs=await fetchAllRows(()=>db.from("ctr_moderation_log").select("*").order("deleted_at",{ascending:false}).order("id",{ascending:false}));$("moderationPanel")?.classList.remove("hidden");$("moderationLog").innerHTML=logs.map(x=>`<article class="note"><div class="note-top"><span class="note-author">${esc(x.deleted_by_email||"Admin")} · ${esc(x.table_name)}</span><span class="note-time">${esc(time(x.deleted_at))}</span></div><div class="note-body">${esc(x.original_body||"")}</div></article>`).join("")||'<div class="empty-state">No deletions recorded.</div>'}else $("moderationPanel")?.classList.add("hidden");
- const sel=$("directRecipient"),old=selectedDirectRecipient||sel.value,newSel=$("dmNewRecipient"),newOld=newSel.value;
- sel.innerHTML='<option value="">'+(isAdmin()?'All conversations (admin view)':'Choose a team member…')+'</option>'+team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join("");
- if(old&&team.some(p=>p.user_id===old)){sel.value=old;selectedDirectRecipient=old}
- newSel.innerHTML='<option value="">＋ New message</option>'+team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join("");if(newOld&&team.some(p=>p.user_id===newOld))newSel.value=newOld;
- direct=await fetchAllRows(()=>db.from("ctr_direct_messages").select("*").order("created_at",{ascending:true}).order("id",{ascending:true}));
- renderDirect();renderPersonal();updateUnread();if(isAdmin())renderAgentDashboard();
+ const sequence=++directLoadSequence;
+ const inbox=$("directInboxList");
+ if(!team.length&&inbox)inbox.innerHTML='<div class="empty-state">Loading team contacts…</div>';
+ try{
+  const {data:people,error:peopleError}=await db.from("ctr_team_directory").select("user_id,email,display_name").order("display_name");
+  if(sequence!==directLoadSequence)return;
+  if(peopleError)throw new Error("Team contacts: "+peopleError.message);
+  team=people||[];
+  if(isAdmin()){
+   const logs=await fetchAllRows(()=>db.from("ctr_moderation_log").select("*").order("deleted_at",{ascending:false}).order("id",{ascending:false}));
+   if(sequence!==directLoadSequence)return;
+   $("moderationPanel")?.classList.remove("hidden");
+   $("moderationLog").innerHTML=logs.map(x=>`<article class="note"><div class="note-top"><span class="note-author">${esc(x.deleted_by_email||"Admin")} · ${esc(x.table_name)}</span><span class="note-time">${esc(time(x.deleted_at))}</span></div><div class="note-body">${esc(x.original_body||"")}</div></article>`).join("")||'<div class="empty-state">No deletions recorded.</div>';
+  }else $("moderationPanel")?.classList.add("hidden");
+  const sel=$("directRecipient"),old=selectedDirectRecipient||sel.value,newSel=$("dmNewRecipient"),newOld=newSel.value;
+  sel.innerHTML='<option value="">Choose a team member…</option>'+team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join("");
+  if(old&&team.some(p=>p.user_id===old)){sel.value=old;selectedDirectRecipient=old}else{selectedDirectRecipient="";sel.value=""}
+  newSel.innerHTML='<option value="">＋ New message</option>'+team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join("");
+  if(newOld&&team.some(p=>p.user_id===newOld))newSel.value=newOld;
+  let query=db.from("ctr_direct_messages").select("*").order("created_at",{ascending:true}).order("id",{ascending:true});
+  if(!isAdmin())query=query.or("sender_id.eq."+user.id+",recipient_id.eq."+user.id);
+  direct=await fetchAllRows(()=>query);
+  if(sequence!==directLoadSequence)return;
+  renderDirect();renderPersonal();updateUnread();if(isAdmin())renderAgentDashboard();
+  if(inbox)inbox.setAttribute("aria-busy","false");
+ }catch(error){
+  if(sequence!==directLoadSequence)return;
+  console.error("CTR Direct Chat load failed",error);
+  if(inbox){inbox.setAttribute("aria-busy","false");inbox.innerHTML='<div class="empty-state"><h3>Chats could not be loaded</h3><p>'+esc(error?.message||"Check your connection and refresh.")+'</p><button class="refresh-btn" type="button" data-direct-retry>Retry loading</button></div>';}
+  status("Direct Chat error: "+(error?.message||"Please refresh and try again."));
+ }
 }
 
 async function refreshMessages(){
@@ -423,21 +446,26 @@ $("directForm").onsubmit=async e=>{
   const {error}=await db.from("ctr_direct_messages").insert({sender_id:user.id,recipient_id:recipient,sender_email:user.email,body});
   if(error){status("Message could not be sent: "+error.message);return}
   $("directInput").value="";
+  selectedDirectRecipient=String(recipient);
   selectedDirectKey=directPairKey(user.id,recipient);
-  await loadDirect();
   $("directRecipient").value=recipient;
-  renderDirect();
+  await loadDirect();
+  if(selectedDirectRecipient===String(recipient))renderDirect();
   markSeen("direct");
   status("Message sent.");
  }catch(err){status("Message failed: "+(err?.message||"Please try again."))}
  finally{send.disabled=false}
 };
 $("directInboxList").addEventListener("click",e=>{
- const row=e.target instanceof Element?e.target.closest("button.dm-conversation[data-dm-other]"):null;
+ const target=e.target instanceof Element?e.target:null;if(!target)return;
+ if(target.closest("[data-direct-retry]")){loadDirect();return}
+ const row=target.closest("button.dm-conversation[data-dm-other]");
  if(!row||!$("directInboxList").contains(row))return;
- e.preventDefault();const id=row.dataset.dmOther;if(!id)return;
- try{openDirectConversation(id)}catch(err){console.error("Could not open direct conversation",err);status("Could not open this conversation: "+(err?.message||"Please refresh and try again."))}
-});;
+ e.preventDefault();
+ const id=row.dataset.dmOther;
+ if(!id)return;
+ openDirectConversation(id);
+});
 document.addEventListener("click",async e=>{
  const cp=e.target.closest("[data-copy-phone]");if(cp){try{await navigator.clipboard.writeText(cp.dataset.copyPhone);status("Phone copied.")}catch{status("Clipboard unavailable.")}return}
  const cn=e.target.closest("[data-copy-note]");if(cn){const n=group.find(x=>x.id===cn.dataset.copyNote);if(n){try{await navigator.clipboard.writeText(n.body);status("CRM note copied.")}catch{status("Clipboard unavailable.")}}return}
