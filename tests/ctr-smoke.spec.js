@@ -89,6 +89,20 @@ test("authenticated agent can use all workspace sections and open Direct Chat", 
   expect(pageErrors, "Uncaught JavaScript errors during workspace navigation").toEqual([]);
 });
 
+test("view switching hides inactive notes and keeps CRM assistant on Group Notes only", async ({ page }) => {
+  await page.goto("./");
+  const group = page.locator("#groupView");
+  await expect(group).toBeVisible();
+  for (const view of ["personal", "direct", "followups", "dashboard"]) {
+    await page.locator('[data-view="' + view + '"]').click();
+    await expect(group).toBeHidden();
+    await expect(page.locator("#" + view + "View")).toBeVisible();
+  }
+  await page.locator('[data-view="group"]').click();
+  await expect(group).toBeVisible();
+  await expect(page.locator("#crmGenerator")).toBeVisible();
+});
+
 test("authenticated admin can inspect agent conversations and activity", async ({ page }) => {
   const email = process.env.CTR_ADMIN_TEST_EMAIL;
   const password = process.env.CTR_ADMIN_TEST_PASSWORD;
