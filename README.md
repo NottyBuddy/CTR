@@ -1,21 +1,30 @@
 # CTR — Calling Team Records
 
-A two-space CRM notes workspace:
-- **Group Notes:** shared timeline, persisted in Supabase and synced live across signed-in users.
-- **Personal Notes:** private open-call, callback and follow-up notes. RLS ensures each user can access only their own notes.
-- **Fixed chat colour:** each user chooses one colour once. Database uniqueness prevents two users taking the same colour; no update policy allows changing it later.
+CTR is a private team CRM workspace deployed at https://nottybuddy.github.io/CTR/.
 
-## Configure Supabase
-1. Create a Supabase project.
-2. Run `supabase-schema.sql` in **SQL Editor**.
-3. Copy the Project URL and publishable key (or legacy anon key) from **Project Settings → API**.
-4. Replace the two placeholders at the top of `app.js`. Never use a service-role key in frontend code.
-5. In **Authentication → URL Configuration**, add your GitHub Pages URL to allowed redirect URLs.
-6. Enable Realtime for `ctr_group_notes` and `ctr_personal_notes` in Database → Replication if the SQL publication commands were not applied.
-7. In GitHub **Settings → Pages**, set **Build and deployment → Source** to **GitHub Actions**. The included workflow deploys the site on every push to `main`.
+## Workspace
+- **Group Chat:** shared CRM notes, search/date filters, reactions and live updates.
+- **Personal Notes:** each member's notes; CTR admin can review them for team oversight.
+- **Direct Chat:** private agent-to-agent conversations; CTR admin can inspect team conversations from the Agents Dashboard.
+- **Follow-ups:** shared callback queue with pending/completed status.
+- **Agents Dashboard:** agent-wise activity counts and, for the CTR admin account, conversation and activity audit.
+- **CRM Note Generator:** prepares a group-share note and a CRM-ready copy locally in the browser.
 
-## Access
-Create accounts using CTR's sign-up screen. For a controlled team, disable public sign-ups after the required accounts are created or use an invite-only process. Configure email confirmation and SMTP as required.
+## Backend and access
+The frontend uses Supabase Auth and the Supabase project configured at the top of `app.js`. The browser must use only the project's publishable/anon key; never place a service-role key in client code.
 
-## Important
-The frontend is not connected until valid Supabase URL and publishable/anon key are configured and the SQL is run. Personal note privacy and the one-time unique colour rule are enforced by database Row Level Security and constraints, not merely by the UI.
+The database schema and row-level-security policies are documented in `supabase-schema.sql`. That file is a reference/migration script; changing it in GitHub does not automatically apply SQL to the live Supabase database. Do not rerun the full schema against a live database without reviewing the statements and current schema first.
+
+The app currently presents a sign-in form for provisioned accounts. It does not provide public self-service sign-up. Password reset uses the GitHub Pages project URL as the Supabase redirect target; ensure that URL is allowed under Supabase Authentication → URL Configuration.
+
+## Deployment
+GitHub Pages publishes the `main` branch root. The `.nojekyll` file is included so static assets are served without Jekyll processing. The Pages deployment and Playwright browser checks run through GitHub Actions.
+
+## Browser tests
+The Playwright workflow checks:
+- Public page, CSS/JS assets, and sign-in form.
+- Desktop and mobile horizontal overflow.
+- Authenticated agent navigation and Direct Chat contact selection (requires `CTR_TEST_EMAIL` and `CTR_TEST_PASSWORD` repository Actions secrets).
+- Authenticated admin agent audit and conversation drill-down (requires `CTR_ADMIN_TEST_EMAIL` and `CTR_ADMIN_TEST_PASSWORD` secrets).
+
+Use dedicated test accounts. Do not put passwords in source files or commit them. Authenticated tests are skipped when their secrets are absent; a green run without those secrets verifies only public-page and layout checks, not real message send/receive.
