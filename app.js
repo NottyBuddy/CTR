@@ -207,7 +207,7 @@ function renderDirect(){
   selectedDirectKey=active.key;
   $("directRecipient").value=active.otherId;
   $("dmNewRecipient").value="";
-  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name,active.otherId)}</span><div><strong>${esc(active.name)}</strong><small>Private conversation · CTR team member</small></div><div class="dm-thread-actions"><button type="button" class="message-action" ${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}</div>`;
+  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name,active.otherId)}</span><div><strong>${esc(active.name)}</strong><small>Private conversation · CTR team member</small></div><div class="dm-thread-actions">${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}</div>`;
   const box=$("directNotes"),near=box.scrollHeight-box.scrollTop-box.clientHeight<120;
   box.innerHTML=active.messages.map(m=>{
    const mine=m.sender_id===user.id,from=team.find(p=>p.user_id===m.sender_id)?.display_name||"CTR Member";
