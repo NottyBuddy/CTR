@@ -49,6 +49,14 @@ test("authenticated agent can use all workspace sections and open Direct Chat", 
   await firstContact.click();
   await expect(page.locator("#directInput")).toBeEnabled();
   await expect(page.locator("#directForm button[type=submit]")).toBeEnabled();
+
+  // Mobile: selecting a contact must reveal the thread pane, and the header must return to the inbox.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator("#directInboxList button.dm-conversation").first().click();
+  await expect(page.locator("#directView .dm-inbox")).toHaveClass(/mobile-thread-open/);
+  await expect(page.locator("#dmThreadHeader")).toBeVisible();
+  await page.locator("#dmThreadHeader").click();
+  await expect(page.locator("#directView .dm-inbox")).not.toHaveClass(/mobile-thread-open/);
   expect(pageErrors, "Uncaught JavaScript errors during workspace navigation").toEqual([]);
 });
 
