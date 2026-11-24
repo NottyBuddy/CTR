@@ -297,8 +297,8 @@ function renderAIQuestions(questions,uncertainties){
  if(!items.length){box.innerHTML='<strong>Private AI draft ready</strong><p>Review customer facts before sharing.</p>';box.classList.remove("hidden");return}
  box.innerHTML='<strong>AI needs your confirmation</strong>'+items.map(q=>{
   const text=String(q||"").trim();
-  const parts=[...text.matchAll(/(?:^|\\s)([A-C])\\)\\s*([^|;]+?)(?=\\s+[A-C]\\)\\s*|$)/g)];
-  const question=parts.length?text.slice(0,parts[0].index).replace(/[?:\\s]+$/,"?"):text;
+  const parts=[...text.matchAll(/(?:^|\s)([A-C])\)\s*([^|;]+?)(?=\s+[A-C]\)\s*|$)/g)];
+  const question=parts.length?text.slice(0,parts[0].index).replace(/[?:\s]+$/,"?"):text;
   const options=parts.map(m=>({label:m[1],value:m[2].trim()}));
   return '<div class="ai-question-card"><p>'+esc(question)+'</p>'+(options.length?'<div class="ai-option-list">'+options.map(o=>'<button type="button" class="ai-option" data-ai-answer="'+esc(o.value)+'">'+esc(o.label+") "+o.value)+'</button>').join("")+'</div>':'<p class="ai-question-hint">Please clarify this detail in the input above and generate again.</p>')+'</div>';
  }).join("");
