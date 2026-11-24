@@ -2119,3 +2119,7 @@ html,body{height:100%;min-height:100%;overflow:hidden!important}
 .ai-option:hover:not(:disabled),.ai-option.selected{border-color:var(--accent,#8e7cff);background:rgba(142,124,255,.2)}
 .ai-option:disabled{opacity:.65;cursor:default}
 .ai-question-hint{font-size:.88em;opacity:.75}
+
+.dm-thread-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dm-message [data-dm-edit]{margin-top:6px}
+@media(max-width:760px){.dm-thread-actions .message-action{font-size:11px;padding:6px 8px}.dm-message [data-dm-edit]{min-height:32px}}
