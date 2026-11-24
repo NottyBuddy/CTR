@@ -325,7 +325,7 @@ function smartDrafts(raw){
  if(!notes.length)notes.push("Call details received: "+source+".");
  const crm=["CUSTOMER CALL NOTE","Customer Name | Contact Number",(name||"Not provided")+" | "+(phone?.[0]||"Not provided"),"","Call Summary:",...notes,"","Clarifications / Missing Information:",...missing.map(x=>"• "+x),"","Next Action: "+(callback?(followDate?"Reconnect with the customer on "+followDate+" and confirm the complete requirement.":"Schedule a callback and confirm the complete requirement."):"Confirm the call outcome and agree on the next action.")].join("\n");
  const group=["CRM UPDATE | "+(restaurant?"Restaurant project":commercial?"Commercial property":construction?"New construction":"Customer call update"),...notes,"","Pending information: "+(missing.length?missing.join(" "):"No key details flagged."),"Assigned to: Not specified"].join("\n");
- return {group,crm};
+ return {group,crm,clarifications:missing};
 }
 async function generateNotes(){
  const raw=$("aiInput").value.trim();
