@@ -32,7 +32,7 @@ jobs:
       - name: Wait for GitHub Pages to serve this build
         run: |
           for attempt in $(seq 1 24); do
-            if curl --fail --silent --show-error https://nottybuddy.github.io/CTR/ -o /tmp/ctr-home.html 2>/dev/null && grep -q "CTR — Calling Team Records" /tmp/ctr-home.html; then
+            if curl --fail --silent --show-error https://nottybuddy.github.io/CTR/ -o /tmp/ctr-home.html 2>/dev/null && grep -q "CTR — Calling Team Records" /tmp/ctr-home.html && grep -q "toggleAIPanel" /tmp/ctr-home.html && grep -q "dashboardFrom" /tmp/ctr-home.html; then
               echo "CTR page is live."
               exit 0
             fi
