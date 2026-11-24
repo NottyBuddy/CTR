@@ -273,8 +273,24 @@ function renderPersonal(){
  $("personalNotes").innerHTML=rows.length?rows.map(n=>{const owner=team.find(t=>t.user_id===n.user_id)?.display_name||(n.user_id===user.id?displayName(user.email):"CTR Member");return `<article class="note personal-note"><div class="note-top"><span class="note-author">${isAdmin()?esc(owner)+" · PERSONAL NOTE":"PRIVATE NOTE"}</span><span class="note-time">${esc(time(n.created_at))}${n.edited_at?" · edited":""}</span><button class="message-action" data-pedit="${n.id}">Edit</button>${isAdmin()? `<button class="delete-note" data-pdelete="${n.id}">Admin · Delete</button>`:""}</div><div class="note-body">${esc(n.body)}</div></article>`}).join(""):'<div class="empty-state"><h3>No matching personal notes</h3><p>Try clearing your search.</p></div>';
 }
 $("newFollowupBtn")?.addEventListener("click",()=>{const form=$("followupForm");form.classList.toggle("hidden");if(!form.classList.contains("hidden"))$("followupCustomer").focus();$("newFollowupBtn").textContent=form.classList.contains("hidden")?"＋ Create Follow-up":"− Close form";});
+function setAIPanelCollapsed(collapsed){
+ const view=$("groupView"),button=$("toggleAIPanel");if(!view||!button)return;
+ view.classList.toggle("ai-panel-collapsed",!!collapsed);
+ button.setAttribute("aria-expanded",String(!collapsed));
+ button.setAttribute("aria-label",collapsed?"Expand AI assistant panel":"Collapse AI assistant panel");
+ button.title=collapsed?"Expand AI panel":"Collapse AI panel";
+ button.textContent=collapsed?"›":"‹";
+}
+$("toggleAIPanel")?.addEventListener("click",()=>{
+ const collapsed=!$("groupView").classList.contains("ai-panel-collapsed");
+ setAIPanelCollapsed(collapsed);
+ if(user)try{localStorage.setItem("ctr_ai_panel_collapsed_"+user.id,collapsed?"1":"0")}catch{}
+});
 function showView(v){
- if(v==="group")renderAIHistory();
+ if(v==="group"){
+  renderAIHistory();
+  setAIPanelCollapsed(user&&localStorage.getItem("ctr_ai_panel_collapsed_"+user.id)==="1");
+ }
  $("groupView").classList.toggle("hidden",v!=="group");
  $("personalView").classList.toggle("hidden",v!=="personal");
  $("directView").classList.toggle("hidden",v!=="direct");
