@@ -1799,3 +1799,6 @@ html body #authView #authSubmit{cursor:pointer;touch-action:manipulation}
 @media(prefers-reduced-motion:reduce){
  .app-view .top-nav-btn,.app-view .dm-conversation{transition:none!important}
 }
+
+/* Keep the conversation canvas edge-to-edge; CRM generator remains available on its other workspace views. */
+.app-view .main-area .workspace:has(#directView:not(.hidden))>.right-panel{display:none!important}
