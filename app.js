@@ -2,9 +2,11 @@
 const SUPABASE_URL="https://icootmtssyergamuxlxb.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_qgEIXxXXBq2TaNxLMZPkwg_fcwKcdGW";
 const $=id=>document.getElementById(id);
+async function fetchAllRows(queryFactory,pageSize=500){const rows=[];for(let from=0;;from+=pageSize){const {data,error}=await queryFactory().range(from,from+pageSize-1);if(error)throw error;const page=data||[];rows.push(...page);if(page.length<pageSize)break;}return rows;}
 let db,user,group=[],personal=[],direct=[],team=[],channel;
 let groupFilter="",dateFilter="",personalFilter="",directFilter="",followupSearchFilter="";
 let selectedDirectKey="",selectedDirectRecipient="",directInboxFilter="all",mobileThreadOpen=false;
+let adminAuditAgentId="",adminAuditPairKey="",adminAuditSearch="",adminAuditDate="";
 const seenKey=k=>"ctr_seen_"+k+"_"+(user?.id||"");const markSeen=k=>{if(user)localStorage.setItem(seenKey(k),new Date().toISOString());updateUnread()};const countUnread=(a,k)=>a.filter(x=>new Date(x.created_at)>new Date(localStorage.getItem(seenKey(k))||0)).length;function updateUnread(){if(!user)return;for(const [id,n] of [["groupUnread",countUnread(group.filter(x=>x.user_id!==user.id),"group")],["directUnread",countUnread(direct.filter(x=>x.recipient_id===user.id),"direct")]]){const e=$(id);if(e){e.textContent=n;e.classList.toggle("hidden",!n)}}}
 const ADMIN_EMAIL="mahesh.s@hrhnext.com";
 const isAdmin=()=>String(user?.email||"").toLowerCase()===ADMIN_EMAIL;
@@ -62,7 +64,7 @@ function renderFollowups(){
  $("followupCount").textContent=pending.length;const navCount=$("followupNavCount");if(navCount)navCount.textContent=pending.length;
  box.innerHTML=rows.length?rows.map(f=>'<article class="followup-item" data-followup-id="'+f.id+'"><div class="followup-info"><strong>'+esc(f.customer_name)+'</strong><span>'+esc(f.phone)+'</span><time>'+esc(time(f.callback_at))+'</time><p>'+esc(f.details||"")+'</p><small class="followup-status">'+(f.status==="completed"?"Completed":"Pending")+' · '+esc(team.find(t=>t.user_id===f.user_id)?.display_name||displayName(team.find(t=>t.user_id===f.user_id)?.email))+'</small></div><div class="followup-actions"><button class="message-action" data-copy-phone="'+f.phone.replace(/\D/g,"")+'">Copy phone</button>'+(f.status!=="completed"?'<button class="message-action" data-follow-done="'+f.id+'">Complete</button>':'')+'</div></article>').join(""):(q?'<div class="empty-state">No matching follow-ups.</div>':'<div class="empty-state">No pending follow-ups.</div>');
 }
-async function loadFollowups(){const box=$("followupList");const r=await db.from("ctr_followups").select("*").order("callback_at").limit(500);if(r.error){followups=[];$("followupCount").textContent="!";box.innerHTML=`<div class="empty-state">Follow-ups are unavailable: ${esc(r.error.message)}. Run the CTR follow-up SQL in Supabase, then refresh.</div>`;return}followups=r.data||[];renderFollowups();renderAgentDashboard()}
+async function loadFollowups(){const box=$("followupList");try{followups=await fetchAllRows(()=>db.from("ctr_followups").select("*").order("callback_at",{ascending:true}).order("id",{ascending:true}));renderFollowups();renderAgentDashboard()}catch(e){followups=[];$("followupCount").textContent="!";box.innerHTML=`<div class="empty-state">Follow-ups are unavailable: ${esc(e.message)}.</div>`}}
 
 async function renderAgentDashboard(){
  const box=$("agentDashboard");if(!box||!user)return;
@@ -77,18 +79,32 @@ async function renderAgentDashboard(){
    db.from("ctr_followups").select("id",{count:"exact",head:true}).eq("user_id",t.user_id).neq("status","completed"),
    db.from("ctr_followups").select("id",{count:"exact",head:true}).eq("user_id",t.user_id).eq("status","completed")
   ]);
-  return {name:t.display_name||displayName(t.email),notes:(g.count||0)+(p.count||0),pending:pending.count||0,completed:completed.count||0,error:g.error||p.error||pending.error||completed.error};
+  const messages=direct.filter(m=>m.sender_id===t.user_id||m.recipient_id===t.user_id);
+  const partners=new Set(messages.map(m=>m.sender_id===t.user_id?m.recipient_id:m.sender_id));
+  return {id:t.user_id,name:t.display_name||displayName(t.email),notes:(g.count||0)+(p.count||0),pending:pending.count||0,completed:completed.count||0,messageCount:messages.length,partnerCount:partners.size,error:g.error||p.error||pending.error||completed.error};
  }));
- box.innerHTML=rows.map(r=>`<article class="agent-card"><div class="agent-card-head"><strong>${esc(r.name)}</strong><span class="agent-card-label">AGENT ACTIVITY</span></div><div class="agent-metrics"><div><strong>${r.error?"—":r.notes}</strong><span>Total notes</span></div><div><strong>${r.error?"—":r.pending}</strong><span>Pending follow-ups</span></div><div><strong>${r.error?"—":r.completed}</strong><span>Completed callbacks</span></div></div>${r.error?'<small class="agent-metric-error">Some counts could not be loaded.</small>':""}</article>`).join("");
- if(isAdmin()){
-  const {data:messages,error}=await db.from("ctr_direct_messages").select("id,sender_id,recipient_id,body,created_at").order("created_at",{ascending:false}).limit(500);
-  const logs=messages||[],name=id=>team.find(t=>t.user_id===id)?.display_name||"Unknown agent",panel=$("agentChatAudit");
-  if(panel){
-   panel.innerHTML=`<div class="agent-audit-head"><div><h3>Agent message activity</h3><p>Admin-only record of who messaged whom and what was sent.</p></div><span>${logs.length} messages</span></div><input id="agentChatAuditSearch" type="search" placeholder="Search agent, recipient or message…"><div class="agent-audit-list">${error?'<div class="empty-state">Could not load message activity: '+esc(error.message)+'</div>':logs.length?logs.map(m=>`<article class="agent-audit-row"><div class="agent-audit-route"><strong>${esc(name(m.sender_id))}</strong><span>→</span><strong>${esc(name(m.recipient_id))}</strong><time>${esc(time(m.created_at))}</time></div><p>${esc(m.body||"")}</p></article>`).join(""):'<div class="empty-state">No agent messages found.</div>'}</div>`;
-   panel.classList.remove("hidden");
-  }
- }else $("agentChatAudit")?.classList.add("hidden");
+ box.innerHTML=rows.map(r=>`<button type="button" class="agent-card agent-card-select ${adminAuditAgentId===r.id?"selected":""}" data-audit-agent="${esc(r.id)}"><div class="agent-card-head"><strong>${esc(r.name)}</strong><span class="agent-card-label">OPEN RECORDS ↗</span></div><div class="agent-metrics"><div><strong>${r.error?"—":r.notes}</strong><span>Total notes</span></div><div><strong>${r.error?"—":r.pending}</strong><span>Pending follow-ups</span></div><div><strong>${r.error?"—":r.completed}</strong><span>Completed callbacks</span></div></div><div class="agent-audit-card-foot"><span>${r.messageCount} direct messages</span><span>${r.partnerCount} conversations</span></div>${r.error?'<small class="agent-metric-error">Some counts could not be loaded.</small>':""}</button>`).join("");
+ if(isAdmin())renderAdminChatExplorer();else $("agentChatAudit")?.classList.add("hidden");
 }
+function renderAdminChatExplorer(){
+ const panel=$("agentChatAudit");if(!panel||!isAdmin())return;
+ panel.classList.remove("hidden");
+ const name=id=>team.find(t=>t.user_id===id)?.display_name||"CTR Member";
+ const active=team.find(t=>t.user_id===adminAuditAgentId&&String(t.email||"").toLowerCase()!==ADMIN_EMAIL);
+ if(!active){panel.innerHTML='<div class="agent-audit-empty">Select an agent card above to inspect their conversations and activity.</div>';return}
+ const agentMessages=direct.filter(m=>m.sender_id===active.user_id||m.recipient_id===active.user_id);
+ const pairs=new Map();
+ agentMessages.forEach(m=>{const other=m.sender_id===active.user_id?m.recipient_id:m.sender_id;const key=directPairKey(active.user_id,other);if(!pairs.has(key))pairs.set(key,{key,other,messages:[]});pairs.get(key).messages.push(m)});
+ const conversations=[...pairs.values()].map(c=>{c.messages.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));c.last=c.messages[c.messages.length-1];return c}).sort((a,b)=>new Date(b.last.created_at)-new Date(a.last.created_at));
+ const q=adminAuditSearch.trim().toLowerCase();
+ const filtered=conversations.filter(c=>[name(c.other),...c.messages.map(m=>m.body)].join(" ").toLowerCase().includes(q));
+ const chosen=conversations.find(c=>c.key===adminAuditPairKey);
+ panel.innerHTML=`<div class="agent-audit-head"><div><div class="eyebrow">ADMIN ONLY · COMPLETE CHAT ARCHIVE</div><h3>${esc(active.display_name||name(active.user_id))} — Conversation history</h3><p>${agentMessages.length} messages across ${conversations.length} conversations. Full history is loaded from the database.</p></div><button type="button" class="message-action" data-audit-back-agents>All agents</button></div>
+ <div class="agent-audit-controls"><input id="agentChatAuditSearch" type="search" value="${esc(adminAuditSearch)}" placeholder="Search contact or message…"><input id="agentChatAuditDate" type="date" value="${esc(adminAuditDate)}" aria-label="Filter messages by date"></div>
+ ${chosen?`<section class="agent-audit-thread"><div class="agent-audit-thread-head"><button type="button" class="message-action" data-audit-back-list>← Conversations</button><div><strong>${esc(active.display_name||name(active.user_id))} ↔ ${esc(name(chosen.other))}</strong><small>${chosen.messages.length} messages · complete conversation</small></div></div><div class="agent-audit-thread-messages">${chosen.messages.filter(m=>!adminAuditDate||new Date(m.created_at).toLocaleDateString("en-CA")===adminAuditDate).map(m=>`<article class="agent-audit-message ${m.sender_id===active.user_id?"agent-sent":"agent-received"}"><div class="agent-audit-message-meta"><strong>${esc(name(m.sender_id))}</strong><time>${esc(time(m.created_at))}</time></div><p>${esc(m.body||"")}</p></article>`).join("")||'<div class="empty-state">No messages match this date.</div>'}</div></section>`
+ :`<div class="agent-audit-conversations">${filtered.map(c=>`<button type="button" class="agent-audit-conversation" data-audit-pair="${esc(c.key)}"><span class="dm-avatar">${directAvatar(name(c.other),c.other)}</span><span class="agent-audit-conversation-copy"><strong>${esc(name(c.other))}</strong><small>${esc(c.last.body||"")}</small></span><span class="agent-audit-conversation-meta"><time>${esc(time(c.last.created_at))}</time><b>${c.messages.length} messages</b></span></button>`).join("")||'<div class="empty-state">No conversations match your search.</div>'}</div>`}`;
+}
+
 function globalSearch(query){
  const panel=$("globalSearchResults");if(!panel)return;
  const q=query.trim().toLowerCase();if(!q){panel.classList.add("hidden");panel.innerHTML="";return}
@@ -205,33 +221,22 @@ async function loadDirect(){
  const {data:people,error:peopleError}=await db.from("ctr_team_directory").select("user_id,email,display_name").order("display_name");
  if(peopleError){status("Could not load team contacts: "+peopleError.message);return}
  team=people||[];
- if(isAdmin()){const {data:logs}=await db.from("ctr_moderation_log").select("*").order("deleted_at",{ascending:false}).limit(100);$("moderationPanel")?.classList.remove("hidden");$("moderationLog").innerHTML=(logs||[]).map(x=>`<article class="note"><div class="note-top"><span class="note-author">${esc(x.deleted_by_email||"Admin")} · ${esc(x.table_name)}</span><span class="note-time">${esc(time(x.deleted_at))}</span></div><div class="note-body">${esc(x.original_body||"")}</div></article>`).join("")||'<div class="empty-state">No deletions recorded.</div>'}else $("moderationPanel")?.classList.add("hidden");
- const sel=$("directRecipient"),old=selectedDirectRecipient||sel.value; const newSel=$("dmNewRecipient"),newOld=newSel.value;
- sel.innerHTML='<option value="">'+(isAdmin()?'All conversations (admin view)':'Choose a team member…')+'</option>'+
-  team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join("");
- if(old&&team.some(p=>p.user_id===old)){sel.value=old;selectedDirectRecipient=old;} newSel.innerHTML='<option value="">＋ New message</option>'+team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join(""); if(newOld&&team.some(p=>p.user_id===newOld))newSel.value=newOld;
- const {data,error}=await db.from("ctr_direct_messages").select("*").order("created_at",{ascending:false}).limit(1000);
- if(error){status("Could not load direct messages: "+error.message);return}
- direct=(data||[]).reverse();renderDirect();renderPersonal();updateUnread();if(isAdmin())renderAgentDashboard();
+ if(isAdmin()){const logs=await fetchAllRows(()=>db.from("ctr_moderation_log").select("*").order("deleted_at",{ascending:false}).order("id",{ascending:false}));$("moderationPanel")?.classList.remove("hidden");$("moderationLog").innerHTML=logs.map(x=>`<article class="note"><div class="note-top"><span class="note-author">${esc(x.deleted_by_email||"Admin")} · ${esc(x.table_name)}</span><span class="note-time">${esc(time(x.deleted_at))}</span></div><div class="note-body">${esc(x.original_body||"")}</div></article>`).join("")||'<div class="empty-state">No deletions recorded.</div>'}else $("moderationPanel")?.classList.add("hidden");
+ const sel=$("directRecipient"),old=selectedDirectRecipient||sel.value,newSel=$("dmNewRecipient"),newOld=newSel.value;
+ sel.innerHTML='<option value="">'+(isAdmin()?'All conversations (admin view)':'Choose a team member…')+'</option>'+team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join("");
+ if(old&&team.some(p=>p.user_id===old)){sel.value=old;selectedDirectRecipient=old}
+ newSel.innerHTML='<option value="">＋ New message</option>'+team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join("");if(newOld&&team.some(p=>p.user_id===newOld))newSel.value=newOld;
+ direct=await fetchAllRows(()=>db.from("ctr_direct_messages").select("*").order("created_at",{ascending:true}).order("id",{ascending:true}));
+ renderDirect();renderPersonal();updateUnread();if(isAdmin())renderAgentDashboard();
 }
+
 async function refreshMessages(){
  const btn=$("refreshData");btn.disabled=true;btn.classList.add("is-refreshing");btn.setAttribute("aria-label","Refreshing");
- try{
-  const [g,p,c,profiles]=await Promise.all([
-   db.from("ctr_group_notes").select("*").order("created_at").limit(500),
-   db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500),
-   db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),
-   db.from("ctr_profiles").select("user_id,chat_color")
-  ]);
-  if(g.error||p.error||c.error||profiles.error)throw(g.error||p.error||c.error||profiles.error);
-  const colors=Object.fromEntries((profiles.data||[]).map(x=>[x.user_id,x.chat_color]));
-  group=(g.data||[]).map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));personal=p.data||[];
-  renderGroup(true);renderPersonal();await loadFollowups();
-  await loadDirect();renderAgentDashboard();
-  status("Messages refreshed.");
- }catch(e){status("Refresh failed: "+e.message)}
+ try{await loadAll();await loadDirect();renderAgentDashboard();status("All records refreshed.")}
+ catch(e){status("Refresh failed: "+e.message)}
  finally{btn.disabled=false;btn.classList.remove("is-refreshing");btn.setAttribute("aria-label","Refresh")}
 }
+
 function renderPersonal(){
  const rows=personal.filter(n=>!personalFilter||[n.body,team.find(t=>t.user_id===n.user_id)?.display_name||displayName(user.email)].join(" ").toLowerCase().includes(personalFilter));
  $("personalCount").textContent=rows.length;
@@ -274,12 +279,12 @@ async function generateNotes(){
  finally{$("generateAI").disabled=false}
 }
 async function loadAll(){
- const [g,p,c,profiles]=await Promise.all([db.from("ctr_group_notes").select("*").order("created_at").limit(500),db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500),db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),db.from("ctr_profiles").select("user_id,chat_color")]);
- if(g.error||p.error||c.error||profiles.error)throw(g.error||p.error||c.error||profiles.error);
- const colors=Object.fromEntries((profiles.data||[]).map(x=>[x.user_id,x.chat_color]));
- group=(g.data||[]).map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));personal=p.data||[];
+ const [g,p,c,profiles]=await Promise.all([fetchAllRows(()=>db.from("ctr_group_notes").select("*").order("created_at",{ascending:true}).order("id",{ascending:true})),fetchAllRows(()=>db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false})),db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),db.from("ctr_profiles").select("user_id,chat_color")]);
+ if(c.error||profiles.error)throw(c.error||profiles.error);
+ const colors=Object.fromEntries((profiles.data||[]).map(x=>[x.user_id,x.chat_color]));group=g.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));personal=p;
  renderGroup(true);renderPersonal();renderColors(c.data?.chat_color||null);await loadFollowups();
 }
+
 function renderColors(chosen){
  $("colorChoices").innerHTML=palette.map(col=>`<button type="button" class="color-choice ${chosen===col?"selected":""}" data-color="${col}" style="--swatch:${col}" ${chosen?"disabled":""} aria-label="Choose ${col}"></button>`).join("");
  $("colorLock").textContent=chosen?"Your chat colour is locked and cannot be changed.":"Choose one available colour. Each colour can belong to only one user and cannot be changed.";
@@ -323,9 +328,9 @@ async function enableNotifications(){
 function realtime(){
  if(channel)db.removeChannel(channel);
  channel=db.channel("ctr-live-"+user.id)
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_group_notes"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("group",payload.new);const [{data,error},{data:profiles}]=await Promise.all([db.from("ctr_group_notes").select("*").order("created_at").limit(500),db.from("ctr_profiles").select("user_id,chat_color")]);if(!error){const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=(data||[]).map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup();renderAgentDashboard()}})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_group_notes"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("group",payload.new);try{const [data,profiles]=await Promise.all([fetchAllRows(()=>db.from("ctr_group_notes").select("*").order("created_at",{ascending:true}).order("id",{ascending:true})),db.from("ctr_profiles").select("user_id,chat_color")]);const colors=Object.fromEntries((profiles.data||[]).map(x=>[x.user_id,x.chat_color]));group=data.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup();renderAgentDashboard()}catch(e){status("Group history refresh failed: "+e.message)}})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_profiles"},async()=>{const [{data:mine},{data:profiles}]=await Promise.all([db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),db.from("ctr_profiles").select("user_id,chat_color")]);renderColors(mine?.chat_color||null);const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=group.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()})
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes"},async()=>{const {data}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500);personal=data||[];renderPersonal();renderAgentDashboard()})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes"},async()=>{try{personal=await fetchAllRows(()=>db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false}));renderPersonal();renderAgentDashboard()}catch(e){status("Personal notes refresh failed: "+e.message)}})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("direct",payload.new);await loadDirect()})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_followups"},loadFollowups)
  .subscribe(s=>{if(s==="SUBSCRIBED")status("Live sync connected · group updates appear automatically.");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")status("Live sync interrupted. Refresh to reconnect.")});
@@ -388,7 +393,16 @@ $("directRecipient").onchange=()=>{selectedDirectRecipient=$("directRecipient").
 $("dmNewRecipient").addEventListener("change",e=>{const id=e.target.value;if(!id)return;openDirectConversation(id);$("directInput").focus()});
 $("dmThreadHeader").addEventListener("click",()=>{if(window.matchMedia("(max-width:760px)").matches){mobileThreadOpen=false;$("directView").querySelector(".dm-inbox").classList.remove("mobile-thread-open")}});
 document.querySelectorAll("[data-dm-filter]").forEach(b=>b.addEventListener("click",()=>{directInboxFilter=b.dataset.dmFilter;document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x===b));renderDirect()}));
- document.addEventListener("input",e=>{if(e.target.id!=="agentChatAuditSearch")return;const q=e.target.value.trim().toLowerCase();document.querySelectorAll("#agentChatAudit .agent-audit-row").forEach(row=>row.classList.toggle("hidden",!row.textContent.toLowerCase().includes(q)))});
+ document.addEventListener("click",e=>{
+ const t=e.target instanceof Element?e.target:null;if(!t)return;
+ const agent=t.closest("[data-audit-agent]");if(agent){adminAuditAgentId=agent.dataset.auditAgent;adminAuditPairKey="";renderAgentDashboard();return}
+ if(t.closest("[data-audit-back-agents]")){adminAuditAgentId="";adminAuditPairKey="";renderAgentDashboard();return}
+ if(t.closest("[data-audit-back-list]")){adminAuditPairKey="";renderAdminChatExplorer();return}
+ const pair=t.closest("[data-audit-pair]");if(pair){adminAuditPairKey=pair.dataset.auditPair;renderAdminChatExplorer()}
+});
+document.addEventListener("input",e=>{if(e.target?.id==="agentChatAuditSearch"){adminAuditSearch=e.target.value;const pos=e.target.selectionStart;renderAdminChatExplorer();const input=$("agentChatAuditSearch");input?.focus();input?.setSelectionRange(pos,pos)}});
+document.addEventListener("change",e=>{if(e.target?.id==="agentChatAuditDate"){adminAuditDate=e.target.value;renderAdminChatExplorer()}});
+
 $("globalSearch")?.addEventListener("input",e=>globalSearch(e.target.value));
 $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value||"";renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
 $("directForm").onsubmit=async e=>{
@@ -412,14 +426,13 @@ $("directForm").onsubmit=async e=>{
  }catch(err){status("Message failed: "+(err?.message||"Please try again."))}
  finally{send.disabled=false}
 };
-$("directInboxList").addEventListener("click",e=>{
- const row=e.target.closest(".dm-conversation[data-dm-other]");
- if(!row||!$("directInboxList").contains(row))return;
- e.preventDefault();
- const id=row.dataset.dmOther;
- if(!id)return;
- try{openDirectConversation(id)}catch(err){console.error("Could not open direct conversation",err);status("Could not open this conversation: "+(err?.message||"Please refresh and try again."))}
-});
+document.addEventListener("click",e=>{
+ const target=e.target instanceof Element?e.target:null;
+ const row=target?.closest("#directInboxList button.dm-conversation[data-dm-other]");
+ if(!row)return;
+ e.preventDefault();e.stopPropagation();
+ try{openDirectConversation(row.getAttribute("data-dm-other"))}catch(err){console.error("Could not open direct conversation",err);status("Could not open this conversation: "+(err?.message||"Please refresh and try again."))}
+},true);
 document.addEventListener("click",async e=>{
  const cp=e.target.closest("[data-copy-phone]");if(cp){try{await navigator.clipboard.writeText(cp.dataset.copyPhone);status("Phone copied.")}catch{status("Clipboard unavailable.")}return}
  const cn=e.target.closest("[data-copy-note]");if(cn){const n=group.find(x=>x.id===cn.dataset.copyNote);if(n){try{await navigator.clipboard.writeText(n.body);status("CRM note copied.")}catch{status("Clipboard unavailable.")}}return}
