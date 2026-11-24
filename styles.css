@@ -2126,3 +2126,42 @@ html,body{height:100%;min-height:100%;overflow:hidden!important}
 
 /* AI history controls */
 .ai-history-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border-radius:11px;background:rgba(255,255,255,.035);margin:6px 0}.ai-history-open{display:flex;flex:1;min-width:0;flex-direction:column;align-items:flex-start;text-align:left;gap:4px;background:transparent;color:var(--text);padding:0}.ai-history-open strong{font-size:11px;overflow-wrap:anywhere}.ai-history-open small{font-size:9px;color:var(--muted)}.ai-history-actions{display:flex;gap:5px;flex-shrink:0}.ai-history-actions button{font-size:10px;padding:6px 8px;border-radius:8px}
+
+
+/* CTR interaction polish — preserves the existing background and logo assets. */
+@keyframes ctrViewEnter{from{opacity:0;transform:translate3d(0,7px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes ctrModalEnter{from{opacity:0;transform:translate3d(0,10px,0) scale(.985)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+@keyframes ctrSoftShimmer{to{background-position:-200% 0}}
+.notes-view:not(.hidden){animation:ctrViewEnter .22s ease both}
+.ai-panel-toggle{flex:0 0 30px;width:30px;height:30px;display:grid;place-items:center;border-radius:9px;background:rgba(255,255,255,.07);color:#f6e9ed;font-size:20px;line-height:1;transition:background .2s,transform .2s}
+.ai-panel-toggle:hover{background:rgba(255,255,255,.13);transform:translateX(-1px)}
+.right-panel-head{display:flex;align-items:flex-start;gap:10px}
+.ai-panel-title{min-width:0;flex:1}
+.ai-panel-title h3{margin-top:6px}
+@media(min-width:761px){
+ #groupView.ai-panel-collapsed{grid-template-columns:64px minmax(0,1fr)!important}
+ #groupView.ai-panel-collapsed>#crmGenerator{width:64px!important;min-width:64px!important;padding:12px 9px!important;overflow:hidden!important}
+ #groupView.ai-panel-collapsed>#crmGenerator .right-panel-head{justify-content:center;align-items:center}
+ #groupView.ai-panel-collapsed>#crmGenerator .ai-panel-title,
+ #groupView.ai-panel-collapsed>#crmGenerator>*:not(.right-panel-head){display:none!important}
+ #groupView.ai-panel-collapsed>#crmGenerator .ai-panel-toggle{margin:0;transform:none}
+}
+@media(hover:hover) and (pointer:fine){
+ .note,.followup-item,.agent-card,.ai-result,.ai-history-item,.dm-conversation,.agent-audit-conversation{transition:transform .2s ease,box-shadow .2s ease,background-color .2s ease}
+ .note:hover,.followup-item:hover,.agent-card:hover,.ai-result:hover,.dm-conversation:hover,.agent-audit-conversation:hover{transform:translateY(-2px) perspective(900px) rotateX(.35deg);box-shadow:0 14px 32px rgba(0,0,0,.22)}
+ .ai-history-item:hover{transform:translateX(3px)}
+ .top-nav-btn:hover{transform:translateY(-1px)}
+}
+button:active:not(:disabled){transform:scale(.975)}
+.primary,.send-btn,.message-action,.reaction-btn,.top-nav-btn,.header-icon-btn,.ai-option{position:relative;overflow:hidden}
+.primary:active:not(:disabled)::after,.send-btn:active:not(:disabled)::after,.message-action:active:not(:disabled)::after,.reaction-btn:active:not(:disabled)::after,.top-nav-btn:active:not(:disabled)::after,.header-icon-btn:active:not(:disabled)::after,.ai-option:active:not(:disabled)::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at center,rgba(255,255,255,.22),transparent 68%);animation:ctrViewEnter .24s ease-out}
+.global-search-results,.account-settings-card,.ai-question-card{animation:ctrModalEnter .18s ease both}
+.loading-skeleton{border-radius:9px;background:linear-gradient(100deg,rgba(255,255,255,.035) 25%,rgba(255,255,255,.09) 42%,rgba(255,255,255,.035) 60%);background-size:200% 100%;animation:ctrSoftShimmer 1.35s linear infinite}
+@media(max-width:760px){
+ .ai-panel-toggle{display:none}
+ .notes-view:not(.hidden){animation:ctrViewEnter .18s ease both}
+}
+@media(prefers-reduced-motion:reduce){
+ .notes-view:not(.hidden),.global-search-results,.account-settings-card,.ai-question-card,.loading-skeleton{animation:none!important}
+ button:active:not(:disabled){transform:none}
+}
