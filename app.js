@@ -64,7 +64,7 @@ function renderFollowups(){
 }
 async function loadFollowups(){const box=$("followupList");const r=await db.from("ctr_followups").select("*").order("callback_at").limit(500);if(r.error){followups=[];$("followupCount").textContent="!";box.innerHTML=`<div class="empty-state">Follow-ups are unavailable: ${esc(r.error.message)}. Run the CTR follow-up SQL in Supabase, then refresh.</div>`;return}followups=r.data||[];renderFollowups();renderAgentDashboard()}
 
-async async function renderAgentDashboard(){
+async function renderAgentDashboard(){
  const box=$("agentDashboard");if(!box||!user)return;
  const agents=(isAdmin()?team.filter(t=>String(t.email||"").toLowerCase()!==ADMIN_EMAIL):team.filter(t=>t.user_id===user.id));
  if(!isAdmin()&&!agents.length)agents.push({user_id:user.id,email:user.email,display_name:displayName(user.email)});
@@ -389,7 +389,8 @@ $("directRecipient").onchange=renderDirect;
 $("dmNewRecipient").addEventListener("change",e=>{const id=e.target.value;if(!id)return;openDirectConversation(id);$("directInput").focus()});
 $("dmThreadHeader").addEventListener("click",()=>{if(window.matchMedia("(max-width:760px)").matches){mobileThreadOpen=false;$("directView").querySelector(".dm-inbox").classList.remove("mobile-thread-open")}});
 document.querySelectorAll("[data-dm-filter]").forEach(b=>b.addEventListener("click",()=>{directInboxFilter=b.dataset.dmFilter;document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x===b));renderDirect()}));
- $("globalSearch")?.addEventListener("input",e=>globalSearch(e.target.value));
+ document.addEventListener("input",e=>{if(e.target.id!=="agentChatAuditSearch")return;const q=e.target.value.trim().toLowerCase();document.querySelectorAll("#agentChatAudit .agent-audit-row").forEach(row=>row.classList.toggle("hidden",!row.textContent.toLowerCase().includes(q)))});
+$("globalSearch")?.addEventListener("input",e=>globalSearch(e.target.value));
 $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value||"";renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
 $("directForm").onsubmit=async e=>{
  e.preventDefault();
