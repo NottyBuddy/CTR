@@ -426,13 +426,12 @@ $("directForm").onsubmit=async e=>{
  }catch(err){status("Message failed: "+(err?.message||"Please try again."))}
  finally{send.disabled=false}
 };
-document.addEventListener("click",e=>{
- const target=e.target instanceof Element?e.target:null;
- const row=target?.closest("#directInboxList button.dm-conversation[data-dm-other]");
- if(!row)return;
- e.preventDefault();e.stopPropagation();
- try{openDirectConversation(row.getAttribute("data-dm-other"))}catch(err){console.error("Could not open direct conversation",err);status("Could not open this conversation: "+(err?.message||"Please refresh and try again."))}
-},true);
+$("directInboxList").addEventListener("click",e=>{
+ const row=e.target instanceof Element?e.target.closest("button.dm-conversation[data-dm-other]"):null;
+ if(!row||!$("directInboxList").contains(row))return;
+ e.preventDefault();const id=row.dataset.dmOther;if(!id)return;
+ try{openDirectConversation(id)}catch(err){console.error("Could not open direct conversation",err);status("Could not open this conversation: "+(err?.message||"Please refresh and try again."))}
+});;
 document.addEventListener("click",async e=>{
  const cp=e.target.closest("[data-copy-phone]");if(cp){try{await navigator.clipboard.writeText(cp.dataset.copyPhone);status("Phone copied.")}catch{status("Clipboard unavailable.")}return}
  const cn=e.target.closest("[data-copy-note]");if(cn){const n=group.find(x=>x.id===cn.dataset.copyNote);if(n){try{await navigator.clipboard.writeText(n.body);status("CRM note copied.")}catch{status("Clipboard unavailable.")}}return}
