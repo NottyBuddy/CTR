@@ -2110,3 +2110,12 @@ html,body{height:100%;min-height:100%;overflow:hidden!important}
  .ai-history-list{max-height:190px}
  #groupView>#crmGenerator{order:-1!important}
 }
+
+/* Clickable, accessible clarification choices in the private CRM assistant */
+.ai-question-card{margin-top:10px;padding:11px;border:1px solid rgba(142,124,255,.2);border-radius:12px;background:rgba(255,255,255,.035)}
+.ai-question-card p{margin:0 0 9px;line-height:1.45}
+.ai-option-list{display:flex;flex-wrap:wrap;gap:8px}
+.ai-option{padding:8px 12px;border:1px solid rgba(142,124,255,.35);border-radius:9px;background:rgba(142,124,255,.09);color:inherit;cursor:pointer;font:inherit;text-align:left}
+.ai-option:hover:not(:disabled),.ai-option.selected{border-color:var(--accent,#8e7cff);background:rgba(142,124,255,.2)}
+.ai-option:disabled{opacity:.65;cursor:default}
+.ai-question-hint{font-size:.88em;opacity:.75}
