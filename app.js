@@ -274,6 +274,7 @@ function renderPersonal(){
 }
 $("newFollowupBtn")?.addEventListener("click",()=>{const form=$("followupForm");form.classList.toggle("hidden");if(!form.classList.contains("hidden"))$("followupCustomer").focus();$("newFollowupBtn").textContent=form.classList.contains("hidden")?"＋ Create Follow-up":"− Close form";});
 function showView(v){
+ if(v==="group")renderAIHistory();
  $("groupView").classList.toggle("hidden",v!=="group");
  $("personalView").classList.toggle("hidden",v!=="personal");
  $("directView").classList.toggle("hidden",v!=="direct");
@@ -284,6 +285,22 @@ function showView(v){
  if(v==="direct"){mobileThreadOpen=false;$("directView").querySelector(".dm-inbox").classList.remove("mobile-thread-open");loadDirect();markSeen("direct")}if(v==="group")markSeen("group");
 }
 let generatedDrafts={group:"",crm:""};
+const aiHistoryKey=()=> "ctr_ai_history_"+(user?.id||"anonymous");
+function readAIHistory(){try{return JSON.parse(localStorage.getItem(aiHistoryKey())||"[]").slice(0,100)}catch{return []}}
+function saveAIHistory(entry){if(!user)return;const rows=readAIHistory();rows.unshift({...entry,id:Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7),createdAt:new Date().toISOString()});try{localStorage.setItem(aiHistoryKey(),JSON.stringify(rows.slice(0,100)))}catch(e){$("aiStatus").textContent="Draft generated, but browser storage is full. Copy the notes before leaving."}renderAIHistory()}
+function renderAIHistory(){
+ const box=$("aiHistoryList");if(!box)return;const rows=readAIHistory();
+ box.innerHTML=rows.length?rows.map((r,i)=>'<button class="ai-history-item" type="button" data-ai-history="'+esc(r.id)+'"><strong>'+esc((r.raw||"Untitled call").slice(0,68))+'</strong><small>'+esc(new Date(r.createdAt).toLocaleString())+' · '+esc(r.confidence||"review")+' confidence</small></button>').join(""):'<p class="ai-history-empty">Your generated notes will appear here.</p>';
+}
+function restoreAIHistory(id){
+ const row=readAIHistory().find(x=>x.id===id);if(!row)return;
+ $("aiInput").value=row.raw||"";generatedDrafts={group:row.group||"",crm:row.crm||""};
+ $("aiGroup").innerHTML=formatNoteHtml(generatedDrafts.group);$("aiCrm").innerHTML=formatNoteHtml(generatedDrafts.crm);
+ $("aiResults").classList.toggle("hidden",!generatedDrafts.group&&!generatedDrafts.crm);
+ const items=[...(row.questions||[]),...(row.uncertainties||[])];const q=$("aiQuestions");
+ q.innerHTML=items.length?'<strong>AI clarification / review</strong><ul>'+items.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul>':'<strong>Restored saved draft</strong><p>Review before sharing.</p>';q.classList.remove("hidden");
+ $("aiStatus").textContent="Saved draft restored. Review before using.";
+}
 function smartDrafts(raw){
  const source=String(raw||"").replace(/[,;]+/g," ").replace(/\s+/g," ").trim();
  const notes=[],missing=[],alias={mum:"Mumbai",bom:"Mumbai",mh:"Maharashtra",ap:"Andhra Pradesh",hyd:"Hyderabad",blr:"Bengaluru",bangalore:"Bengaluru",chn:"Chennai",kol:"Kolkata",pune:"Pune",del:"Delhi",ts:"Telangana",ka:"Karnataka",tn:"Tamil Nadu",rj:"Rajasthan",up:"Uttar Pradesh",mp:"Madhya Pradesh",gj:"Gujarat"};
@@ -339,6 +356,7 @@ async function generateNotes(){
    else if(p?.status==="initiate")$("aiStatus").textContent="Preparing model file: "+(p.file||"");
   });
   generatedDrafts={group:result.group,crm:result.crm};
+  saveAIHistory({raw,group:result.group,crm:result.crm,questions:result.questions||[],uncertainties:result.uncertainties||[],confidence:result.confidence});
   $("aiGroup").innerHTML=formatNoteHtml(result.group);
   $("aiCrm").innerHTML=formatNoteHtml(result.crm);
   const box=$("aiQuestions"),items=[...(result.questions||[]),...(result.uncertainties||[])];
@@ -458,6 +476,8 @@ $("forgotPassword").onclick=async()=>{if(!db)return;const email=$("email").value
 document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>showView(b.dataset.view));
 $("colorChoices").onclick=e=>{const b=e.target.closest("[data-color]");if(b&&!b.disabled)chooseColor(b.dataset.color)};
 $("generateAI").onclick=generateNotes;
+$("aiHistoryList")?.addEventListener("click",e=>{const item=e.target.closest("[data-ai-history]");if(item)restoreAIHistory(item.dataset.aiHistory)});
+$("clearAIHistory")?.addEventListener("click",()=>{if(!user)return;if(!confirm("Clear saved CRM assistant history from this browser for this account?"))return;localStorage.removeItem(aiHistoryKey());renderAIHistory();$("aiStatus").textContent="Saved draft history cleared from this device."});
 $("refreshData").onclick=refreshMessages;$("enableNotifications")?.addEventListener("click",enableNotifications);
 $("directRecipient").onchange=()=>{selectedDirectRecipient=$("directRecipient").value||"";selectedDirectKey=selectedDirectRecipient?directPairKey(user.id,selectedDirectRecipient):"";renderDirect()};
 $("dmNewRecipient").addEventListener("change",e=>{const id=e.target.value;if(!id)return;openDirectConversation(id);$("directInput").focus()});
