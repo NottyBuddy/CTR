@@ -146,6 +146,7 @@ function openDirectConversation(id){
  $("directSearch").value="";
  document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x.dataset.dmFilter==="all"));
  mobileThreadOpen=window.matchMedia("(max-width:760px)").matches;
+ $("directView").querySelector(".dm-inbox").classList.toggle("mobile-thread-open",mobileThreadOpen);
  renderDirect();
  markSeen("direct");
  $("directInput").disabled=false;
