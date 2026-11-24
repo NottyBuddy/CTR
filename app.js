@@ -74,7 +74,7 @@ async function renderAgentDashboard(){
  if(!agents.length){box.innerHTML='<div class="empty-state">No agent activity available yet.</div>';return}
  box.innerHTML='<div class="empty-state">Updating agent activity…</div>';
  const rows=await Promise.all(agents.map(async t=>{
-  const from=dashboardFrom?dashboardFrom+"T00:00:00.000Z":null,to=dashboardTo?dashboardTo+"T23:59:59.999Z":null;
+  const from=dashboardFrom?new Date(dashboardFrom+"T00:00:00").toISOString():null,to=dashboardTo?new Date(dashboardTo+"T23:59:59.999").toISOString():null;
   let gq=db.from("ctr_group_notes").select("id",{count:"exact",head:true}).eq("user_id",t.user_id);
   let pq=db.from("ctr_personal_notes").select("id",{count:"exact",head:true}).eq("user_id",t.user_id);
   let fq=db.from("ctr_followups").select("id",{count:"exact",head:true}).eq("user_id",t.user_id);
