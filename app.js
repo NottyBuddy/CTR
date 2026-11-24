@@ -141,19 +141,36 @@ function renderAdminChatExplorer(){
  :`<section class="agent-audit-section"><div class="agent-audit-section-title"><h4>People this agent chatted with</h4><span>${filtered.length} contacts</span></div><div class="agent-audit-conversations">${filtered.map(c=>`<button type="button" class="agent-audit-conversation" data-audit-pair="${esc(c.key)}"><span class="dm-avatar">${directAvatar(name(c.other),c.other)}</span><span class="agent-audit-conversation-copy"><strong>${esc(name(c.other))}</strong><small>${esc(c.last.body||"")}</small></span><span class="agent-audit-conversation-meta"><time>${esc(time(c.last.created_at))}</time><b>${c.messages.length} messages</b></span></button>`).join("")||'<div class="empty-state">No conversations match your search.</div>'}</div></section>
  <section class="agent-audit-activity"><div class="agent-audit-section-title"><h4>Activity records</h4><span>${activityRows.length} records</span></div><div class="agent-audit-activity-list">${activityRows.map(x=>`<article class="agent-audit-activity-item"><div><strong>${esc(x.kind)}</strong>${x.status?`<small>${esc(x.status)}</small>`:""}</div><time>${esc(time(x.created_at))}</time><p>${esc(x.body||"")}</p></article>`).join("")||'<div class="empty-state">No activity records match these filters.</div>'}</div></section>`}`;
 }
-function globalSearch(query){
+let globalSearchRequest=0;
+async function globalSearch(query){
  const panel=$("globalSearchResults");if(!panel)return;
- const q=query.trim().toLowerCase();if(!q){panel.classList.add("hidden");panel.innerHTML="";return}
- const hits=[];
- const add=(kind,view,items,getText,getTitle,getDate)=>items.forEach(item=>{const text=String(getText(item)||"");if(text.toLowerCase().includes(q))hits.push({kind,view,title:getTitle(item),text,date:getDate(item)})});
- add("Group note","group",group,n=>[n.body,n.author_email,displayName(n.author_email)].join(" "),n=>displayName(n.author_email),n=>n.created_at);
- add("Personal note","personal",personal,n=>[n.body,team.find(t=>t.user_id===n.user_id)?.display_name].join(" "),n=>team.find(t=>t.user_id===n.user_id)?.display_name||"Personal note",n=>n.created_at);
- add("Direct message","direct",direct,n=>[n.body,team.find(t=>t.user_id===n.sender_id)?.display_name,team.find(t=>t.user_id===n.recipient_id)?.display_name].join(" "),n=>team.find(t=>t.user_id===n.sender_id)?.display_name||"Direct message",n=>n.created_at);
- add("Follow-up","followups",followups,n=>[n.customer_name,n.phone,n.details,team.find(t=>t.user_id===n.user_id)?.display_name||displayName(team.find(t=>t.user_id===n.user_id)?.email)].join(" "),n=>n.customer_name,n=>n.callback_at);
- const limited=hits;
- panel.innerHTML=limited.length?'<div class="global-search-head">'+hits.length+' matching record'+(hits.length===1?'':'s')+''+'</div>'+limited.map(r=>`<button type="button" class="global-search-hit" data-search-view="${r.view}"><span><b>${esc(r.title)}</b><small>${esc(r.kind)} · ${esc(time(r.date))}</small></span><span class="global-hit-snippet">${esc(r.text.slice(0,150))}</span></button>`).join(""):'<div class="global-search-empty">No matching records found.</div>';
- panel.classList.remove("hidden");
+ const q=String(query||"").trim();const request=++globalSearchRequest;
+ if(!q){panel.classList.add("hidden");panel.innerHTML="";return}
+ if(q.length<2){panel.innerHTML='<div class="global-search-empty">Type at least 2 characters to search all records.</div>';panel.classList.remove("hidden");return}
+ panel.innerHTML='<div class="global-search-empty">Searching all accessible records…</div>';panel.classList.remove("hidden");
+ const pattern="%"+q.replace(/[%_\\]/g,"\\$&")+"%";
+ try{
+  const [g,p,d,fc,fp,fd]=await Promise.all([
+   db.from("ctr_group_notes").select("*").ilike("body",pattern).order("created_at",{ascending:false}).limit(30),
+   db.from("ctr_personal_notes").select("*").ilike("body",pattern).order("created_at",{ascending:false}).limit(30),
+   db.from("ctr_direct_messages").select("*").ilike("body",pattern).order("created_at",{ascending:false}).limit(30),
+   db.from("ctr_followups").select("*").ilike("customer_name",pattern).order("callback_at",{ascending:false}).limit(30),
+   db.from("ctr_followups").select("*").ilike("phone",pattern).order("callback_at",{ascending:false}).limit(30),
+   db.from("ctr_followups").select("*").ilike("details",pattern).order("callback_at",{ascending:false}).limit(30)
+  ]);
+  if(request!==globalSearchRequest)return;
+  const failed=[g,p,d,fc,fp,fd].find(x=>x.error);if(failed)throw failed.error;
+  const hits=[];
+  (g.data||[]).forEach(n=>hits.push({kind:"Group note",view:"group",title:displayName(n.author_email),text:n.body||"",date:n.created_at}));
+  (p.data||[]).forEach(n=>hits.push({kind:"Personal note",view:"personal",title:team.find(t=>t.user_id===n.user_id)?.display_name||"Personal note",text:n.body||"",date:n.created_at}));
+  (d.data||[]).forEach(n=>hits.push({kind:"Direct message",view:"direct",title:team.find(t=>t.user_id===(n.sender_id===user.id?n.recipient_id:n.sender_id))?.display_name||"Direct message",text:n.body||"",date:n.created_at}));
+  const followupRows=new Map();[...(fc.data||[]),...(fp.data||[]),...(fd.data||[])].forEach(n=>followupRows.set(n.id,n));
+  [...followupRows.values()].forEach(n=>hits.push({kind:"Follow-up",view:"followups",title:n.customer_name||"Follow-up",text:[n.customer_name,n.phone,n.details].filter(Boolean).join(" · "),date:n.callback_at}));
+  hits.sort((x,y)=>new Date(y.date||0)-new Date(x.date||0));
+  panel.innerHTML=hits.length?'<div class="global-search-head">'+hits.length+' matching records'+(hits.length===180?' · showing latest matches':'')+'</div>'+hits.slice(0,180).map(r=>'<button type="button" class="global-search-hit" data-search-view="'+r.view+'"><span><b>'+esc(r.title)+'</b><small>'+esc(r.kind)+' · '+esc(time(r.date))+'</small></span><span class="global-hit-snippet">'+esc(r.text.slice(0,150))+'</span></button>').join(""):'<div class="global-search-empty">No matching records found.</div>';
+ }catch(e){if(request!==globalSearchRequest)return;panel.innerHTML='<div class="global-search-empty">Search failed: '+esc(e.message||"Database query failed")+'</div>';console.warn("CTR global search failed",e)}
 }
+
 function directPairKey(a,b){return [a,b].sort().join("::")}
 function directAvatar(name,userId=""){const chosen=userId?localStorage.getItem("ctr_avatar_"+userId):"";if(chosen)return esc(chosen);const parts=String(name||"CTR Member").trim().split(/\s+/);return esc((parts[0]?.[0]||"C")+(parts.length>1?parts[parts.length-1][0]:""))}
 const CTR_AVATARS=["⚔️","🛡️","🐉","🐺","🦊","🐯","🦅","🐼","🦁","🐲","🌙","🔥","🎭","👑","🌸","☯️"];
