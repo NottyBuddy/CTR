@@ -203,16 +203,16 @@ function renderDirect(){
 }
 async function loadDirect(){
  const {data:people,error:peopleError}=await db.from("ctr_team_directory").select("user_id,email,display_name").order("display_name");
- if(peopleError){status("Team directory unavailable. Run the direct-message SQL update in Supabase.");return}
+ if(peopleError){status("Could not load team contacts: "+peopleError.message);return}
  team=people||[];
  if(isAdmin()){const {data:logs}=await db.from("ctr_moderation_log").select("*").order("deleted_at",{ascending:false}).limit(100);$("moderationPanel")?.classList.remove("hidden");$("moderationLog").innerHTML=(logs||[]).map(x=>`<article class="note"><div class="note-top"><span class="note-author">${esc(x.deleted_by_email||"Admin")} · ${esc(x.table_name)}</span><span class="note-time">${esc(time(x.deleted_at))}</span></div><div class="note-body">${esc(x.original_body||"")}</div></article>`).join("")||'<div class="empty-state">No deletions recorded.</div>'}else $("moderationPanel")?.classList.add("hidden");
  const sel=$("directRecipient"),old=selectedDirectRecipient||sel.value; const newSel=$("dmNewRecipient"),newOld=newSel.value;
  sel.innerHTML='<option value="">'+(isAdmin()?'All conversations (admin view)':'Choose a team member…')+'</option>'+
   team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join("");
  if(old&&team.some(p=>p.user_id===old)){sel.value=old;selectedDirectRecipient=old;} newSel.innerHTML='<option value="">＋ New message</option>'+team.filter(p=>p.user_id!==user.id).map(p=>`<option value="${p.user_id}">${esc(p.display_name)}</option>`).join(""); if(newOld&&team.some(p=>p.user_id===newOld))newSel.value=newOld;
- const {data,error}=await db.from("ctr_direct_messages").select("*").order("created_at",{ascending:true}).limit(1000);
+ const {data,error}=await db.from("ctr_direct_messages").select("*").order("created_at",{ascending:false}).limit(1000);
  if(error){status("Could not load direct messages: "+error.message);return}
- direct=data||[];renderDirect();renderPersonal();updateUnread();renderAgentDashboard();
+ direct=(data||[]).reverse();renderDirect();renderPersonal();updateUnread();if(isAdmin())renderAgentDashboard();
 }
 async function refreshMessages(){
  const btn=$("refreshData");btn.disabled=true;btn.classList.add("is-refreshing");btn.setAttribute("aria-label","Refreshing");
@@ -384,7 +384,7 @@ document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>showView(b.dat
 $("colorChoices").onclick=e=>{const b=e.target.closest("[data-color]");if(b&&!b.disabled)chooseColor(b.dataset.color)};
 $("generateAI").onclick=generateNotes;
 $("refreshData").onclick=refreshMessages;$("enableNotifications")?.addEventListener("click",enableNotifications);
-$("directRecipient").onchange=renderDirect;
+$("directRecipient").onchange=()=>{selectedDirectRecipient=$("directRecipient").value||"";selectedDirectKey=selectedDirectRecipient?directPairKey(user.id,selectedDirectRecipient):"";renderDirect()};
 $("dmNewRecipient").addEventListener("change",e=>{const id=e.target.value;if(!id)return;openDirectConversation(id);$("directInput").focus()});
 $("dmThreadHeader").addEventListener("click",()=>{if(window.matchMedia("(max-width:760px)").matches){mobileThreadOpen=false;$("directView").querySelector(".dm-inbox").classList.remove("mobile-thread-open")}});
 document.querySelectorAll("[data-dm-filter]").forEach(b=>b.addEventListener("click",()=>{directInboxFilter=b.dataset.dmFilter;document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x===b));renderDirect()}));
@@ -412,12 +412,14 @@ $("directForm").onsubmit=async e=>{
  }catch(err){status("Message failed: "+(err?.message||"Please try again."))}
  finally{send.disabled=false}
 };
-document.addEventListener("click",e=>{
+$("directInboxList").addEventListener("click",e=>{
  const row=e.target.closest(".dm-conversation[data-dm-other]");
- if(!row)return;
- e.preventDefault();e.stopPropagation();
- try{openDirectConversation(row.dataset.dmOther)}catch(err){console.error("Could not open direct conversation",err);status("Could not open this conversation: "+(err?.message||"Please refresh and try again."))}
-},true);
+ if(!row||!$("directInboxList").contains(row))return;
+ e.preventDefault();
+ const id=row.dataset.dmOther;
+ if(!id)return;
+ try{openDirectConversation(id)}catch(err){console.error("Could not open direct conversation",err);status("Could not open this conversation: "+(err?.message||"Please refresh and try again."))}
+});
 document.addEventListener("click",async e=>{
  const cp=e.target.closest("[data-copy-phone]");if(cp){try{await navigator.clipboard.writeText(cp.dataset.copyPhone);status("Phone copied.")}catch{status("Clipboard unavailable.")}return}
  const cn=e.target.closest("[data-copy-note]");if(cn){const n=group.find(x=>x.id===cn.dataset.copyNote);if(n){try{await navigator.clipboard.writeText(n.body);status("CRM note copied.")}catch{status("Clipboard unavailable.")}}return}
@@ -444,7 +446,23 @@ document.addEventListener("click",async e=>{
 });
 $("followupForm").onsubmit=async e=>{e.preventDefault();if(!user)return;const customer_name=$("followupCustomer").value.trim(),phone=$("followupPhone").value.trim(),rawAt=$("followupAt").value,callback=new Date(rawAt);if(!customer_name||!phone||!rawAt||Number.isNaN(callback.getTime())){status("Enter customer name, phone and a valid callback date/time.");return}const submit=$("followupForm").querySelector("button[type=submit]");submit.disabled=true;const payload={user_id:user.id,customer_name,phone,callback_at:callback.toISOString(),details:$("followupDetails").value.trim(),status:"pending"};const r=await db.from("ctr_followups").insert(payload).select("id").single();submit.disabled=false;if(r.error){status("Could not schedule follow-up: "+r.error.message);return}$("followupForm").reset();$("followupForm").classList.add("hidden");$("newFollowupBtn").textContent="＋ Create Follow-up";await loadFollowups();status("Callback saved to the shared pending list.");};
 $("noteForm").onsubmit=async e=>{e.preventDefault();const body=$("noteInput").value.trim();if(!body||!user)return;const {error}=await db.from("ctr_group_notes").insert({user_id:user.id,author_email:user.email,body});if(error)status("Could not send: "+error.message);else {$("noteInput").value="";renderGroup(true)}};
-$("personalForm").onsubmit=async e=>{e.preventDefault();const body=$("personalInput").value.trim();if(!body||!user)return;const submit=$("personalForm").querySelector('button[type="submit"]');submit.disabled=true;try{const {data,error}=await db.from("ctr_personal_notes").insert({user_id:user.id,body}).select("*").single();if(error){status("Could not save personal note: "+error.message);return}personal.unshift(data);$("personalInput").value="";renderPersonal();status("Personal note saved.")}catch(err){status("Could not save personal note: "+(err?.message||"Please try again."))}finally{submit.disabled=false}};
+$("personalForm").onsubmit=async e=>{
+ e.preventDefault();
+ const body=$("personalInput").value.trim();
+ if(!body||!user)return;
+ const submit=$("personalForm").querySelector('button[type="submit"]');
+ submit.disabled=true;
+ try{
+  const {error}=await db.from("ctr_personal_notes").insert({user_id:user.id,body});
+  if(error){status("Could not save personal note: "+error.message);return}
+  $("personalInput").value="";
+  const {data, error:readError}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).limit(500);
+  if(!readError)personal=data||[];
+  renderPersonal();
+  status(readError?"Personal note saved. Refresh if it does not appear yet.":"Personal note saved.");
+ }catch(err){status("Could not save personal note: "+(err?.message||"Please try again."))}
+ finally{submit.disabled=false}
+};
 document.addEventListener("click",async e=>{const target=e.target.closest("button");if(!target)return;const g=target.dataset.gdelete,p=target.dataset.pdelete,d=target.dataset.ddelete;const edit=target.dataset.edit,pedit=target.dataset.pedit,pin=target.dataset.pin,rid=target.dataset.react,emoji=target.dataset.emoji;
 if(edit){const n=group.find(x=>x.id===edit);if(n){const body=prompt("Edit message",n.body);if(body!==null&&body.trim()){const {error}=await db.from("ctr_group_notes").update({body:body.trim(),edited_at:new Date().toISOString()}).eq("id",edit);if(error)status(error.message)}}}
 if(pedit){const n=personal.find(x=>x.id===pedit);if(n){const body=prompt("Edit personal note",n.body);if(body!==null&&body.trim()){const {error}=await db.from("ctr_personal_notes").update({body:body.trim(),edited_at:new Date().toISOString()}).eq("id",pedit);if(error)status(error.message)}}}
