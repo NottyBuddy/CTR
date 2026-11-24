@@ -155,13 +155,18 @@ function openDirectConversation(id){
  $("directInput").focus();
  status("Chat opened: "+(person.display_name||"team member"));
 }
+const dmHiddenKey=()=> "ctr_dm_hidden_"+(user?.id||"anonymous");
+function readHiddenDMIds(){try{return new Set(JSON.parse(localStorage.getItem(dmHiddenKey())||"[]").map(String))}catch{return new Set()}}
+function writeHiddenDMIds(ids){try{localStorage.setItem(dmHiddenKey(),JSON.stringify([...ids]))}catch(e){status("Could not save local chat history preference.")}}
 function renderDirect(){
  const admin=isAdmin(),people=team.filter(p=>p.user_id!==user.id);
+ const hiddenIds=readHiddenDMIds();
+ const visibleDirect=direct.filter(m=>!hiddenIds.has(String(m.id)));
  $("directAdminHint")?.classList.add("hidden"); // The header is re-rendered; this optional element may no longer exist.
  $("directCount").textContent=direct.length;
  let allConversations=[];
  {  const pairs=new Map();
-  direct.forEach(m=>{
+  visibleDirect.forEach(m=>{
    if(m.sender_id!==user.id&&m.recipient_id!==user.id)return;
    const key=directPairKey(m.sender_id,m.recipient_id);
    if(!pairs.has(key))pairs.set(key,[]);
@@ -198,11 +203,11 @@ function renderDirect(){
   selectedDirectKey=active.key;
   $("directRecipient").value=active.otherId;
   $("dmNewRecipient").value="";
-  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name,active.otherId)}</span><div><strong>${esc(active.name)}</strong><small>Private conversation · CTR team member</small></div><div class="dm-thread-actions">${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}</div>`;
+  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name,active.otherId)}</span><div><strong>${esc(active.name)}</strong><small>Private conversation · CTR team member</small></div><div class="dm-thread-actions"><button type="button" class="message-action" data-clear-dm="${esc(active.otherId)}">Clear history</button>${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}</div>`;
   const box=$("directNotes"),near=box.scrollHeight-box.scrollTop-box.clientHeight<120;
   box.innerHTML=active.messages.map(m=>{
    const mine=m.sender_id===user.id,from=team.find(p=>p.user_id===m.sender_id)?.display_name||"CTR Member";
-   return `<article class="dm-message ${mine?"mine":""}">${admin&&!mine?`<span class="dm-message-sender">${esc(from)}</span>`:""}<div>${esc(m.body||"")}</div><time>${esc(time(m.created_at))}${mine?" · ✓✓":""}</time>${admin?`<button class="delete-note" data-ddelete="${m.id}">Delete</button>`:""}</article>`;
+   return `<article class="dm-message ${mine?"mine":""}" data-dm-message="${m.id}">${admin&&!mine?`<span class="dm-message-sender">${esc(from)}</span>`:""}<div>${esc(m.body||"")}</div><time>${esc(time(m.created_at))}${mine?" · ✓✓":""}</time>${mine?`<button type="button" class="message-action" data-dm-edit="${m.id}">Edit</button>`:""}${admin?`<button class="delete-note" data-ddelete="${m.id}">Delete</button>`:""}</article>`;
   }).join("")||'<div class="dm-empty-thread"><div class="dm-empty-mark">✉</div><strong>Start a private conversation</strong><span>Write a message below to begin chatting.</span></div>';
   let lastDay="";
   [...box.querySelectorAll(".dm-message")].forEach((card,index)=>{
@@ -535,6 +540,7 @@ $("directForm").onsubmit=async e=>{
  }catch(err){status("Message failed: "+(err?.message||"Please try again."))}
  finally{send.disabled=false}
 };
+$("directNotes").addEventListener("click",async e=>{const clear=e.target.closest("[data-clear-dm]");if(clear){const other=clear.dataset.clearDm;const ids=direct.filter(m=>directPairKey(m.sender_id,m.recipient_id)===directPairKey(user.id,other)).map(m=>String(m.id));if(!ids.length){status("There is no chat history to clear.");return}if(!confirm("Clear this conversation from your device only? Messages remain visible to the other person and in the CRM database."))return;const hidden=readHiddenDMIds();ids.forEach(id=>hidden.add(id));writeHiddenDMIds(hidden);renderDirect();status("Conversation hidden on this device. Shared messages were not deleted.");return}const edit=e.target.closest("[data-dm-edit]");if(edit){const msg=direct.find(m=>String(m.id)===String(edit.dataset.dmEdit));if(!msg||msg.sender_id!==user.id)return;const body=prompt("Edit your message",msg.body||"");if(body===null)return;if(!body.trim()){status("Message cannot be empty.");return}edit.disabled=true;const {error}=await db.from("ctr_direct_messages").update({body:body.trim()}).eq("id",msg.id).eq("sender_id",user.id);edit.disabled=false;if(error){status("Edit failed. Apply the direct-message edit permission migration in Supabase: "+error.message);return}await loadDirect();renderDirect();status("Message updated.");}});
 $("directInboxList").addEventListener("click",e=>{
  const target=e.target instanceof Element?e.target:null;if(!target)return;
  if(target.closest("[data-direct-retry]")){loadDirect();return}
