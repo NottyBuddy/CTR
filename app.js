@@ -7,6 +7,7 @@ let db,user,group=[],personal=[],direct=[],team=[],channel;
 let groupFilter="",dateFilter="",personalFilter="",directFilter="",followupSearchFilter="";
 let selectedDirectKey="",selectedDirectRecipient="",directInboxFilter="all",mobileThreadOpen=false;
 let adminAuditAgentId="",adminAuditPairKey="",adminAuditSearch="",adminAuditDate="";
+let dashboardFrom="",dashboardTo="";
 const seenKey=k=>"ctr_seen_"+k+"_"+(user?.id||"");const markSeen=k=>{if(user)localStorage.setItem(seenKey(k),new Date().toISOString());updateUnread()};const countUnread=(a,k)=>a.filter(x=>new Date(x.created_at)>new Date(localStorage.getItem(seenKey(k))||0)).length;function updateUnread(){if(!user)return;for(const [id,n] of [["groupUnread",countUnread(group.filter(x=>x.user_id!==user.id),"group")],["directUnread",countUnread(direct.filter(x=>x.recipient_id===user.id),"direct")]]){const e=$(id);if(e){e.textContent=n;e.classList.toggle("hidden",!n)}}}
 const ADMIN_EMAIL="mahesh.s@hrhnext.com";
 const isAdmin=()=>String(user?.email||"").toLowerCase()===ADMIN_EMAIL;
@@ -73,17 +74,25 @@ async function renderAgentDashboard(){
  if(!agents.length){box.innerHTML='<div class="empty-state">No agent activity available yet.</div>';return}
  box.innerHTML='<div class="empty-state">Updating agent activity…</div>';
  const rows=await Promise.all(agents.map(async t=>{
-  const [g,p,pending,completed]=await Promise.all([
-   db.from("ctr_group_notes").select("id",{count:"exact",head:true}).eq("user_id",t.user_id),
-   db.from("ctr_personal_notes").select("id",{count:"exact",head:true}).eq("user_id",t.user_id),
-   db.from("ctr_followups").select("id",{count:"exact",head:true}).eq("user_id",t.user_id).neq("status","completed"),
-   db.from("ctr_followups").select("id",{count:"exact",head:true}).eq("user_id",t.user_id).eq("status","completed")
-  ]);
-  const messages=direct.filter(m=>m.sender_id===t.user_id||m.recipient_id===t.user_id);
+  const from=dashboardFrom?dashboardFrom+"T00:00:00.000Z":null,to=dashboardTo?dashboardTo+"T23:59:59.999Z":null;
+  let gq=db.from("ctr_group_notes").select("id",{count:"exact",head:true}).eq("user_id",t.user_id);
+  let pq=db.from("ctr_personal_notes").select("id",{count:"exact",head:true}).eq("user_id",t.user_id);
+  let fq=db.from("ctr_followups").select("id",{count:"exact",head:true}).eq("user_id",t.user_id);
+  let cq=db.from("ctr_followups").select("id",{count:"exact",head:true}).eq("user_id",t.user_id).eq("status","completed");
+  if(from){gq=gq.gte("created_at",from);pq=pq.gte("created_at",from);fq=fq.gte("callback_at",from);cq=cq.gte("callback_at",from)}
+  if(to){gq=gq.lte("created_at",to);pq=pq.lte("created_at",to);fq=fq.lte("callback_at",to);cq=cq.lte("callback_at",to)}
+  const [g,p,pending,completed]=await Promise.all([gq,pq,fq.neq("status","completed"),cq]);
+  const messages=direct.filter(m=>(m.sender_id===t.user_id||m.recipient_id===t.user_id)&&(!from||new Date(m.created_at)>=new Date(from))&&(!to||new Date(m.created_at)<=new Date(to)));
   const partners=new Set(messages.map(m=>m.sender_id===t.user_id?m.recipient_id:m.sender_id));
-  return {id:t.user_id,name:t.display_name||displayName(t.email),notes:(g.count||0)+(p.count||0),pending:pending.count||0,completed:completed.count||0,messageCount:messages.length,partnerCount:partners.size,error:g.error||p.error||pending.error||completed.error};
+  return {id:t.user_id,name:t.display_name||displayName(t.email),groupCount:g.count||0,personalCount:p.count||0,notes:(g.count||0)+(p.count||0),pending:pending.count||0,completed:completed.count||0,messageCount:messages.length,partnerCount:partners.size,error:g.error||p.error||pending.error||completed.error};
  }));
  box.innerHTML=rows.map(r=>`<button type="button" class="agent-card agent-card-select ${adminAuditAgentId===r.id?"selected":""}" data-audit-agent="${esc(r.id)}"><div class="agent-card-head"><strong>${esc(r.name)}</strong><span class="agent-card-label">OPEN RECORDS ↗</span></div><div class="agent-metrics"><div><strong>${r.error?"—":r.notes}</strong><span>Total notes</span></div><div><strong>${r.error?"—":r.pending}</strong><span>Pending follow-ups</span></div><div><strong>${r.error?"—":r.completed}</strong><span>Completed callbacks</span></div></div><div class="agent-audit-card-foot"><span>${r.messageCount} direct messages</span><span>${r.partnerCount} conversations</span></div>${r.error?'<small class="agent-metric-error">Some counts could not be loaded.</small>':""}</button>`).join("");
+ const summary=$("dashboardSummary");
+ if(summary){
+  const totals=rows.reduce((a,r)=>({group:a.group+r.groupCount,personal:a.personal+r.personalCount,pending:a.pending+r.pending,completed:a.completed+r.completed,messages:a.messages+r.messageCount}),{group:0,personal:0,pending:0,completed:0,messages:0});
+  const max=Math.max(1,...rows.map(r=>r.groupCount+r.personalCount+r.messageCount));
+  summary.innerHTML='<div class="dashboard-summary-head"><strong>'+(isAdmin()?"Team overview":"Your activity")+'</strong><small>'+(dashboardFrom||dashboardTo?esc(dashboardFrom||"Start")+" – "+esc(dashboardTo||"Today"):"All available records")+'</small></div><div class="dashboard-total-grid"><div><strong>'+totals.group+'</strong><span>Group notes</span></div><div><strong>'+totals.personal+'</strong><span>Personal notes</span></div><div><strong>'+totals.messages+'</strong><span>Direct messages</span></div><div><strong>'+totals.pending+'</strong><span>Pending</span></div><div><strong>'+totals.completed+'</strong><span>Completed</span></div></div><div class="dashboard-chart-title">Activity by agent</div>'+rows.map(r=>'<div class="dashboard-bar-row"><span>'+esc(r.name)+'</span><div class="dashboard-bar-track" role="img" aria-label="'+esc(r.name)+' activity"><i style="width:'+Math.round((r.groupCount+r.personalCount+r.messageCount)/max*100)+'%"></i></div><b>'+(r.groupCount+r.personalCount+r.messageCount)+'</b></div>').join("");
+ }
  if(isAdmin())renderAdminChatExplorer();else $("agentChatAudit")?.classList.add("hidden");
 }
 function renderAdminChatExplorer(){
@@ -531,6 +540,9 @@ document.querySelectorAll("[data-dm-filter]").forEach(b=>b.addEventListener("cli
 document.addEventListener("input",e=>{if(e.target?.id==="agentChatAuditSearch"){adminAuditSearch=e.target.value;const pos=e.target.selectionStart;renderAdminChatExplorer();const input=$("agentChatAuditSearch");input?.focus();input?.setSelectionRange(pos,pos)}});
 document.addEventListener("change",e=>{if(e.target?.id==="agentChatAuditDate"){adminAuditDate=e.target.value;renderAdminChatExplorer()}});
 
+$("dashboardFrom")?.addEventListener("change",e=>{dashboardFrom=e.target.value||"";if(dashboardTo&&dashboardFrom>dashboardTo){dashboardTo="";$("dashboardTo").value=""}renderAgentDashboard()});
+$("dashboardTo")?.addEventListener("change",e=>{dashboardTo=e.target.value||"";if(dashboardFrom&&dashboardTo<dashboardFrom){dashboardFrom="";$("dashboardFrom").value=""}renderAgentDashboard()});
+$("dashboardReset")?.addEventListener("click",()=>{dashboardFrom=dashboardTo="";$("dashboardFrom").value="";$("dashboardTo").value="";renderAgentDashboard()});
 $("globalSearch")?.addEventListener("input",e=>globalSearch(e.target.value));
 $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value||"";renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
 $("directForm").onsubmit=async e=>{
