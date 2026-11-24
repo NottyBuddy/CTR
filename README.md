@@ -36,4 +36,9 @@ The Group Notes page includes a browser-side shorthand organizer for preparing a
 
 
 ## CRM note privacy
-The Group Notes draft helper processes call shorthand locally in the browser. It does not send CRM input to Gemini, OpenAI, an AI gateway, or another model provider. It is a rule-based drafting helper, not a full generative AI model. Do not configure or add third-party AI API keys for this feature. A future private generative model must run locally in the user's browser/device or on infrastructure controlled by the organization, with no external prompt transmission.
+The Group Notes CRM Assistant runs its small language model in the browser/device. Customer prompts are not sent to Gemini, OpenAI, an AI gateway, or another inference provider. First use downloads model files from the configured public model host; this is not fully offline on first use. Do not add third-party AI API keys or remote inference fallbacks. The small model can make mistakes, so review generated notes and confirm ambiguous details before sharing.
+
+
+## Direct Chat controls
+- Members can edit only messages they sent. The database policy migration is in `supabase-direct-message-edit.sql`; run that file once in the Supabase SQL Editor to enable this permission and the edited timestamp column. It does not delete or rewrite existing messages.
+- **Clear history** hides the selected conversation on the current browser/device for the signed-in account only. It does not delete messages from Supabase or from the other participant's view. Browser local storage is used to remember the hidden message IDs.
