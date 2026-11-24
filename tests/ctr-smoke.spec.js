@@ -4,7 +4,7 @@ test("CTR public page loads and sign-in form is usable", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", error => pageErrors.push(error.message));
 
-  await page.goto("/");
+  await page.goto("./");
   await expect(page).toHaveTitle(/CTR — Calling Team Records/);
   await expect(page.locator("#authView")).toBeVisible();
   await expect(page.locator("#email")).toBeVisible();
@@ -19,7 +19,7 @@ test("authenticated agent can open the Direct Chat workspace", async ({ page }) 
   const password = process.env.CTR_TEST_PASSWORD;
   test.skip(!email || !password, "Set CTR_TEST_EMAIL and CTR_TEST_PASSWORD GitHub Actions secrets for authenticated checks.");
 
-  await page.goto("/");
+  await page.goto("./");
   await page.locator("#email").fill(email);
   await page.locator("#password").fill(password);
   await page.locator("#authSubmit").click();
@@ -44,7 +44,7 @@ test("authenticated admin can open the Agents Dashboard", async ({ page }) => {
   const password = process.env.CTR_ADMIN_TEST_PASSWORD;
   test.skip(!email || !password, "Set CTR_ADMIN_TEST_EMAIL and CTR_ADMIN_TEST_PASSWORD GitHub Actions secrets for admin checks.");
 
-  await page.goto("/");
+  await page.goto("./");
   await page.locator("#email").fill(email);
   await page.locator("#password").fill(password);
   await page.locator("#authSubmit").click();
@@ -57,7 +57,7 @@ test("authenticated admin can open the Agents Dashboard", async ({ page }) => {
 
 test("CTR layout fits a mobile viewport without horizontal overflow", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
+  await page.goto("./");
   await expect(page.locator("#authView")).toBeVisible();
   const dimensions = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }));
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1);
