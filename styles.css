@@ -2067,3 +2067,9 @@ html,body{height:100%;min-height:100%;overflow:hidden!important}
 @media(max-width:760px){
  #groupView #crmGenerator{width:100%!important;margin:14px 0 0!important;padding:17px 14px!important}
 }
+
+/* Override the legacy desktop rule that hid the CRM generator on Group Notes. */
+.app-view:has(#groupView:not(.hidden)) #crmGenerator{
+ display:block!important;
+ visibility:visible!important;
+}
