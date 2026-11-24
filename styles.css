@@ -2073,3 +2073,23 @@ html,body{height:100%;min-height:100%;overflow:hidden!important}
  display:block!important;
  visibility:visible!important;
 }
+
+/* Group Notes: dock CRM assistant on the left; keep chat content on the right. */
+@media(min-width:761px){
+ .app-view:has(#groupView:not(.hidden)) .workspace{display:block!important;min-width:0!important}
+ .app-view:has(#groupView:not(.hidden)) .chat{width:100%!important;max-width:none!important;min-width:0!important}
+ #groupView{display:grid!important;grid-template-columns:minmax(265px,30%) minmax(0,1fr)!important;column-gap:20px!important;row-gap:0!important;align-items:start!important}
+ #groupView>#crmGenerator{grid-column:1!important;grid-row:1 / span 6!important;position:sticky!important;top:16px!important;align-self:start!important;width:100%!important;max-height:calc(100vh - 150px)!important;overflow-y:auto!important;margin:16px 0 0!important;padding:19px 16px!important;border-radius:18px!important}
+ #groupView>.chat-head,#groupView>#connectionBanner,#groupView>.search-toolbar,#groupView>.color-picker-wrap,#groupView>#notes,#groupView>#noteForm{grid-column:2!important;min-width:0!important}
+ #groupView>.chat-head{grid-row:1!important;padding-top:16px!important}
+ #groupView>#connectionBanner{grid-row:2!important}
+ #groupView>.search-toolbar{grid-row:3!important}
+ #groupView>.color-picker-wrap{grid-row:4!important}
+ #groupView>#notes{grid-row:5!important}
+ #groupView>#noteForm{grid-row:6!important}
+}
+@media(max-width:760px){
+ #groupView{display:flex!important;flex-direction:column!important;min-width:0!important}
+ #groupView>#crmGenerator{order:-1!important;position:static!important;width:100%!important;max-height:none!important;overflow:visible!important;margin:12px 0 8px!important}
+ #groupView>.chat-head,#groupView>#connectionBanner,#groupView>.search-toolbar,#groupView>.color-picker-wrap,#groupView>#notes,#groupView>#noteForm{width:100%!important;min-width:0!important}
+}
