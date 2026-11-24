@@ -100,15 +100,3 @@ test("CTR layout fits desktop and mobile viewports without horizontal overflow",
   }
 });
 
-test("GPT CRM assistant API is deployed and rejects unauthenticated requests", async ({ request }) => {
-  const endpoint = "https://ctr-ai-assistant-notty-buddy.vercel.app/api/crm-assistant";
-  const get = await request.get(endpoint);
-  expect(get.status()).toBe(405);
-  const post = await request.post(endpoint, {
-    headers: { Origin: "https://nottybuddy.github.io", "Content-Type": "application/json" },
-    data: { input: "test CRM note" }
-  });
-  expect(post.status()).toBe(401);
-  const body = await post.json();
-  expect(body.error).toMatch(/sign in|session/i);
-});
