@@ -155,18 +155,12 @@ function openDirectConversation(id){
  $("directInput").focus();
  status("Chat opened: "+(person.display_name||"team member"));
 }
-const dmHiddenKey=()=> "ctr_dm_hidden_"+(user?.id||"anonymous");
-function readHiddenDMIds(){try{return new Set(JSON.parse(localStorage.getItem(dmHiddenKey())||"[]").map(String))}catch{return new Set()}}
-function writeHiddenDMIds(ids){try{localStorage.setItem(dmHiddenKey(),JSON.stringify([...ids]))}catch(e){status("Could not save local chat history preference.")}}
 function renderDirect(){
  const admin=isAdmin(),people=team.filter(p=>p.user_id!==user.id);
- const hiddenIds=readHiddenDMIds();
- const visibleDirect=direct.filter(m=>!hiddenIds.has(String(m.id)));
  $("directAdminHint")?.classList.add("hidden"); // The header is re-rendered; this optional element may no longer exist.
  $("directCount").textContent=direct.length;
  let allConversations=[];
  {  const pairs=new Map();
-  visibleDirect.forEach(m=>{
    if(m.sender_id!==user.id&&m.recipient_id!==user.id)return;
    const key=directPairKey(m.sender_id,m.recipient_id);
    if(!pairs.has(key))pairs.set(key,[]);
@@ -203,7 +197,7 @@ function renderDirect(){
   selectedDirectKey=active.key;
   $("directRecipient").value=active.otherId;
   $("dmNewRecipient").value="";
-  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name,active.otherId)}</span><div><strong>${esc(active.name)}</strong><small>Private conversation · CTR team member</small></div><div class="dm-thread-actions"><button type="button" class="message-action" data-clear-dm="${esc(active.otherId)}">Clear history</button>${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}</div>`;
+  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name,active.otherId)}</span><div><strong>${esc(active.name)}</strong><small>Private conversation · CTR team member</small></div><div class="dm-thread-actions"><button type="button" class="message-action" ${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}</div>`;
   const box=$("directNotes"),near=box.scrollHeight-box.scrollTop-box.clientHeight<120;
   box.innerHTML=active.messages.map(m=>{
    const mine=m.sender_id===user.id,from=team.find(p=>p.user_id===m.sender_id)?.display_name||"CTR Member";
@@ -295,7 +289,7 @@ function readAIHistory(){try{return JSON.parse(localStorage.getItem(aiHistoryKey
 function saveAIHistory(entry){if(!user)return;const rows=readAIHistory();rows.unshift({...entry,id:Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7),createdAt:new Date().toISOString()});try{localStorage.setItem(aiHistoryKey(),JSON.stringify(rows.slice(0,100)))}catch(e){$("aiStatus").textContent="Draft generated, but browser storage is full. Copy the notes before leaving."}renderAIHistory()}
 function renderAIHistory(){
  const box=$("aiHistoryList");if(!box)return;const rows=readAIHistory();
- box.innerHTML=rows.length?rows.map((r,i)=>'<button class="ai-history-item" type="button" data-ai-history="'+esc(r.id)+'"><strong>'+esc((r.raw||"Untitled call").slice(0,68))+'</strong><small>'+esc(new Date(r.createdAt).toLocaleString())+' · '+esc(r.confidence||"review")+' confidence</small></button>').join(""):'<p class="ai-history-empty">Your generated notes will appear here.</p>';
+ box.innerHTML=rows.length?rows.map(r=>'<article class="ai-history-item"><button class="ai-history-open" type="button" data-ai-history="'+esc(r.id)+'"><strong>'+esc((r.raw||"Untitled call").slice(0,68))+'</strong><small>'+esc(new Date(r.createdAt).toLocaleString())+' · '+esc(r.confidence||"review")+' confidence</small></button><div class="ai-history-actions"><button type="button" class="message-action" data-ai-edit="'+esc(r.id)+'">Edit</button><button type="button" class="delete-note" data-ai-delete="'+esc(r.id)+'">Delete</button></div></article>').join(""):'<p class="ai-history-empty">Your generated notes will appear here.</p>';
 }
 function renderAIQuestions(questions,uncertainties){
  const box=$("aiQuestions"),items=[...(questions||[]),...(uncertainties||[]).map(x=>"Review: "+x)];
@@ -499,7 +493,11 @@ $("aiQuestions")?.addEventListener("click",e=>{
  card.querySelectorAll("button").forEach(btn=>{btn.disabled=true;btn.classList.toggle("selected",btn===option)});
  $("aiStatus").textContent="Confirmation added. Updating the CRM drafts…";generateNotes();
 });
-$("aiHistoryList")?.addEventListener("click",e=>{const item=e.target.closest("[data-ai-history]");if(item)restoreAIHistory(item.dataset.aiHistory)});
+$("aiHistoryList")?.addEventListener("click",e=>{const edit=e.target.closest("[data-ai-edit]"),del=e.target.closest("[data-ai-delete]"),item=e.target.closest("[data-ai-history]");
+  if(edit){const rows=readAIHistory(),row=rows.find(x=>x.id===edit.dataset.aiEdit);if(!row)return;const raw=prompt("Edit saved AI chat input",row.raw||"");if(raw===null)return;if(!raw.trim()){status("AI history input cannot be empty.");return}row.raw=raw.trim();row.group="";row.crm="";row.questions=[];row.uncertainties=[];row.confidence="review";localStorage.setItem(aiHistoryKey(),JSON.stringify(rows));$("aiInput").value=row.raw;generatedDrafts={group:"",crm:""};$("aiResults").classList.add("hidden");renderAIHistory();$("aiStatus").textContent="Saved input edited. Generate again to create updated CRM drafts.";return}
+  if(del){if(!confirm("Delete this saved AI conversation from this device?"))return;localStorage.setItem(aiHistoryKey(),JSON.stringify(readAIHistory().filter(x=>x.id!==del.dataset.aiDelete)));renderAIHistory();$("aiStatus").textContent="Saved AI conversation deleted from this device.";return}
+  if(item)restoreAIHistory(item.dataset.aiHistory)
+ });
 $("clearAIHistory")?.addEventListener("click",()=>{if(!user)return;if(!confirm("Clear saved CRM assistant history from this browser for this account?"))return;localStorage.removeItem(aiHistoryKey());renderAIHistory();$("aiStatus").textContent="Saved draft history cleared from this device."});
 $("refreshData").onclick=refreshMessages;$("enableNotifications")?.addEventListener("click",enableNotifications);
 $("directRecipient").onchange=()=>{selectedDirectRecipient=$("directRecipient").value||"";selectedDirectKey=selectedDirectRecipient?directPairKey(user.id,selectedDirectRecipient):"";renderDirect()};
@@ -540,7 +538,6 @@ $("directForm").onsubmit=async e=>{
  }catch(err){status("Message failed: "+(err?.message||"Please try again."))}
  finally{send.disabled=false}
 };
-$("dmThreadHeader").addEventListener("click",e=>{const clear=e.target.closest("[data-clear-dm]");if(!clear)return;e.stopPropagation();const other=clear.dataset.clearDm;const ids=direct.filter(m=>directPairKey(m.sender_id,m.recipient_id)===directPairKey(user.id,other)).map(m=>String(m.id));if(!ids.length){status("There is no chat history to clear.");return}if(!confirm("Clear this conversation from your device only? Messages remain visible to the other person and in the CRM database."))return;const hidden=readHiddenDMIds();ids.forEach(id=>hidden.add(id));writeHiddenDMIds(hidden);renderDirect();status("Conversation hidden on this device. Shared messages were not deleted.");});
 $("directNotes").addEventListener("click",async e=>{const edit=e.target.closest("[data-dm-edit]");if(edit){const msg=direct.find(m=>String(m.id)===String(edit.dataset.dmEdit));if(!msg||msg.sender_id!==user.id)return;const body=prompt("Edit your message",msg.body||"");if(body===null)return;if(!body.trim()){status("Message cannot be empty.");return}edit.disabled=true;const {error}=await db.from("ctr_direct_messages").update({body:body.trim(),edited_at:new Date().toISOString()}).eq("id",msg.id).eq("sender_id",user.id);edit.disabled=false;if(error){status("Edit failed. Apply the direct-message edit permission migration in Supabase: "+error.message);return}await loadDirect();renderDirect();status("Message updated.");}});
 $("directInboxList").addEventListener("click",e=>{
  const target=e.target instanceof Element?e.target:null;if(!target)return;
