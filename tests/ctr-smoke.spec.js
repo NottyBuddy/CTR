@@ -12,11 +12,14 @@ test("CTR public page, assets and sign-in form load without JavaScript errors", 
   await expect(page.locator("#authSubmit")).toBeEnabled();
   await expect(page.locator("#toggleAIPanel")).toBeAttached();
   await expect(page.locator("#dashboardFrom")).toBeAttached();
-  const assets = await Promise.all(["./styles.css?v=ctr-crm-polish-20261124-3", "./app.js?v=ctr-crm-polish-20261124-3", "./crm-local-ai.js?v=ctr-local-qwen-clarify-3", "./file_000000003bf88208a1f705b3f6395db2.png", "./file_000000005f188208adc8f107a4f7bc8b.png", "./assets/ctr-samurai-icons.svg"].map(url => request.get(new URL(url, "https://nottybuddy.github.io/CTR/").toString())));
+  await expect(page.locator("#toggleNotificationPanel")).toBeAttached();
+  await expect(page.locator("#themeToggle")).toBeAttached();
+  await expect(page.locator("#exportCrmData")).toBeAttached();
+  const assets = await Promise.all(["./styles.css?v=ctr-admin-centre-20261124-5", "./app.js?v=ctr-admin-centre-20261124-5", "./crm-local-ai.js?v=ctr-local-qwen-clarify-3", "./file_000000003bf88208a1f705b3f6395db2.png", "./file_000000005f188208adc8f107a4f7bc8b.png", "./assets/ctr-samurai-icons.svg"].map(url => request.get(new URL(url, "https://nottybuddy.github.io/CTR/").toString())));
   console.log("CTR_ASSET_STATUS", JSON.stringify(assets.map(x => x.status())));
   expect(assets.map(x => x.status())).toEqual([200, 200, 200, 200, 200, 200]);
   expect(pageErrors, "Uncaught JavaScript errors").toEqual([]);
-  const appSource = await (await request.get(new URL("./app.js?v=ctr-chat-history-20261124-21", "https://nottybuddy.github.io/CTR/").toString())).text();
+  const appSource = await (await request.get(new URL("./app.js?v=ctr-admin-centre-20261124-5", "https://nottybuddy.github.io/CTR/").toString())).text();
   expect(appSource).toContain("data-dm-edit");
   expect(appSource).not.toContain("data-clear-dm");
   expect(appSource).toContain("data-ai-edit");
@@ -25,6 +28,11 @@ test("CTR public page, assets and sign-in form load without JavaScript errors", 
   expect(appSource).toContain("data-reply-note");
   expect(appSource).toContain("data-dm-reply");
   expect(appSource).toContain("dashboardFrom");
+  expect(appSource).toContain("PAGE_SIZE=50");
+  expect(appSource).toContain("loadOlderDirect");
+  expect(appSource).toContain("loadNotifications");
+  expect(appSource).toContain("exportAllCrmData");
+  expect(appSource).toContain("ctr_notifications");
 });
 
 test("authenticated agent can use all workspace sections and open Direct Chat", async ({ page }) => {
@@ -61,6 +69,12 @@ test("authenticated agent can use all workspace sections and open Direct Chat", 
   await firstContact.click();
   await expect(page.locator("#directInput")).toBeEnabled();
   await expect(page.locator("#directForm button[type=submit]")).toBeEnabled();
+  await expect(page.locator("#exportCrmData")).toBeHidden();
+  await page.locator("#themeToggle").click();
+  await expect(page.locator("body")).toHaveClass(/theme-light/);
+  await page.locator("#themeToggle").click();
+  await page.locator("#toggleNotificationPanel").click();
+  await expect(page.locator("#notificationPanel")).toBeVisible();
 
   // Mobile: selecting a contact must reveal the thread pane, and the header must return to the inbox.
   await page.setViewportSize({ width: 390, height: 844 });
@@ -87,6 +101,7 @@ test("authenticated admin can inspect agent conversations and activity", async (
   await page.locator('[data-view="dashboard"]').click();
   await expect(page.locator("#dashboardView")).toBeVisible();
   await expect(page.locator("#agentDashboard")).toBeVisible();
+  await expect(page.locator("#exportCrmData")).toBeVisible();
   const agent = page.locator("#agentDashboard [data-audit-agent]").first();
   await expect(agent).toBeVisible({ timeout: 20000 });
   await agent.click();
