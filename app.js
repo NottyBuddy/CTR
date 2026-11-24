@@ -49,7 +49,7 @@ function enhanceGroupMessages(rows){
   if(n.user_id!==user.id&&new Date(n.created_at).getTime()>seen&&!unreadDone){const sep=document.createElement("div");sep.className="unread-divider";sep.textContent="New messages";card.before(sep);unreadDone=true}
   const body=n.body||"",m=body.match(/(?:\+?91[\s-]?)?[6-9]\d{9}/);
   const top=card.querySelector(".note-top");
-  if(m&&top){const phone=m[0].replace(/\\D/g,"");const cp=document.createElement("button");cp.className="message-action";cp.type="button";cp.dataset.copyPhone=phone;cp.textContent="Copy number";top.append(cp)}
+  if(m&&top){const phone=m[0].replace(/\D/g,"");const cp=document.createElement("button");cp.className="message-action";cp.type="button";cp.dataset.copyPhone=phone;cp.textContent="Copy number";top.append(cp)}
   const tools=document.createElement("div");tools.className="note-tools";const copy=document.createElement("button");copy.type="button";copy.className="message-action";copy.dataset.copyNote=n.id;copy.textContent="Copy note";tools.append(copy);card.append(tools);
  });
 }
@@ -60,7 +60,7 @@ function renderFollowups(){
  const q=followupSearchFilter.trim().toLowerCase();
  const rows=(q?followups.filter(f=>[f.customer_name,f.phone,f.details,team.find(t=>t.user_id===f.user_id)?.display_name||displayName(team.find(t=>t.user_id===f.user_id)?.email)].join(" ").toLowerCase().includes(q)):pending).sort((a,b)=>new Date(a.callback_at)-new Date(b.callback_at));
  $("followupCount").textContent=pending.length;const navCount=$("followupNavCount");if(navCount)navCount.textContent=pending.length;
- box.innerHTML=rows.length?rows.map(f=>'<article class="followup-item" data-followup-id="'+f.id+'"><div class="followup-info"><strong>'+esc(f.customer_name)+'</strong><span>'+esc(f.phone)+'</span><time>'+esc(time(f.callback_at))+'</time><p>'+esc(f.details||"")+'</p><small class="followup-status">'+(f.status==="completed"?"Completed":"Pending")+' · '+esc(team.find(t=>t.user_id===f.user_id)?.display_name||displayName(team.find(t=>t.user_id===f.user_id)?.email))+'</small></div><div class="followup-actions"><button class="message-action" data-copy-phone="'+f.phone.replace(/\\D/g,"")+'">Copy phone</button>'+(f.status!=="completed"?'<button class="message-action" data-follow-done="'+f.id+'">Complete</button>':'')+'</div></article>').join(""):(q?'<div class="empty-state">No matching follow-ups.</div>':'<div class="empty-state">No pending follow-ups.</div>');
+ box.innerHTML=rows.length?rows.map(f=>'<article class="followup-item" data-followup-id="'+f.id+'"><div class="followup-info"><strong>'+esc(f.customer_name)+'</strong><span>'+esc(f.phone)+'</span><time>'+esc(time(f.callback_at))+'</time><p>'+esc(f.details||"")+'</p><small class="followup-status">'+(f.status==="completed"?"Completed":"Pending")+' · '+esc(team.find(t=>t.user_id===f.user_id)?.display_name||displayName(team.find(t=>t.user_id===f.user_id)?.email))+'</small></div><div class="followup-actions"><button class="message-action" data-copy-phone="'+f.phone.replace(/\D/g,"")+'">Copy phone</button>'+(f.status!=="completed"?'<button class="message-action" data-follow-done="'+f.id+'">Complete</button>':'')+'</div></article>').join(""):(q?'<div class="empty-state">No matching follow-ups.</div>':'<div class="empty-state">No pending follow-ups.</div>');
 }
 async function loadFollowups(){const box=$("followupList");const r=await db.from("ctr_followups").select("*").order("callback_at").limit(500);if(r.error){followups=[];$("followupCount").textContent="!";box.innerHTML=`<div class="empty-state">Follow-ups are unavailable: ${esc(r.error.message)}. Run the CTR follow-up SQL in Supabase, then refresh.</div>`;return}followups=r.data||[];renderFollowups();renderAgentDashboard()}
 
@@ -95,7 +95,7 @@ function globalSearch(query){
  panel.classList.remove("hidden");
 }
 function directPairKey(a,b){return [a,b].sort().join("::")}
-function directAvatar(name,userId=""){const chosen=userId?localStorage.getItem("ctr_avatar_"+userId):"";if(chosen)return esc(chosen);const parts=String(name||"CTR Member").trim().split(/\\s+/);return esc((parts[0]?.[0]||"C")+(parts.length>1?parts[parts.length-1][0]:""))}
+function directAvatar(name,userId=""){const chosen=userId?localStorage.getItem("ctr_avatar_"+userId):"";if(chosen)return esc(chosen);const parts=String(name||"CTR Member").trim().split(/\s+/);return esc((parts[0]?.[0]||"C")+(parts.length>1?parts[parts.length-1][0]:""))}
 const CTR_AVATARS=["⚔️","🛡️","🐉","🐺","🦊","🐯","🦅","🐼","🦁","🐲","🌙","🔥","🎭","👑","🌸","☯️"];
 function setupAccountSettings(){
  if(!$("accountSettingsBtn")){const b=document.createElement("button");b.id="accountSettingsBtn";b.type="button";b.className="account-settings-btn";b.innerHTML='<span class="account-current-avatar"></span><span>Account settings</span>';b.addEventListener("click",()=>{$("accountSettingsModal").classList.remove("hidden");renderAccountAvatars()});$("userEmail").after(b)}
@@ -298,7 +298,7 @@ function sendMessageNotification(kind,row){
  const activeView=kind==="group"?"groupView":"directView";
  if(!document.hidden&&!$(activeView).classList.contains("hidden"))return;
  const sender=kind==="group"?displayName(row.author_email):(team.find(x=>x.user_id===row.sender_id)?.display_name||"CTR Member");
- const raw=String(row.body||"").replace(/\\s+/g," ").trim();
+ const raw=String(row.body||"").replace(/\s+/g," ").trim();
  const body=raw.length>130?raw.slice(0,127)+"…":raw;
  try{
   const note=new Notification(kind==="group"?"CTR · Group Chat":"CTR · Direct Message",{body:sender+": "+body,tag:"ctr-"+kind+"-"+row.id,renotify:false});
