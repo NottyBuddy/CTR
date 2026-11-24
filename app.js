@@ -136,8 +136,7 @@ function renderDirect(){
  $("directAdminHint").classList.add("hidden");
  $("directCount").textContent=direct.length;
  let allConversations=[];
- if(false){/* Admin-wide monitoring is now in Agent Dashboard. */ }else{
-  const pairs=new Map();
+ {  const pairs=new Map();
   direct.forEach(m=>{
    if(m.sender_id!==user.id&&m.recipient_id!==user.id)return;
    const key=directPairKey(m.sender_id,m.recipient_id);
@@ -445,7 +444,7 @@ document.addEventListener("click",async e=>{
 });
 $("followupForm").onsubmit=async e=>{e.preventDefault();if(!user)return;const customer_name=$("followupCustomer").value.trim(),phone=$("followupPhone").value.trim(),rawAt=$("followupAt").value,callback=new Date(rawAt);if(!customer_name||!phone||!rawAt||Number.isNaN(callback.getTime())){status("Enter customer name, phone and a valid callback date/time.");return}const submit=$("followupForm").querySelector("button[type=submit]");submit.disabled=true;const payload={user_id:user.id,customer_name,phone,callback_at:callback.toISOString(),details:$("followupDetails").value.trim(),status:"pending"};const r=await db.from("ctr_followups").insert(payload).select("id").single();submit.disabled=false;if(r.error){status("Could not schedule follow-up: "+r.error.message);return}$("followupForm").reset();$("followupForm").classList.add("hidden");$("newFollowupBtn").textContent="＋ Create Follow-up";await loadFollowups();status("Callback saved to the shared pending list.");};
 $("noteForm").onsubmit=async e=>{e.preventDefault();const body=$("noteInput").value.trim();if(!body||!user)return;const {error}=await db.from("ctr_group_notes").insert({user_id:user.id,author_email:user.email,body});if(error)status("Could not send: "+error.message);else {$("noteInput").value="";renderGroup(true)}};
-$("personalForm").onsubmit=async e=>{e.preventDefault();const body=$("personalInput").value.trim();if(!body||!user)return;const {error}=await db.from("ctr_personal_notes").insert({user_id:user.id,body});if(error)status("Could not save: "+error.message);else $("personalInput").value=""};
+$("personalForm").onsubmit=async e=>{e.preventDefault();const body=$("personalInput").value.trim();if(!body||!user)return;const submit=$("personalForm").querySelector('button[type="submit"]');submit.disabled=true;try{const {data,error}=await db.from("ctr_personal_notes").insert({user_id:user.id,body}).select("*").single();if(error){status("Could not save personal note: "+error.message);return}personal.unshift(data);$("personalInput").value="";renderPersonal();status("Personal note saved.")}catch(err){status("Could not save personal note: "+(err?.message||"Please try again."))}finally{submit.disabled=false}};
 document.addEventListener("click",async e=>{const target=e.target.closest("button");if(!target)return;const g=target.dataset.gdelete,p=target.dataset.pdelete,d=target.dataset.ddelete;const edit=target.dataset.edit,pedit=target.dataset.pedit,pin=target.dataset.pin,rid=target.dataset.react,emoji=target.dataset.emoji;
 if(edit){const n=group.find(x=>x.id===edit);if(n){const body=prompt("Edit message",n.body);if(body!==null&&body.trim()){const {error}=await db.from("ctr_group_notes").update({body:body.trim(),edited_at:new Date().toISOString()}).eq("id",edit);if(error)status(error.message)}}}
 if(pedit){const n=personal.find(x=>x.id===pedit);if(n){const body=prompt("Edit personal note",n.body);if(body!==null&&body.trim()){const {error}=await db.from("ctr_personal_notes").update({body:body.trim(),edited_at:new Date().toISOString()}).eq("id",pedit);if(error)status(error.message)}}}
