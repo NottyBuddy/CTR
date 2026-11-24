@@ -10,9 +10,9 @@ test("CTR public page, assets and sign-in form load without JavaScript errors", 
   await expect(page.locator("#email")).toBeVisible();
   await expect(page.locator("#password")).toBeVisible();
   await expect(page.locator("#authSubmit")).toBeEnabled();
-  const assets = await Promise.all(["./styles.css?v=ctr-gpt-assistant-20261124-12", "./app.js?v=ctr-gpt-assistant-20261124-11", "./file_000000003bf88208a1f705b3f6395db2.png", "./file_000000005f188208adc8f107a4f7bc8b.png", "./assets/ctr-samurai-icons.svg"].map(url => request.get(new URL(url, "https://nottybuddy.github.io/CTR/").toString())));
+  const assets = await Promise.all(["./styles.css?v=ctr-gpt-assistant-20261124-12", "./app.js?v=ctr-ondevice-ai-20261124-16", "./crm-local-ai.js?v=ctr-local-qwen-1", "./file_000000003bf88208a1f705b3f6395db2.png", "./file_000000005f188208adc8f107a4f7bc8b.png", "./assets/ctr-samurai-icons.svg"].map(url => request.get(new URL(url, "https://nottybuddy.github.io/CTR/").toString())));
   console.log("CTR_ASSET_STATUS", JSON.stringify(assets.map(x => x.status())));
-  expect(assets.map(x => x.status())).toEqual([200, 200, 200, 200, 200]);
+  expect(assets.map(x => x.status())).toEqual([200, 200, 200, 200, 200, 200]);
   expect(pageErrors, "Uncaught JavaScript errors").toEqual([]);
 });
 
