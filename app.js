@@ -330,16 +330,22 @@ function smartDrafts(raw){
 async function generateNotes(){
  const raw=$("aiInput").value.trim();
  if(!raw){$("aiStatus").textContent="Paste customer call details first.";return}
- $("generateAI").disabled=true;$("aiStatus").textContent="Preparing a private draft in this browser…";
+ if(!window.CTRLocalAI){$("aiStatus").textContent="Private local AI module did not load. Refresh and retry.";return}
+ $("generateAI").disabled=true;$("aiStatus").textContent="Loading private AI model… First use downloads model files to this browser; this may take a few minutes.";
  try{
-  generatedDrafts=smartDrafts(raw);
-  $("aiGroup").innerHTML=formatNoteHtml(generatedDrafts.group);
-  $("aiCrm").innerHTML=formatNoteHtml(generatedDrafts.crm);
-  const box=$("aiQuestions"),questions=generatedDrafts.clarifications||[];
-  box.innerHTML=questions.length?'<strong>Clarifications to review</strong><ul>'+questions.map(q=>'<li>'+esc(q)+'</li>').join("")+'</ul>':'<strong>Private draft ready</strong><p>Review the draft before sharing.</p>';
+  const result=await window.CTRLocalAI.generate(raw,(p)=>{
+   if(p?.status==="progress"&&Number.isFinite(p.progress))$("aiStatus").textContent="Downloading private AI model… "+Math.round(p.progress)+"%";
+   else if(p?.status==="done")$("aiStatus").textContent="Model file ready. Preparing your notes…";
+   else if(p?.status==="initiate")$("aiStatus").textContent="Preparing model file: "+(p.file||"");
+  });
+  generatedDrafts={group:result.group,crm:result.crm};
+  $("aiGroup").innerHTML=formatNoteHtml(result.group);
+  $("aiCrm").innerHTML=formatNoteHtml(result.crm);
+  const box=$("aiQuestions"),items=[...(result.questions||[]),...(result.uncertainties||[])];
+  box.innerHTML=items.length?'<strong>AI clarification / review</strong><ul>'+items.map(q=>'<li>'+esc(q)+'</li>').join("")+'</ul>':'<strong>Private AI draft ready</strong><p>Review customer facts before sharing.</p>';
   box.classList.remove("hidden");$("aiResults").classList.remove("hidden");
-  $("aiStatus").textContent="Private local drafting · No customer details sent to an AI provider.";
- }catch(e){$("aiStatus").textContent="Could not prepare notes: "+(e?.message||"Please retry.");}
+  $("aiStatus").textContent="On-device AI · "+result.confidence+" confidence · Customer prompt processed in this browser only.";
+ }catch(e){$("aiStatus").textContent="Private AI: "+(e?.message||"Could not prepare notes. Check browser memory and connection.");}
  finally{$("generateAI").disabled=false}
 }
 async function loadAll(){
