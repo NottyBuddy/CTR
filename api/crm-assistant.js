@@ -55,7 +55,7 @@ module.exports = async function handler(req, res) {
       method: "POST",
       headers: { Authorization: "Bearer " + gatewayToken, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "openai/gpt-5.4",
+        model: "openai/gpt-6.2-sol",
         temperature: 0.2,
         max_tokens: 1800,
         response_format: { type: "json_object" },
