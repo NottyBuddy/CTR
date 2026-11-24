@@ -25,6 +25,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Validate JavaScript syntax
+        run: |
+          node --check app.js
+          node --check crm-local-ai.js
       - name: Wait for GitHub Pages to serve this build
         run: |
           for attempt in $(seq 1 24); do
