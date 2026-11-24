@@ -330,25 +330,17 @@ function smartDrafts(raw){
 async function generateNotes(){
  const raw=$("aiInput").value.trim();
  if(!raw){$("aiStatus").textContent="Paste customer call details first.";return}
- $("generateAI").disabled=true;$("aiStatus").textContent="AI is understanding the call and preparing professional notes…";
+ $("generateAI").disabled=true;$("aiStatus").textContent="Understanding shorthand and organizing the call details…";
  try{
-  const {data:{session},error:sessionError}=await db.auth.getSession();
-  if(sessionError||!session?.access_token)throw new Error("Please sign in to CTR again.");
-  const response=await fetch("https://ctr-ai-assistant-notty-buddy.vercel.app/api/crm-assistant",{
-   method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
-   body:JSON.stringify({input:raw})
-  });
-  const result=await response.json().catch(()=>({}));
-  if(!response.ok)throw new Error(result.error||"AI assistant request failed.");
-  generatedDrafts={group:result.group||"",crm:result.crm||""};
+  generatedDrafts=smartDrafts(raw);
   $("aiGroup").innerHTML=formatNoteHtml(generatedDrafts.group);
   $("aiCrm").innerHTML=formatNoteHtml(generatedDrafts.crm);
-  const questions=Array.isArray(result.questions)?result.questions:[];
   const box=$("aiQuestions");
-  box.innerHTML=questions.length?'<strong>AI needs clarification</strong><ul>'+questions.map(q=>'<li>'+esc(q)+'</li>').join("")+'</ul>':'<strong>AI review</strong><p>No clarification required from the details provided.</p>';
+  const flags=generatedDrafts.clarifications||[];
+  box.innerHTML=flags.length?'<strong>Please confirm before sharing</strong><ul>'+flags.map(q=>'<li>'+esc(q)+'</li>').join("")+'</ul>':'<strong>Review</strong><p>Draft prepared from the details provided. Check names, quantities and dates before sharing.</p>';
   box.classList.remove("hidden");$("aiResults").classList.remove("hidden");
-  $("aiStatus").textContent="AI drafts ready · Confidence: "+(result.confidence||"medium")+". Review before sharing.";
- }catch(e){$("aiStatus").textContent="AI assistant: "+(e?.message||"Could not prepare notes.");}
+  $("aiStatus").textContent="Free draft ready · Review for accuracy before sharing.";
+ }catch(e){$("aiStatus").textContent="Could not prepare notes: "+(e?.message||"Please retry.");}
  finally{$("generateAI").disabled=false}
 }
 async function loadAll(){
