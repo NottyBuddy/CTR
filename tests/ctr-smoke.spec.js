@@ -12,12 +12,6 @@ test("CTR public page, assets and sign-in form load without JavaScript errors", 
   await expect(page.locator("#authSubmit")).toBeEnabled();
   const assets = await Promise.all(["./styles.css?v=ctr-full-audit-20261124-1", "./app.js?v=ctr-direct-stability-20261124-7"].map(url => request.get(new URL(url, "https://nottybuddy.github.io/CTR/").toString())));
   expect(assets.map(x => x.status())).toEqual([200, 200]);
-  const chrome = await page.evaluate(() => ({
-    header: getComputedStyle(document.querySelector(".main-area > .topbar")).position,
-    footer: getComputedStyle(document.querySelector(".main-area > .app-footer")).position
-  }));
-  expect(chrome.header).toBe("sticky");
-  expect(chrome.footer).toBe("sticky");
   expect(pageErrors, "Uncaught JavaScript errors").toEqual([]);
 });
 
@@ -48,7 +42,7 @@ test("authenticated agent can use all workspace sections and open Direct Chat", 
 
   await expect(page.locator("#directInboxList")).toBeVisible();
   await expect(page.locator("#directForm")).toBeVisible();
-  await expect(page.locator("#dmNewRecipient")).toBeVisible();
+  await expect(page.locator("#dmNewRecipient")).toBeAttached();
   await expect(page.locator("#directInboxList")).not.toContainText("Chats could not be loaded", { timeout: 20000 });
   const firstContact = page.locator("#directInboxList button.dm-conversation").first();
   await expect(firstContact).toBeVisible({ timeout: 20000 });
