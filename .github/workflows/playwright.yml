@@ -1,0 +1,46 @@
+name: CTR Playwright checks
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ctr-playwright-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright
+        run: npm install --no-save @playwright/test
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run browser tests
+        run: npx playwright test
+        env:
+          CI: true
+          CTR_TEST_EMAIL: ${{ secrets.CTR_TEST_EMAIL }}
+          CTR_TEST_PASSWORD: ${{ secrets.CTR_TEST_PASSWORD }}
+          CTR_ADMIN_TEST_EMAIL: ${{ secrets.CTR_ADMIN_TEST_EMAIL }}
+          CTR_ADMIN_TEST_PASSWORD: ${{ secrets.CTR_ADMIN_TEST_PASSWORD }}
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ctr-playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
