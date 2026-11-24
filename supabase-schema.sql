@@ -284,7 +284,7 @@ drop policy if exists "Users mark own notifications read" on public.ctr_notifica
 create policy "Users mark own notifications read" on public.ctr_notifications for update to authenticated using(auth.uid()=recipient_id) with check(auth.uid()=recipient_id);
 drop policy if exists "Users delete own notifications" on public.ctr_notifications;
 create policy "Users delete own notifications" on public.ctr_notifications for delete to authenticated using(auth.uid()=recipient_id);
-revoke insert,truncate on public.ctr_notifications from anon,authenticated;
+revoke all on public.ctr_notifications from anon,authenticated;
 grant select,update,delete on public.ctr_notifications to authenticated;
 create or replace function public.ctr_notify_group_note() returns trigger language plpgsql security definer set search_path=public,auth as $$ begin
  insert into public.ctr_notifications(recipient_id,actor_id,kind,reference_id,title,body)
