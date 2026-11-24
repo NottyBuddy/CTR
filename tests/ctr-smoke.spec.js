@@ -10,7 +10,7 @@ test("CTR public page, assets and sign-in form load without JavaScript errors", 
   await expect(page.locator("#email")).toBeVisible();
   await expect(page.locator("#password")).toBeVisible();
   await expect(page.locator("#authSubmit")).toBeEnabled();
-  const assets = await Promise.all(["./styles.css?v=ctr-full-audit-20261124-3", "./app.js?v=ctr-direct-stability-20261124-7", "./file_000000003bf88208a1f705b3f6395db2.png", "./file_000000005f188208adc8f107a4f7bc8b.png", "./assets/ctr-samurai-icons.svg"].map(url => request.get(new URL(url, "https://nottybuddy.github.io/CTR/").toString())));
+  const assets = await Promise.all(["./styles.css?v=ctr-gpt-assistant-20261124-12", "./app.js?v=ctr-gpt-assistant-20261124-11", "./file_000000003bf88208a1f705b3f6395db2.png", "./file_000000005f188208adc8f107a4f7bc8b.png", "./assets/ctr-samurai-icons.svg"].map(url => request.get(new URL(url, "https://nottybuddy.github.io/CTR/").toString())));
   console.log("CTR_ASSET_STATUS", JSON.stringify(assets.map(x => x.status())));
   expect(assets.map(x => x.status())).toEqual([200, 200, 200, 200, 200]);
   expect(pageErrors, "Uncaught JavaScript errors").toEqual([]);
@@ -98,4 +98,17 @@ test("CTR layout fits desktop and mobile viewports without horizontal overflow",
     const dimensions = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }));
     expect(dimensions.scrollWidth, "Horizontal overflow at viewport " + viewport.width).toBeLessThanOrEqual(dimensions.clientWidth + 1);
   }
+});
+
+test("GPT CRM assistant API is deployed and rejects unauthenticated requests", async ({ request }) => {
+  const endpoint = "https://ctr-ai-assistant-notty-buddy.vercel.app/api/crm-assistant";
+  const get = await request.get(endpoint);
+  expect(get.status()).toBe(405);
+  const post = await request.post(endpoint, {
+    headers: { Origin: "https://nottybuddy.github.io", "Content-Type": "application/json" },
+    data: { input: "test CRM note" }
+  });
+  expect(post.status()).toBe(401);
+  const body = await post.json();
+  expect(body.error).toMatch(/sign in|session/i);
 });
