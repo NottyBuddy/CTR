@@ -260,3 +260,11 @@ drop policy if exists "Owners and admin update followups" on public.ctr_followup
 drop policy if exists "CTR members can complete followups" on public.ctr_followups;
 create policy "CTR members can complete followups" on public.ctr_followups
  for update to authenticated using(true) with check(true);
+
+-- Direct-message editing. Safe for the sender only; does not grant edit/delete access to other users' messages.
+alter table public.ctr_direct_messages add column if not exists edited_at timestamptz;
+drop policy if exists "Users can edit own direct messages" on public.ctr_direct_messages;
+create policy "Users can edit own direct messages"
+on public.ctr_direct_messages for update to authenticated
+using (auth.uid()=sender_id)
+with check (auth.uid()=sender_id);
