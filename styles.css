@@ -4155,3 +4155,61 @@ body.theme-light .module-card{
  backdrop-filter:none!important;
  -webkit-backdrop-filter:none!important;
 }
+
+
+/* Compact workspace headers: remove section labels/descriptions to give chat more room.
+   Keep underlying counters and dashboard actions in the DOM for existing JS. */
+body .shell #groupView > .chat-head,
+body .shell #personalView > .chat-head,
+body .shell #dashboardView > .chat-head{
+ display:none!important;
+}
+
+/* FINAL LIGHT THEME BACKGROUND: single authoritative image layer.
+   The previous stylesheet accumulated conflicting background declarations. */
+html:has(body.theme-light){
+ min-height:100%!important;
+ background:#f3f1f0 url("./light-theme-bg.webp") center center / cover fixed no-repeat!important;
+}
+body.theme-light{
+ min-height:100vh!important;
+ background:transparent!important;
+ background-image:none!important;
+}
+body.theme-light::before,
+body.theme-light::after{
+ content:none!important;
+ display:none!important;
+}
+body.theme-light .shell,
+body.theme-light .shell .workspace,
+body.theme-light .shell .chat,
+body.theme-light .shell .chat.glass,
+body.theme-light .shell .notes-view,
+body.theme-light .shell #groupView,
+body.theme-light .shell #personalView,
+body.theme-light .shell #dashboardView,
+body.theme-light .shell #followupsView,
+body.theme-light .shell #directView{
+ background:transparent!important;
+ background-color:transparent!important;
+ background-image:none!important;
+ box-shadow:none!important;
+}
+body.theme-light .shell #groupView .notes,
+body.theme-light .shell #groupView .note,
+body.theme-light .shell #personalView .notes,
+body.theme-light .shell #personalView .note,
+body.theme-light .shell #followupsView .followup-panel,
+body.theme-light .shell #followupsView .followup-list,
+body.theme-light .shell #followupsView .followup-item,
+body.theme-light .shell #dashboardView .dashboard-summary,
+body.theme-light .shell #dashboardView .agent-dashboard,
+body.theme-light .shell #dashboardView .agent-card{
+ background:transparent!important;
+ background-color:transparent!important;
+ background-image:none!important;
+ box-shadow:none!important;
+ backdrop-filter:none!important;
+ -webkit-backdrop-filter:none!important;
+}
