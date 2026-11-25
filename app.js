@@ -326,7 +326,7 @@ function renderPersonal(){
 }
 $("newFollowupBtn")?.addEventListener("click",()=>{const form=$("followupForm");form.classList.toggle("hidden");if(!form.classList.contains("hidden"))$("followupCustomer").focus();$("newFollowupBtn").textContent=form.classList.contains("hidden")?"＋ Create Follow-up":"− Close form";});
 function setAIPanelCollapsed(collapsed){
- const view=$("groupView"),button=$("toggleAIPanel");if(!view||!button)return;
+ const view=$("followupsView"),button=$("toggleAIPanel");if(!view||!button)return;
  view.classList.toggle("ai-panel-collapsed",!!collapsed);
  button.setAttribute("aria-expanded",String(!collapsed));
  button.setAttribute("aria-label",collapsed?"Expand AI assistant panel":"Collapse AI assistant panel");
@@ -334,12 +334,12 @@ function setAIPanelCollapsed(collapsed){
  button.textContent=collapsed?"›":"‹";
 }
 $("toggleAIPanel")?.addEventListener("click",()=>{
- const collapsed=!$("groupView").classList.contains("ai-panel-collapsed");
+ const collapsed=!$("followupsView").classList.contains("ai-panel-collapsed");
  setAIPanelCollapsed(collapsed);
  if(user)try{localStorage.setItem("ctr_ai_panel_collapsed_"+user.id,collapsed?"1":"0")}catch{}
 });
 function showView(v){
- if(v==="group"){
+ if(v==="followups"){
   renderAIHistory();
   setAIPanelCollapsed(user&&localStorage.getItem("ctr_ai_panel_collapsed_"+user.id)==="1");
  }
