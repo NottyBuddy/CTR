@@ -2978,3 +2978,149 @@ body.theme-light #groupView>#notes>.note.mine{background:#f9e8ed!important}
  #groupView>#notes>.note,
  #groupView>#notes>.note.mine{width:100%!important;max-width:100%!important}
 }
+
+
+/* CTR LIGHT THEME — final high-specificity override layer.
+   The legacy transparent Samurai rules above were marked !important and
+   overrode the earlier light palette. This layer intentionally comes last. */
+body.theme-light{
+ color-scheme:light!important;
+ --text:#21171c!important;--muted:#685b62!important;
+ --panel:#ffffff!important;--panel2:#f8f4f5!important;--bg:#f7f5f4!important;
+ background:#f7f5f4!important;color:#21171c!important;
+}
+html:has(body.theme-light),body.theme-light{background:#f7f5f4!important}
+body.theme-light::before{
+ background:
+ linear-gradient(180deg,rgba(250,248,247,.90),rgba(250,248,247,.94)),
+ url("https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=2000&q=80")
+ center 42%/cover no-repeat!important;
+ opacity:1!important;transform:none!important;
+}
+body.theme-light .shell,
+body.theme-light .main-area,
+body.theme-light .workspace,
+body.theme-light .notes-view,
+body.theme-light #groupView,
+body.theme-light #personalView,
+body.theme-light #dashboardView,
+body.theme-light #followupsView,
+body.theme-light #directView{
+ color:#21171c!important;
+}
+body.theme-light .topbar,
+body.theme-light .chat,
+body.theme-light .glass,
+body.theme-light .right-panel,
+body.theme-light .panel,
+body.theme-light .auth-card,
+body.theme-light .composer,
+body.theme-light .followup-panel,
+body.theme-light .dm-thread-pane,
+body.theme-light .dm-list-pane,
+body.theme-light .modal,
+body.theme-light .modal-card,
+body.theme-light .notification-panel,
+body.theme-light .dashboard-summary,
+body.theme-light .dashboard-filters,
+body.theme-light .agent-card,
+body.theme-light .followup-item,
+body.theme-light .note,
+body.theme-light .personal-note,
+body.theme-light .dm-conversation,
+body.theme-light .dm-thread-header,
+body.theme-light .dm-compose-wrap,
+body.theme-light .global-search-results{
+ background:#fff!important;background-image:none!important;
+ background-color:#fff!important;color:#21171c!important;
+ border:1px solid #e8dfe2!important;
+ box-shadow:0 5px 22px rgba(52,29,38,.07)!important;
+ -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+}
+body.theme-light #groupView>#notes>.note,
+body.theme-light #groupView>#notes>.note.mine{
+ background:#fff!important;background-image:none!important;
+ color:#21171c!important;border:1px solid #e8dfe2!important;
+ box-shadow:0 4px 15px rgba(52,29,38,.055)!important;
+}
+body.theme-light #groupView>#notes>.note.mine{background:#fff7f9!important}
+body.theme-light .brand-name,
+body.theme-light h1,body.theme-light h2,body.theme-light h3,
+body.theme-light h4,body.theme-light strong,
+body.theme-light .note-author,body.theme-light .note-body,
+body.theme-light .followup-info,body.theme-light .dm-message,
+body.theme-light .dm-thread-header strong,
+body.theme-light .right-panel-head h3,
+body.theme-light .chat-head h2,
+body.theme-light .dashboard-total-grid strong{
+ color:#21171c!important;text-shadow:none!important;
+}
+body.theme-light p,
+body.theme-light .brand-sub,body.theme-light .muted,
+body.theme-light .note-time,body.theme-light .chat-head p,
+body.theme-light .dm-thread-header small,
+body.theme-light .dm-convo-copy span,body.theme-light .dm-convo-meta,
+body.theme-light .dashboard-total-grid span,
+body.theme-light .dashboard-bar-row>span,
+body.theme-light .composer-foot,body.theme-light .app-footer,
+body.theme-light .auth-foot,body.theme-light .empty-state,
+body.theme-light .connection-banner,
+body.theme-light .right-panel-head p{
+ color:#685b62!important;text-shadow:none!important;
+}
+body.theme-light label,
+body.theme-light input,body.theme-light textarea,body.theme-light select{
+ color:#21171c!important;text-shadow:none!important;
+ background:#fff!important;background-color:#fff!important;
+ border:1px solid #ded3d8!important;
+}
+body.theme-light input::placeholder,
+body.theme-light textarea::placeholder{color:#887b82!important;opacity:1!important}
+body.theme-light button,
+body.theme-light .top-nav-btn,
+body.theme-light .header-icon-btn,
+body.theme-light .message-action,
+body.theme-light .refresh-btn,
+body.theme-light .older-page-btn,
+body.theme-light .send-btn,
+body.theme-light .primary,
+body.theme-light .text-btn,
+body.theme-light .reaction-btn,
+body.theme-light .delete-note{
+ color:#54243b!important;text-shadow:none!important;
+ background:#f7edf1!important;background-color:#f7edf1!important;
+ border:1px solid #ead9e0!important;box-shadow:none!important;
+}
+body.theme-light .top-nav-btn.active,
+body.theme-light .top-nav-btn[aria-current="page"]{
+ color:#fff!important;background:#54243b!important;
+ border-color:#54243b!important;
+}
+body.theme-light .send-btn,
+body.theme-light .primary{background:#54243b!important;color:#fff!important;border-color:#54243b!important}
+body.theme-light .online-pill,
+body.theme-light .unread-badge{background:#f4e2e9!important;color:#54243b!important}
+body.theme-light .dm-message{background:#f5eff1!important;color:#21171c!important}
+body.theme-light .dm-message.mine{background:#f8e8ee!important;color:#21171c!important}
+body.theme-light .notification-item{background:#fff!important;color:#21171c!important;border-color:#eee5e8!important}
+body.theme-light .notification-item:hover{background:#faf3f5!important}
+body.theme-light .date-separator,
+body.theme-light .unread-divider{color:#725d66!important}
+body.theme-light .note-avatar,
+body.theme-light .avatar,
+body.theme-light .profile-avatar,
+body.theme-light .user-avatar,
+body.theme-light .message-avatar{
+ background:#54243b!important;background-color:#54243b!important;color:#fff!important;
+ border-color:#e5d4dc!important;
+}
+body.theme-light .dashboard-total-grid>div{background:#f8f3f5!important;color:#21171c!important}
+body.theme-light .dashboard-chart-title,
+body.theme-light .dashboard-summary-head strong{color:#39252e!important}
+body.theme-light .global-search-wrap>input{background:#fff!important;color:#21171c!important}
+body.theme-light .global-search-hit{background:#fff!important;color:#21171c!important;border-color:#eee5e8!important}
+body.theme-light .global-search-hit small,
+body.theme-light .global-hit-snippet{color:#685b62!important}
+body.theme-light .topbar svg,
+body.theme-light .top-nav-btn svg,
+body.theme-light .header-icon-btn svg{color:currentColor!important}
