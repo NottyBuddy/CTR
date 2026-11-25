@@ -2481,3 +2481,58 @@ body.theme-light .empty-state{color:#75666e}
 /* Follow-ups only: full-width callback queue after removing the unreliable AI generator. */
 #followupsView{width:100%;min-width:0}
 #followupsView>.followup-queue-panel{width:100%!important;max-width:none!important;min-width:0!important;margin:0!important}
+
+
+/* Shared Channel message stream: keep cards packed together and scroll as one timeline. */
+@media(min-width:761px){
+ .app-view .main-area>.workspace{min-height:0!important}
+ .app-view .main-area>.workspace>.chat{
+  height:calc(100dvh - 190px)!important;
+  min-height:0!important;
+  max-height:calc(100dvh - 190px)!important;
+  overflow:hidden!important;
+ }
+ #groupView{
+  display:flex!important;flex-direction:column!important;
+  height:100%!important;min-height:0!important;max-height:100%!important;
+  overflow:hidden!important;
+ }
+ #groupView>#notes{
+  display:flex!important;flex:1 1 0!important;flex-direction:column!important;
+  justify-content:flex-start!important;align-content:flex-start!important;
+  align-items:stretch!important;gap:9px!important;
+  height:auto!important;min-height:0!important;max-height:none!important;
+  overflow-x:hidden!important;overflow-y:auto!important;
+  padding:12px 8px 18px!important;
+  scroll-behavior:smooth!important;
+ }
+ #groupView>#notes>.note{
+  display:block!important;flex:0 0 auto!important;
+  align-self:flex-start!important;width:max-content!important;
+  max-width:min(88%,900px)!important;min-width:190px!important;
+  margin:0!important;
+ }
+ #groupView>#notes>.note.mine{align-self:flex-end!important}
+ #groupView>#notes>.date-separator,
+ #groupView>#notes>.unread-divider,
+ #groupView>#notes>.older-page-btn{flex:0 0 auto!important;margin:4px 0!important}
+ #groupView>#noteForm{flex:0 0 auto!important;position:relative!important}
+}
+@media(max-width:760px){
+ #groupView>#notes{
+  display:flex!important;flex-direction:column!important;
+  justify-content:flex-start!important;align-content:flex-start!important;
+  align-items:stretch!important;gap:8px!important;
+  overflow-y:auto!important;overscroll-behavior:contain!important;
+  padding:10px 4px 16px!important;
+ }
+ #groupView>#notes>.note{
+  display:block!important;flex:0 0 auto!important;
+  align-self:flex-start!important;width:max-content!important;
+  max-width:92%!important;min-width:0!important;margin:0!important;
+ }
+ #groupView>#notes>.note.mine{align-self:flex-end!important}
+ #groupView>#notes>.date-separator,
+ #groupView>#notes>.unread-divider,
+ #groupView>#notes>.older-page-btn{flex:0 0 auto!important;margin:4px 0!important}
+}
