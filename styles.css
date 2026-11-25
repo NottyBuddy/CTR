@@ -4266,3 +4266,59 @@ body.theme-light .shell #directView{
   background:transparent!important;
   background-image:none!important;
 }
+
+
+/* CTR LIGHT THEME — final canvas-level wallpaper source.
+   Use the document canvas rather than body pseudo-elements; prior overrides
+   repeatedly disabled pseudo layers and produced inconsistent rendering. */
+html:has(body.theme-light){
+  min-height:100%;
+  background-color:#f3f1f0!important;
+  background-image:url("./light-theme-bg.webp?rev=20261125c")!important;
+  background-position:center center!important;
+  background-size:cover!important;
+  background-repeat:no-repeat!important;
+  background-attachment:fixed!important;
+}
+body.theme-light{
+  min-height:100vh!important;
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  isolation:auto!important;
+}
+body.theme-light::before,
+body.theme-light::after{
+  content:none!important;
+  display:none!important;
+  background:none!important;
+}
+body.theme-light > .shell,
+body.theme-light > .shell > #appView,
+body.theme-light > .shell > #authView,
+body.theme-light .shell .app-view,
+body.theme-light .shell .main-area,
+body.theme-light .shell .workspace,
+body.theme-light .shell .notes-view,
+body.theme-light .shell #groupView,
+body.theme-light .shell #personalView,
+body.theme-light .shell #dashboardView,
+body.theme-light .shell #followupsView,
+body.theme-light .shell #directView{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+}
+body.theme-light .shell .chat,
+body.theme-light .shell .chat.glass,
+body.theme-light .shell .right-panel,
+body.theme-light .shell .topbar,
+body.theme-light .shell .glass{
+  background:rgba(255,255,255,.10)!important;
+  background-color:rgba(255,255,255,.10)!important;
+  background-image:none!important;
+  border-color:rgba(84,36,59,.18)!important;
+  box-shadow:0 5px 22px rgba(42,25,34,.055)!important;
+  backdrop-filter:blur(7px) saturate(110%)!important;
+  -webkit-backdrop-filter:blur(7px) saturate(110%)!important;
+}
