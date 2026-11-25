@@ -142,3 +142,45 @@ test("CTR layout fits desktop and mobile viewports without horizontal overflow",
     expect(dimensions.scrollWidth, "Horizontal overflow at viewport " + viewport.width).toBeLessThanOrEqual(dimensions.clientWidth + 1);
   }
 });
+
+test("Light Theme wallpaper asset loads and is applied to the visible page layer", async ({ page, request }) => {
+  await page.goto("./");
+  const assetUrl = new URL("./light-theme-bg.webp?rev=wallpaper-verification", "https://nottybuddy.github.io/CTR/").toString();
+  const assetResponse = await request.get(assetUrl);
+  expect(assetResponse.status(), "Light Theme wallpaper must be served by GitHub Pages").toBe(200);
+  expect(assetResponse.headers()["content-type"] || "").toContain("image/webp");
+
+  await page.locator("#themeToggle").click();
+  await expect(page.locator("body")).toHaveClass(/theme-light/);
+
+  const rendered = await page.evaluate(async () => {
+    const pseudo = getComputedStyle(document.body, "::before");
+    const shell = document.querySelector("body > .shell");
+    const image = new Image();
+    image.src = "/CTR/light-theme-bg.webp?rev=wallpaper-verification";
+    let decoded = false;
+    try { await image.decode(); decoded = true; } catch {}
+    return {
+      pseudoBackground: pseudo.backgroundImage,
+      pseudoDisplay: pseudo.display,
+      pseudoVisibility: pseudo.visibility,
+      pseudoOpacity: pseudo.opacity,
+      pseudoPosition: pseudo.position,
+      pseudoZIndex: pseudo.zIndex,
+      shellPosition: shell ? getComputedStyle(shell).position : null,
+      shellZIndex: shell ? getComputedStyle(shell).zIndex : null,
+      imageDecoded: decoded,
+      imageWidth: image.naturalWidth,
+      imageHeight: image.naturalHeight
+    };
+  });
+  console.log("CTR_LIGHT_WALLPAPER_DIAGNOSTIC", JSON.stringify(rendered));
+  expect(rendered.pseudoBackground).toContain("light-theme-bg.webp");
+  expect(rendered.pseudoDisplay).not.toBe("none");
+  expect(rendered.pseudoVisibility).toBe("visible");
+  expect(Number(rendered.pseudoOpacity)).toBeGreaterThan(0);
+  expect(rendered.imageDecoded, "Wallpaper image must decode in Chromium").toBe(true);
+  expect(rendered.imageWidth).toBeGreaterThan(0);
+  expect(rendered.imageHeight).toBeGreaterThan(0);
+  expect(rendered.shellZIndex).toBe("1");
+});
