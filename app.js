@@ -489,21 +489,6 @@ $("authForm").addEventListener("submit",async e=>{
 $("authRetry")?.addEventListener("click",()=>connectAuth().catch(err=>{console.error("CTR retry failed",err);status("Connection failed: "+(err?.message||"Please try again."),true)}));
 $("forgotPassword").onclick=async()=>{if(!db){status("Connecting to sign-in service…",true);try{await connectAuth()}catch(err){status("Could not connect to sign-in service: "+(err?.message||"Please try again."),true);return}}if(!db){status("Could not connect to sign-in service. Please retry.",true);$("authRetry")?.classList.remove("hidden");return}const email=$("email").value.trim().toLowerCase();if(!email){status("Enter your registered email address first.",true);$("email").focus();return}const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:"https://nottybuddy.github.io/CTR/"});status(error?error.message:"If this email belongs to a CTR account, a password reset link will be sent.",true)};
 document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>showView(b.dataset.view));
-$("generateAI").onclick=generateNotes;
-$("aiQuestions")?.addEventListener("click",e=>{
- const option=e.target.closest("[data-ai-answer]");if(!option)return;
- const card=option.closest(".ai-question-card"),question=card?.querySelector("p")?.textContent||"Clarification";
- const answer=option.dataset.aiAnswer||"";if(!answer)return;
- $("aiInput").value=$("aiInput").value.trim()+"\\nClarification: "+question+" Answer: "+answer;
- card.querySelectorAll("button").forEach(btn=>{btn.disabled=true;btn.classList.toggle("selected",btn===option)});
- $("aiStatus").textContent="Confirmation added. Updating the CRM drafts…";generateNotes();
-});
-$("aiHistoryList")?.addEventListener("click",e=>{const edit=e.target.closest("[data-ai-edit]"),del=e.target.closest("[data-ai-delete]"),item=e.target.closest("[data-ai-history]");
-  if(edit){const rows=readAIHistory(),row=rows.find(x=>x.id===edit.dataset.aiEdit);if(!row)return;const raw=prompt("Edit saved AI chat input",row.raw||"");if(raw===null)return;if(!raw.trim()){status("AI history input cannot be empty.");return}row.raw=raw.trim();row.group="";row.crm="";row.questions=[];row.uncertainties=[];row.confidence="review";localStorage.setItem(aiHistoryKey(),JSON.stringify(rows));$("aiInput").value=row.raw;generatedDrafts={group:"",crm:""};$("aiResults").classList.add("hidden");renderAIHistory();$("aiStatus").textContent="Saved input edited. Generate again to create updated CRM drafts.";return}
-  if(del){if(!confirm("Delete this saved AI conversation from this device?"))return;localStorage.setItem(aiHistoryKey(),JSON.stringify(readAIHistory().filter(x=>x.id!==del.dataset.aiDelete)));renderAIHistory();$("aiStatus").textContent="Saved AI conversation deleted from this device.";return}
-  if(item)restoreAIHistory(item.dataset.aiHistory)
- });
-$("clearAIHistory")?.addEventListener("click",()=>{if(!user)return;if(!confirm("Clear saved CRM assistant history from this browser for this account?"))return;localStorage.removeItem(aiHistoryKey());renderAIHistory();$("aiStatus").textContent="Saved draft history cleared from this device."});
 $("refreshData").onclick=refreshMessages;
 $("enableNotifications")?.addEventListener("click",enableNotifications);
 $("toggleNotificationPanel")?.addEventListener("click",async()=>{const panel=$("notificationPanel"),opening=panel.classList.contains("hidden");panel.classList.toggle("hidden",!opening);$("toggleNotificationPanel").setAttribute("aria-expanded",String(opening));if(opening)await loadNotifications()});
@@ -573,23 +558,7 @@ document.addEventListener("click",async e=>{
  const dmCopy=e.target.closest("[data-copy-dm]");if(dmCopy){const m=direct.find(x=>x.id===dmCopy.dataset.copyDm);if(m){try{await navigator.clipboard.writeText(m.body);status("Message copied.")}catch{status("Clipboard unavailable.")}}return}
  const searchHit=e.target.closest("[data-search-view]");if(searchHit){const view=searchHit.dataset.searchView;showView(view);const q=$("globalSearch").value.trim();if(view==="group"){$("groupSearch").value=q;groupFilter=q;renderGroup()}else if(view==="personal"){$("personalSearch").value=q;personalFilter=q;renderPersonal()}else if(view==="direct"){$("directSearch").value=q;directFilter=q;renderDirect()}else if(view==="followups"){followupSearchFilter=q;renderFollowups();requestAnimationFrame(()=>{const target=$("followupList").querySelector(".followup-item");target?.scrollIntoView({behavior:"smooth",block:"center"})})}$("globalSearchResults").classList.add("hidden");return}
  const done=e.target.closest("[data-follow-done]");if(done){if(!window.confirm("Mark this follow-up as complete? It will be removed from Pending Follow-ups."))return;done.disabled=true;const r=await db.from("ctr_followups").update({status:"completed",completed_at:new Date().toISOString()}).eq("id",done.dataset.followDone).eq("status","pending");done.disabled=false;if(r.error)status("Could not complete follow-up: "+r.error.message);else{await loadFollowups();status("Follow-up completed and removed from pending list.")}return}
- const use=e.target.closest("[data-ai-use]");
- if(use){
-  if(use.dataset.aiUse==="group"){
-   if(!generatedDrafts.group||!user)return;
-   const {error}=await db.from("ctr_group_notes").insert({user_id:user.id,author_email:user.email,body:generatedDrafts.group});
-   $("aiStatus").textContent=error?"Could not share: "+error.message:"Group note shared successfully.";
-  }else if(use.dataset.aiUse==="crm"){
-   try{await navigator.clipboard.writeText(generatedDrafts.crm);$("aiStatus").textContent="CRM note copied. Paste it into your CRM."}
-   catch{$("aiStatus").textContent="Clipboard access unavailable. Select and copy the CRM text."}
-  }
- }
- const copy=e.target.closest("[data-copy]");
- if(copy){
-  const text=generatedDrafts[copy.dataset.copy];
-  try{await navigator.clipboard.writeText(text);$("aiStatus").textContent="Copied "+(copy.dataset.copy==="group"?"group":"CRM")+" note."}
-  catch{$("aiStatus").textContent="Clipboard access unavailable. Select the note and copy it."}
- }
+
 });
 $("followupForm").onsubmit=async e=>{e.preventDefault();if(!user)return;const customer_name=$("followupCustomer").value.trim(),phone=$("followupPhone").value.trim(),rawAt=$("followupAt").value,callback=new Date(rawAt);if(!customer_name||!phone||!rawAt||Number.isNaN(callback.getTime())){status("Enter customer name, phone and a valid callback date/time.");return}const submit=$("followupForm").querySelector("button[type=submit]");submit.disabled=true;const payload={user_id:user.id,customer_name,phone,callback_at:callback.toISOString(),details:$("followupDetails").value.trim(),status:"pending"};const r=await db.from("ctr_followups").insert(payload).select("id").single();submit.disabled=false;if(r.error){status("Could not schedule follow-up: "+r.error.message);return}$("followupForm").reset();$("followupForm").classList.add("hidden");$("newFollowupBtn").textContent="＋ Create Follow-up";await loadFollowups();status("Callback saved to the shared pending list.");};
 $("noteForm").onsubmit=async e=>{e.preventDefault();const body=$("noteInput").value.trim();if(!body||!user)return;const {error}=await db.from("ctr_group_notes").insert({user_id:user.id,author_email:user.email,body});if(error)status("Could not send: "+error.message);else {$("noteInput").value="";renderGroup(true)}};
