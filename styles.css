@@ -4325,3 +4325,12 @@ body.theme-light .shell .glass{
   backdrop-filter:blur(7px) saturate(110%)!important;
   -webkit-backdrop-filter:blur(7px) saturate(110%)!important;
 }
+
+
+/* CTR Light Theme wallpaper: explicit DOM layer, independent of page canvas/pseudo-elements. */
+html:has(body.theme-light){background:#f3f1f0!important;}
+body.theme-light{position:relative!important;isolation:isolate!important;background:transparent!important;background-image:none!important;}
+body.theme-light > .ctr-theme-wallpaper{position:fixed!important;inset:0!important;z-index:-1!important;display:block!important;pointer-events:none!important;background-color:#f3f1f0!important;background-image:url("./light-theme-bg.webp?rev=20261125f")!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important;}
+body.theme-light > .ctr-theme-wallpaper[hidden]{display:none!important;}
+body.theme-light > .shell{position:relative!important;z-index:0!important;background:transparent!important;background-image:none!important;}
+body.theme-light .shell .main-area,body.theme-light .shell .workspace,body.theme-light .shell .chat,body.theme-light .shell .notes-view,body.theme-light .shell #groupView,body.theme-light .shell #personalView,body.theme-light .shell #dashboardView,body.theme-light .shell #followupsView,body.theme-light .shell #directView{background:transparent!important;background-image:none!important;}
