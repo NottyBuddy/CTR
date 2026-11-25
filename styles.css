@@ -2910,3 +2910,71 @@ body.theme-light #groupView>#notes>.note{
   box-shadow:0 5px 18px rgba(45,24,32,.06)!important;
 }
 body.theme-light #groupView>#notes>.note.mine{background:#f9e8ed!important}
+
+
+/* Shared Channel final layout correction:
+   messages are a single readable feed, not left/right chat bubbles.
+   The previous mine/right + max-content rules created a huge empty centre
+   on desktop and made the timeline look as if messages were missing. */
+#groupView>#notes{
+ display:flex!important;
+ flex-direction:column!important;
+ align-items:stretch!important;
+ justify-content:flex-start!important;
+ align-content:stretch!important;
+ gap:9px!important;
+ width:100%!important;
+ min-width:0!important;
+}
+#groupView>#notes>.note,
+#groupView>#notes>.note.mine{
+ display:block!important;
+ position:relative!important;
+ float:none!important;
+ align-self:stretch!important;
+ flex:0 0 auto!important;
+ width:100%!important;
+ min-width:0!important;
+ max-width:100%!important;
+ margin:0!important;
+ box-sizing:border-box!important;
+}
+#groupView>#notes>.note .note-body{
+ display:block!important;
+ width:100%!important;
+ max-width:100%!important;
+ white-space:pre-wrap!important;
+ overflow-wrap:anywhere!important;
+ word-break:normal!important;
+ line-height:1.5!important;
+}
+#groupView>#notes>.note .note-top{
+ display:flex!important;
+ flex-wrap:wrap!important;
+ align-items:center!important;
+ gap:6px 9px!important;
+ min-width:0!important;
+}
+#groupView>#notes>.note .note-tools,
+#groupView>#notes>.note .reaction-row{
+ display:flex!important;
+ flex-wrap:wrap!important;
+ align-items:center!important;
+}
+#groupView>#notes>.date-separator,
+#groupView>#notes>.unread-divider,
+#groupView>#notes>.older-page-btn{
+ width:100%!important;
+ align-self:stretch!important;
+ flex:0 0 auto!important;
+}
+@media(min-width:761px){
+ #groupView>#notes{padding:12px 12px 20px!important;gap:9px!important}
+ #groupView>#notes>.note,
+ #groupView>#notes>.note.mine{max-width:100%!important}
+}
+@media(max-width:760px){
+ #groupView>#notes{padding:9px 5px 16px!important;gap:8px!important}
+ #groupView>#notes>.note,
+ #groupView>#notes>.note.mine{width:100%!important;max-width:100%!important}
+}
