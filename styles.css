@@ -4268,18 +4268,22 @@ body.theme-light .shell #directView{
 }
 
 
-/* CTR LIGHT THEME — apply wallpaper directly to the body viewport.
-   The document canvas alone was not visible consistently on deployed Pages;
-   body now owns the image, while app containers remain transparent. */
-html{
+/* CTR LIGHT THEME — paint the wallpaper on both document canvas and body.
+   This keeps it visible behind transparent app surfaces across viewport sizes. */
+html:has(body.theme-light){
   min-height:100%;
-  background-color:#f3f1f0!important;
+  background-color:transparent!important;
+  background-image:url("/CTR/light-theme-bg.webp?rev=20261125e")!important;
+  background-position:center center!important;
+  background-size:cover!important;
+  background-repeat:no-repeat!important;
+  background-attachment:fixed!important;
 }
 body.theme-light{
   min-height:100vh!important;
-  background:#f3f1f0 url("/CTR/light-theme-bg.webp?rev=20261125d") center center / cover fixed no-repeat!important;
+  background:#f3f1f0 url("/CTR/light-theme-bg.webp?rev=20261125e") center center / cover fixed no-repeat!important;
   background-color:#f3f1f0!important;
-  background-image:url("/CTR/light-theme-bg.webp?rev=20261125d")!important;
+  background-image:url("/CTR/light-theme-bg.webp?rev=20261125e")!important;
   background-position:center center!important;
   background-size:cover!important;
   background-repeat:no-repeat!important;
