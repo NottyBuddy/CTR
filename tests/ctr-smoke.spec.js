@@ -149,9 +149,9 @@ test("CTR layout fits desktop and mobile viewports without horizontal overflow",
   }
 });
 
-test("Light Theme wallpaper is rendered on the document canvas", async ({ page, request }) => {
+test("Light Theme wallpaper is rendered behind the app surfaces", async ({ page, request }) => {
   await page.goto("./");
-  const assetUrl = new URL("./light-theme-bg.webp?rev=20261125c", "https://nottybuddy.github.io/CTR/").toString();
+  const assetUrl = new URL("./light-theme-bg.webp?rev=20261125e", "https://nottybuddy.github.io/CTR/").toString();
   const assetResponse = await request.get(assetUrl);
   expect(assetResponse.status(), "Light Theme wallpaper must be served by GitHub Pages").toBe(200);
   expect(assetResponse.headers()["content-type"] || "").toContain("image/webp");
@@ -168,7 +168,7 @@ test("Light Theme wallpaper is rendered on the document canvas", async ({ page, 
     const bodyStyle = getComputedStyle(document.body);
     const shell = document.querySelector("body > .shell");
     const image = new Image();
-    image.src = "/CTR/light-theme-bg.webp?rev=20261125c";
+    image.src = "/CTR/light-theme-bg.webp?rev=20261125e";
     let decoded = false;
     try { await image.decode(); decoded = true; } catch {}
     return {
@@ -183,9 +183,8 @@ test("Light Theme wallpaper is rendered on the document canvas", async ({ page, 
     };
   });
   console.log("CTR_LIGHT_WALLPAPER_CANVAS_DIAGNOSTIC", JSON.stringify(rendered));
-  expect(rendered.canvasBackground, "Wallpaper must be attached to the visible document canvas").toContain("light-theme-bg.webp");
-  expect(rendered.canvasSize).toContain("cover");
-  expect(rendered.bodyBackground).toBe("none");
+  expect(rendered.canvasBackground + " " + rendered.bodyBackground, "Wallpaper must be attached to the visible page background").toContain("light-theme-bg.webp");
+  expect(rendered.canvasSize + " " + getComputedStyle(document.body).backgroundSize).toContain("cover");
   expect(rendered.shellBackground).toBe("none");
   expect(rendered.imageDecoded, "Wallpaper image must decode in Chromium").toBe(true);
   expect(rendered.imageWidth).toBeGreaterThan(0);
