@@ -3901,7 +3901,7 @@ body.theme-light{
  background-color:#d9d5d4!important;
  background-image:
  linear-gradient(rgba(250,248,247,.12),rgba(250,248,247,.12)),
- url("https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=2400&q=90")!important;
+ url("./light-theme-bg.webp")!important;
  background-position:center center!important;
  background-size:cover!important;
  background-repeat:no-repeat!important;
