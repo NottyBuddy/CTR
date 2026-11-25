@@ -3785,3 +3785,112 @@ body.theme-light .dm-date-separator{
 body.theme-light .dm-empty-thread,
 body.theme-light .dm-empty-thread strong,
 body.theme-light .dm-empty-thread span{color:#40363d!important;text-shadow:none!important}
+
+
+/* LIGHT MODE — authoritative wallpaper and transparent surfaces.
+   Specificity intentionally exceeds earlier .shell and generic [class*=card] rules. */
+body.theme-light{
+ background:
+ linear-gradient(rgba(248,246,245,.22),rgba(248,246,245,.30)),
+ url("./file_000000005f188208adc8f107a4f7bc8b.png") center center / cover fixed no-repeat!important;
+ background-color:#eee9e7!important;
+ color:#292329!important;
+}
+body.theme-light:before{content:none!important;display:none!important}
+body.theme-light .shell,
+body.theme-light .shell .app-view,
+body.theme-light .shell .main-area,
+body.theme-light .shell .workspace,
+body.theme-light .shell .notes-view,
+body.theme-light .shell #directView,
+body.theme-light .shell .direct-inbox-view{
+ background:transparent!important;background-color:transparent!important;
+ background-image:none!important;
+}
+body.theme-light .shell .dm-inbox,
+body.theme-light .shell #directView .dm-inbox{
+ background:rgba(255,255,255,.055)!important;
+ background-color:rgba(255,255,255,.055)!important;
+ background-image:none!important;
+ border:1px solid rgba(255,255,255,.42)!important;
+ box-shadow:0 8px 28px rgba(38,25,30,.08)!important;
+ backdrop-filter:blur(8px) saturate(115%)!important;
+ -webkit-backdrop-filter:blur(8px) saturate(115%)!important;
+}
+body.theme-light .shell #directView .dm-list-pane,
+body.theme-light .shell #directView .dm-thread-pane,
+body.theme-light .shell #directView .dm-thread-messages{
+ background:rgba(255,255,255,.035)!important;
+ background-color:rgba(255,255,255,.035)!important;
+ background-image:none!important;box-shadow:none!important;
+ backdrop-filter:blur(4px)!important;-webkit-backdrop-filter:blur(4px)!important;
+}
+body.theme-light .shell #directView .dm-thread-header,
+body.theme-light .shell #directView .dm-compose-wrap{
+ background:rgba(255,255,255,.16)!important;
+ background-color:rgba(255,255,255,.16)!important;
+ background-image:none!important;box-shadow:none!important;
+ border-color:rgba(255,255,255,.38)!important;
+ backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;
+}
+body.theme-light .shell #directView .dm-conversation,
+body.theme-light .shell #directView .dm-conversation.active,
+body.theme-light .shell #directView .dm-conversation:hover{
+ background:rgba(255,255,255,.055)!important;
+ background-color:rgba(255,255,255,.055)!important;
+ background-image:none!important;box-shadow:none!important;
+ border-bottom:1px solid rgba(255,255,255,.24)!important;
+ color:#292329!important;
+}
+body.theme-light .shell #directView .dm-message,
+body.theme-light .shell #directView .dm-message.mine{
+ background:rgba(255,255,255,.09)!important;
+ background-color:rgba(255,255,255,.09)!important;
+ background-image:none!important;
+ border:1px solid rgba(255,255,255,.44)!important;
+ box-shadow:0 3px 12px rgba(38,25,30,.045)!important;
+ color:#292329!important;
+ backdrop-filter:blur(10px) saturate(115%)!important;
+ -webkit-backdrop-filter:blur(10px) saturate(115%)!important;
+}
+body.theme-light .shell #directView .dm-message.mine{
+ background:rgba(84,36,59,.085)!important;
+ background-color:rgba(84,36,59,.085)!important;
+ border-color:rgba(84,36,59,.20)!important;
+}
+body.theme-light .shell #directView .dm-message-sender{color:#54243b!important}
+body.theme-light .shell #directView .dm-message time,
+body.theme-light .shell #directView .dm-convo-copy>span,
+body.theme-light .shell #directView .dm-convo-meta,
+body.theme-light .shell #directView .dm-thread-header small{color:#51474d!important}
+body.theme-light .shell #directView .dm-convo-copy strong,
+body.theme-light .shell #directView .dm-thread-header strong{color:#292329!important}
+body.theme-light .shell #directView .dm-composer{
+ background:rgba(255,255,255,.12)!important;
+ background-color:rgba(255,255,255,.12)!important;
+ background-image:none!important;border:1px solid rgba(255,255,255,.42)!important;
+ box-shadow:none!important;backdrop-filter:blur(9px)!important;
+ -webkit-backdrop-filter:blur(9px)!important;
+}
+body.theme-light .shell #directView .dm-composer textarea{
+ background:transparent!important;background-color:transparent!important;color:#292329!important;
+}
+body.theme-light .shell #directView .dm-date-separator{
+ background:rgba(255,255,255,.20)!important;color:#40363d!important;
+ border:1px solid rgba(255,255,255,.36)!important;box-shadow:none!important;
+}
+body.theme-light .shell .glass,
+body.theme-light .shell .chat,
+body.theme-light .shell .right-panel,
+body.theme-light .shell .panel,
+body.theme-light .shell .note,
+body.theme-light .shell .personal-note,
+body.theme-light .shell .agent-card,
+body.theme-light .shell .followup-item,
+body.theme-light .shell [class*="card"]{
+ background:rgba(255,255,255,.075)!important;
+ background-color:rgba(255,255,255,.075)!important;
+ background-image:none!important;box-shadow:0 4px 18px rgba(38,25,30,.045)!important;
+ border-color:rgba(255,255,255,.30)!important;
+ backdrop-filter:blur(9px)!important;-webkit-backdrop-filter:blur(9px)!important;
+}
