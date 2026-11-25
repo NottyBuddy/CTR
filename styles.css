@@ -2712,3 +2712,142 @@ body.theme-light .status-line{color:#a12c4d!important}
 body.theme-light .auth-foot{color:#806e77!important}
 body.theme-light .brand-mark{box-shadow:0 3px 12px rgba(179,38,75,.16)!important}
 body.theme-light ::selection{background:#f0cbd7!important;color:#351a25!important}
+
+
+/* CTR Light theme refinement — complete module coverage and a fresh Japanese landscape. */
+body.theme-light{
+ --bg:#f7f3f3!important;--panel:#fff!important;--panel2:#f5eef1!important;
+ --text:#211a1e!important;--muted:#6f6269!important;
+ background:#f7f3f3!important;
+}
+body.theme-light:before{
+ display:block!important;content:""!important;opacity:1!important;
+ background:
+  linear-gradient(180deg,rgba(250,247,247,.84),rgba(250,247,247,.88)),
+  url("https://images.unsplash.com/photo-1779186157876-c9f3549dce85?auto=format&fit=crop&fm=jpg&ixlib=rb-4.1.0&q=75&w=2400") center center/cover no-repeat!important;
+ background-attachment:fixed!important;
+ animation:none!important;
+}
+body.theme-light .shell,
+body.theme-light .app-view,
+body.theme-light .main-area,
+body.theme-light .workspace,
+body.theme-light .notes-view,
+body.theme-light .followups-workspace,
+body.theme-light .direct-inbox-view,
+body.theme-light .agent-dashboard,
+body.theme-light .agent-chat-audit{background:transparent!important;color:#211a1e!important}
+body.theme-light .glass,
+body.theme-light .topbar,
+body.theme-light .chat,
+body.theme-light .right-panel,
+body.theme-light .panel,
+body.theme-light .modal,
+body.theme-light .modal-card,
+body.theme-light .account-settings-modal,
+body.theme-light .account-settings-card,
+body.theme-light .auth-card,
+body.theme-light .followup-panel,
+body.theme-light .dm-list-pane,
+body.theme-light .dm-thread-header,
+body.theme-light .dm-compose-wrap,
+body.theme-light .dm-composer,
+body.theme-light .moderation-panel{
+ background:rgba(255,255,255,.91)!important;
+ color:#211a1e!important;
+ border-color:rgba(111,67,83,.16)!important;
+ box-shadow:0 12px 36px rgba(60,32,43,.075)!important;
+ backdrop-filter:blur(16px)!important;
+ -webkit-backdrop-filter:blur(16px)!important;
+}
+body.theme-light .note,
+body.theme-light .personal-note,
+body.theme-light .followup-item,
+body.theme-light .agent-card,
+body.theme-light .dm-conversation,
+body.theme-light .dashboard-summary,
+body.theme-light .dashboard-filters,
+body.theme-light .dashboard-total-grid>div,
+body.theme-light .agent-audit-card,
+body.theme-light .agent-audit-conversation,
+body.theme-light .agent-audit-thread,
+body.theme-light .agent-audit-activity-item,
+body.theme-light .agent-audit-section,
+body.theme-light .agent-audit-row,
+body.theme-light .agent-audit-message,
+body.theme-light .global-search-hit,
+body.theme-light .notification-item{
+ background:rgba(255,255,255,.94)!important;
+ color:#282126!important;
+ border-color:#e9dfe3!important;
+ box-shadow:0 5px 18px rgba(45,24,32,.05)!important;
+}
+body.theme-light .note.mine,
+body.theme-light .dm-message.mine,
+body.theme-light .agent-audit-message.agent-sent{background:#f9e8ed!important}
+body.theme-light .note.direct-note,
+body.theme-light .dm-message,
+body.theme-light .agent-audit-message.agent-received{background:#f6f1f3!important}
+body.theme-light h1,body.theme-light h2,body.theme-light h3,body.theme-light h4,
+body.theme-light h5,body.theme-light strong,body.theme-light b,
+body.theme-light .brand-name,body.theme-light .note-author,
+body.theme-light .followup-info strong,body.theme-light .agent-card strong,
+body.theme-light .dashboard-total-grid strong,body.theme-light .dm-thread-header strong{
+ color:#211a1e!important
+}
+body.theme-light p,body.theme-light label,body.theme-light small,
+body.theme-light .muted,body.theme-light .brand-sub,body.theme-light .note-time,
+body.theme-light .head-count,body.theme-light .app-footer,
+body.theme-light .dashboard-total-grid span,body.theme-light .dashboard-bar-row>span,
+body.theme-light .dm-convo-meta,body.theme-light .dm-convo-copy span,
+body.theme-light .agent-audit-card-foot,body.theme-light .agent-audit-empty,
+body.theme-light .agent-audit-message-meta time{
+ color:#6f6269!important
+}
+body.theme-light .note-body,body.theme-light .followup-info,
+body.theme-light .dm-message,body.theme-light .agent-audit-row p,
+body.theme-light .agent-audit-message p,body.theme-light .agent-audit-activity-item p,
+body.theme-light .global-search-hit,body.theme-light .notification-item-copy{
+ color:#30262b!important
+}
+body.theme-light input,body.theme-light textarea,body.theme-light select,
+body.theme-light .search-box,body.theme-light .filter-row input,
+body.theme-light .agent-audit-controls input,body.theme-light .dm-filter{
+ background:rgba(255,255,255,.97)!important;color:#211a1e!important;
+ border:1px solid #e5d9df!important;
+ box-shadow:inset 0 1px 2px rgba(40,20,28,.035)!important
+}
+body.theme-light input::placeholder,body.theme-light textarea::placeholder{color:#91848b!important}
+body.theme-light .composer,body.theme-light .dm-compose-wrap,
+body.theme-light .dm-composer{background:rgba(255,255,255,.96)!important;color:#211a1e!important}
+body.theme-light .composer textarea{background:transparent!important;color:#211a1e!important}
+body.theme-light .top-nav-btn{color:#594a51!important}
+body.theme-light .top-nav-btn.active{background:#f7e8ed!important;color:#8e2342!important;box-shadow:none!important}
+body.theme-light .top-nav-btn:hover,
+body.theme-light .notification-item:hover{background:#f8edf1!important;color:#8e2342!important}
+body.theme-light .header-icon-btn,body.theme-light .refresh-btn,
+body.theme-light .signout-btn,body.theme-light .message-action,
+body.theme-light .older-page-btn,body.theme-light .text-btn,
+body.theme-light .dm-filter,body.theme-light .dashboard-filter-btn{
+ background:#f6edf0!important;color:#79334b!important;border-color:#eadce2!important;
+ box-shadow:none!important
+}
+body.theme-light .primary,body.theme-light .send-btn,
+body.theme-light .top-nav-btn.active .nav-symbol{
+ background:linear-gradient(110deg,#c94d70,#92203f)!important;color:#fff!important
+}
+body.theme-light .online-pill,body.theme-light .connection-banner,
+body.theme-light .direct-hint,body.theme-light .direct-route{
+ background:#faedf1!important;color:#92203f!important
+}
+body.theme-light .notification-panel{background:rgba(255,255,255,.98)!important}
+body.theme-light .notification-panel-head,body.theme-light .notification-panel-foot,
+body.theme-light .notification-item{border-color:#eee5e9!important}
+body.theme-light .dashboard-bar-track{background:#eee7ea!important}
+body.theme-light .dashboard-chart-title,body.theme-light .dashboard-summary-head strong{color:#39252e!important}
+body.theme-light .empty-state,body.theme-light .global-search-empty{color:#766970!important}
+body.theme-light .empty-state h3{color:#30262b!important}
+body.theme-light table,body.theme-light th,body.theme-light td{color:#30262b!important;border-color:#e9dfe3!important}
+body.theme-light tr:nth-child(even){background:rgba(248,242,245,.7)!important}
+body.theme-light ::selection{background:#f0cbd7!important;color:#351a25!important}
+@media(prefers-reduced-motion:reduce){body.theme-light:before{animation:none!important}}
