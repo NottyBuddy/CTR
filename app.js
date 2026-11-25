@@ -311,6 +311,11 @@ async function loadDirect(){
 async function loadOlderDirect(){if(!directHasMore||!user)return;const box=$("directNotes"),h=box.scrollHeight,t=box.scrollTop;let q=db.from("ctr_direct_messages").select("*").order("created_at",{ascending:false}).order("id",{ascending:false});if(!isAdmin())q=q.or("sender_id.eq."+user.id+",recipient_id.eq."+user.id);const {data,error}=await q.range(directOffset,directOffset+PAGE_SIZE-1);if(error){status("Could not load older messages: "+error.message);return}const page=data||[];directOffset+=page.length;directHasMore=page.length===PAGE_SIZE;direct=[...page.reverse(),...direct];renderDirect();box.scrollTop=box.scrollHeight-h+t}
 async function loadOlderGroup(){if(!groupHasMore)return;const box=$("notes"),h=box.scrollHeight,t=box.scrollTop;try{await loadGroupPage(false);renderGroup();box.scrollTop=box.scrollHeight-h+t}catch(e){status("Could not load older group notes: "+e.message)}}
 async function loadOlderPersonal(){if(!personalHasMore)return;try{await loadPersonalPage(false);renderPersonal()}catch(e){status("Could not load older personal notes: "+e.message)}}
+async function loadAll(){
+ await Promise.all([loadGroupPage(true),loadPersonalPage(true),loadFollowups()]);
+ renderGroup(true);
+ renderPersonal();
+}
 async function refreshMessages(){
  const btn=$("refreshData");btn.disabled=true;btn.classList.add("is-refreshing");btn.setAttribute("aria-label","Refreshing");
  try{await loadAll();await loadDirect();renderAgentDashboard();status("All records refreshed.")}
