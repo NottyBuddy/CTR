@@ -3894,3 +3894,95 @@ body.theme-light .shell [class*="card"]{
  border-color:rgba(255,255,255,.30)!important;
  backdrop-filter:blur(9px)!important;-webkit-backdrop-filter:blur(9px)!important;
 }
+
+
+/* LIGHT THEME WALLPAPER + FULLY CLEAR SURFACES — final override */
+body.theme-light{
+ background-color:#d9d5d4!important;
+ background-image:
+ linear-gradient(rgba(250,248,247,.12),rgba(250,248,247,.12)),
+ url("https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=2400&q=90")!important;
+ background-position:center center!important;
+ background-size:cover!important;
+ background-repeat:no-repeat!important;
+ background-attachment:fixed!important;
+ color:#241f22!important;
+}
+body.theme-light::before,
+body.theme-light::after{content:none!important;display:none!important;background:none!important}
+body.theme-light .shell,
+body.theme-light .shell .app-view,
+body.theme-light .shell .main-area,
+body.theme-light .shell .workspace,
+body.theme-light .shell .chat,
+body.theme-light .shell .chat.glass,
+body.theme-light .shell .notes-view,
+body.theme-light .shell #groupView,
+body.theme-light .shell #followupsView,
+body.theme-light .shell #personalView,
+body.theme-light .shell #directView,
+body.theme-light .shell .direct-inbox-view{
+ background:transparent!important;
+ background-color:transparent!important;
+ background-image:none!important;
+ box-shadow:none!important;
+}
+body.theme-light .shell #groupView .notes,
+body.theme-light .shell #groupView .note,
+body.theme-light .shell #groupView .note-card,
+body.theme-light .shell #groupView .note-item,
+body.theme-light .shell #personalView .notes,
+body.theme-light .shell #personalView .note,
+body.theme-light .shell #moderationPanel,
+body.theme-light .shell #followupsView .followup-panel,
+body.theme-light .shell #followupsView .followup-queue-panel,
+body.theme-light .shell #followupsView .followup-generator-panel,
+body.theme-light .shell #followupsView .followup-list,
+body.theme-light .shell #followupsView .followup-item,
+body.theme-light .shell #followupsView .followup-info,
+body.theme-light .shell .dashboard-summary,
+body.theme-light .shell .agent-dashboard,
+body.theme-light .shell .agent-card,
+body.theme-light .shell .panel,
+body.theme-light .shell .card,
+body.theme-light .shell [class*="card"]{
+ background:transparent!important;
+ background-color:transparent!important;
+ background-image:none!important;
+ box-shadow:none!important;
+ backdrop-filter:none!important;
+ -webkit-backdrop-filter:none!important;
+ border-color:rgba(84,36,59,.20)!important;
+}
+body.theme-light .shell #groupView .note,
+body.theme-light .shell #groupView .note-card,
+body.theme-light .shell #groupView .note-item,
+body.theme-light .shell #followupsView .followup-item{
+ border:1px solid rgba(84,36,59,.22)!important;
+}
+body.theme-light .shell #followupsView .followup-panel{
+ border:0!important;
+ padding:22px!important;
+}
+body.theme-light .shell .search-toolbar,
+body.theme-light .shell .composer,
+body.theme-light .shell .connection-banner{
+ background:rgba(255,255,255,.10)!important;
+ background-color:rgba(255,255,255,.10)!important;
+ box-shadow:none!important;
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+body.theme-light .shell input,
+body.theme-light .shell textarea,
+body.theme-light .shell select{
+ background:rgba(255,255,255,.72)!important;
+ color:#241f22!important;
+ border-color:rgba(84,36,59,.25)!important;
+}
+body.theme-light .shell :where(h1,h2,h3,h4,p,span,strong,small,label,time){
+ color:#241f22;
+ text-shadow:none!important;
+}
+body.theme-light .shell :where(.eyebrow,.head-count,.followup-status,.note-meta,.note-time){
+ color:#51474d!important;
+}
