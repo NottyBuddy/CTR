@@ -2273,3 +2273,21 @@ body.theme-light .empty-state{color:#75666e}
  .app-view .main-area>.topbar .top-nav-btn{padding:5px 6px!important;font-size:8px!important}
 }
 @media(hover:none),(pointer:coarse){button:active:not(:disabled){transform:none}}
+
+/* Group chat: keep the title and message composer anchored; only message history scrolls. */
+@media(min-width:761px){
+ .app-view .main-area>.workspace{min-height:0}
+ .app-view .main-area>.workspace>.chat{min-height:0;height:calc(100vh - 190px);max-height:calc(100vh - 190px);overflow:hidden}
+ #groupView{height:100%;min-height:0;max-height:100%;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+ #groupView>.chat-head,#groupView>#connectionBanner,#groupView>.search-toolbar,#groupView>.color-picker-wrap,#groupView>#noteForm{flex:0 0 auto!important}
+ #groupView>#notes{flex:1 1 0!important;min-height:0!important;height:auto!important;max-height:none!important;overflow-y:auto!important;overscroll-behavior:contain}
+ #groupView>#noteForm{position:relative!important;z-index:2!important;margin-top:8px!important;flex-shrink:0!important}
+ #groupView>#noteForm textarea{resize:none!important;min-height:64px!important;max-height:110px!important;overflow-y:auto!important}
+}
+@media(max-width:760px){
+ .app-view .main-area>.workspace>.chat{height:auto;max-height:none;overflow:visible}
+ #groupView{height:auto;min-height:0;max-height:none;overflow:visible!important}
+ #groupView>#notes{flex:1 1 auto!important;min-height:220px!important;height:auto!important;max-height:52vh!important;overflow-y:auto!important;overscroll-behavior:contain}
+ #groupView>#noteForm{position:sticky!important;bottom:0!important;z-index:5!important;flex:0 0 auto!important;margin-top:8px!important;background:rgba(8,7,9,.9)!important;backdrop-filter:blur(25px)!important;-webkit-backdrop-filter:blur(25px)!important}
+ #groupView>#noteForm textarea{resize:none!important;min-height:62px!important;max-height:100px!important;overflow-y:auto!important}
+}
