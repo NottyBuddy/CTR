@@ -34,7 +34,7 @@ jobs:
           # App functions live in app.js, not index.html. Check each file in
           # the correct place so this health check does not reject a valid page.
           grep -q "CTR — Calling Team Records" index.html
-          grep -q "toggleAIPanel" app.js
+          # AI panel was intentionally removed from the app; do not gate deployment on it.
           grep -q "dashboardFrom" app.js
           grep -q "toggleNotificationPanel" app.js
           grep -q "themeToggle" index.html
