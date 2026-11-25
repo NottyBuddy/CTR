@@ -172,7 +172,7 @@ test("Light Theme wallpaper is rendered behind the app surfaces", async ({ page,
     let decoded = false;
     try { await image.decode(); decoded = true; } catch {}
     return {
-      canvasBackground: htmlStyle.backgroundImage,
+      wallpaperLayer: (() => { const el = document.querySelector("#ctrThemeWallpaper"); return el ? {backgroundImage:getComputedStyle(el).backgroundImage,backgroundSize:getComputedStyle(el).backgroundSize,position:getComputedStyle(el).position,zIndex:getComputedStyle(el).zIndex} : null })(),\n      canvasBackground: htmlStyle.backgroundImage,
       canvasSize: htmlStyle.backgroundSize,
       canvasPosition: htmlStyle.backgroundPosition,
       bodyBackground: bodyStyle.backgroundImage,
@@ -184,7 +184,7 @@ test("Light Theme wallpaper is rendered behind the app surfaces", async ({ page,
     };
   });
   console.log("CTR_LIGHT_WALLPAPER_CANVAS_DIAGNOSTIC", JSON.stringify(rendered));
-  expect(rendered.canvasBackground + " " + rendered.bodyBackground, "Wallpaper must be attached to the visible page background").toContain("light-theme-bg.webp");
+  expect(rendered.wallpaperLayer?.backgroundImage, "Explicit wallpaper layer must load the image").toContain("light-theme-bg.webp");\n  expect(rendered.wallpaperLayer?.position).toBe("fixed");\n  expect(rendered.wallpaperLayer?.backgroundSize).toBe("cover");
   expect(rendered.canvasSize + " " + rendered.bodySize).toContain("cover");
   expect(rendered.shellBackground).toBe("none");
   expect(rendered.imageDecoded, "Wallpaper image must decode in Chromium").toBe(true);
