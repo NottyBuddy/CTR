@@ -4213,3 +4213,56 @@ body.theme-light .shell #dashboardView .agent-card{
  backdrop-filter:none!important;
  -webkit-backdrop-filter:none!important;
 }
+
+
+/* LIGHT THEME WALLPAPER — single visible layer above the page canvas */
+html:has(body.theme-light){
+  min-height:100%;
+  background:#f3f1f0!important;
+  background-image:none!important;
+}
+body.theme-light{
+  position:relative!important;
+  isolation:isolate!important;
+  min-height:100vh!important;
+  background:transparent!important;
+  background-image:none!important;
+}
+body.theme-light::before{
+  content:""!important;
+  display:block!important;
+  position:fixed!important;
+  inset:0!important;
+  z-index:0!important;
+  pointer-events:none!important;
+  opacity:1!important;
+  visibility:visible!important;
+  background-image:url("/CTR/light-theme-bg.webp?rev=20261125b")!important;
+  background-position:center center!important;
+  background-size:cover!important;
+  background-repeat:no-repeat!important;
+  background-attachment:fixed!important;
+  transform:none!important;
+  filter:none!important;
+}
+body.theme-light::after{content:none!important;display:none!important}
+body.theme-light > .shell{
+  position:relative!important;
+  z-index:1!important;
+  min-height:100vh!important;
+  background:transparent!important;
+  background-image:none!important;
+}
+body.theme-light .shell .app-view,
+body.theme-light .shell .main-area,
+body.theme-light .shell .workspace,
+body.theme-light .shell .chat,
+body.theme-light .shell .notes-view,
+body.theme-light .shell #groupView,
+body.theme-light .shell #personalView,
+body.theme-light .shell #dashboardView,
+body.theme-light .shell #followupsView,
+body.theme-light .shell #directView{
+  background:transparent!important;
+  background-image:none!important;
+}
