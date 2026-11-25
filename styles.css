@@ -3537,3 +3537,145 @@ body.theme-light .app-view .main-area .dm-conversation.selected{
 body.theme-light .app-view .main-area .dm-convo-copy strong{color:#21171c!important}
 body.theme-light .app-view .main-area .dm-convo-copy>span,
 body.theme-light .app-view .main-area .dm-convo-meta time{color:#766b72!important}
+
+
+/* LIGHT THEME READABILITY + TRUE GLASS — override legacy dark :has() rules.
+   The previous pass missed #directNotes/#dmThreadHeader and the high-specificity
+   direct-chat rules, leaving a grey veil, dark header, pink text and neon glow. */
+body.theme-light{
+ color-scheme:light!important;
+ background:#f5f3f1!important;color:#241f22!important;
+ --text:#241f22!important;--muted:#625a5e!important;
+}
+body.theme-light::before{
+ content:""!important;display:block!important;position:fixed!important;inset:0!important;
+ z-index:-3!important;pointer-events:none!important;opacity:1!important;filter:none!important;
+ background:
+ linear-gradient(rgba(250,248,246,.32),rgba(250,248,246,.40)),
+ url("https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=2200&q=85")
+ center/cover fixed no-repeat!important;
+}
+body.theme-light::after{
+ content:none!important;display:none!important;opacity:0!important;
+ background:none!important;filter:none!important;animation:none!important;
+}
+body.theme-light .app-view,
+body.theme-light .main-area,
+body.theme-light .workspace,
+body.theme-light .chat,
+body.theme-light .notes-view,
+body.theme-light #directView,
+body.theme-light .direct-inbox-view{
+ background:transparent!important;background-color:transparent!important;
+ background-image:none!important;color:#241f22!important;
+ box-shadow:none!important;filter:none!important;
+}
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area>.topbar,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .inbox-heading,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-inbox,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-list-pane,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-thread-pane,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area #dmThreadHeader,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area #directNotes,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-compose-wrap,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-composer{
+ background:rgba(255,255,255,.20)!important;
+ background-color:rgba(255,255,255,.20)!important;
+ background-image:none!important;color:#241f22!important;
+ border-color:rgba(255,255,255,.56)!important;
+ box-shadow:none!important;filter:none!important;
+ -webkit-backdrop-filter:blur(12px) saturate(110%)!important;
+ backdrop-filter:blur(12px) saturate(110%)!important;
+}
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-thread-pane{
+ background:rgba(255,255,255,.08)!important;
+}
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area #dmThreadHeader{
+ background:rgba(255,255,255,.40)!important;
+ border-bottom:1px solid rgba(255,255,255,.58)!important;
+}
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area #directNotes{
+ background:rgba(255,255,255,.10)!important;
+}
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-message,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-message.mine{
+ background:rgba(255,255,255,.24)!important;
+ background-image:none!important;color:#241f22!important;
+ border:1px solid rgba(255,255,255,.62)!important;
+ box-shadow:none!important;filter:none!important;
+ -webkit-backdrop-filter:blur(10px)!important;backdrop-filter:blur(10px)!important;
+}
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-message.mine{
+ background:rgba(255,255,255,.30)!important;
+}
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-conversation,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-conversation.active,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-conversation.selected{
+ background:rgba(255,255,255,.16)!important;
+ color:#241f22!important;box-shadow:none!important;
+ border-bottom:1px solid rgba(255,255,255,.38)!important;
+}
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-conversation.selected{
+ border-left:3px solid #54243b!important;
+}
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-composer textarea{
+ color:#241f22!important;background:transparent!important;
+}
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-composer textarea::placeholder{
+ color:#625a5e!important;opacity:1!important;
+}
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-thread-header *,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-message *,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-conversation *,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-empty-thread *,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .inbox-heading *{
+ color:#241f22!important;text-shadow:none!important;filter:none!important;
+}
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-message time,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-convo-meta time,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-convo-copy>span,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-thread-header small,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-compose-hint,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .inbox-heading p{
+ color:#625a5e!important;
+}
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-avatar,
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-empty-avatar{
+ background:rgba(84,36,59,.10)!important;color:#54243b!important;
+ border:1px solid rgba(84,36,59,.20)!important;box-shadow:none!important;
+}
+body.theme-light .app-view:has(#directView:not(.hidden)) .main-area .dm-send-btn{
+ background:#54243b!important;color:#fff!important;box-shadow:none!important;
+}
+body.theme-light .main-area .top-nav-btn,
+body.theme-light .main-area .top-nav-btn *,
+body.theme-light .main-area .top-meta,
+body.theme-light .main-area .top-meta *,
+body.theme-light .sidebar-nav,
+body.theme-light .sidebar-nav *{
+ color:#30282d!important;text-shadow:none!important;filter:none!important;
+}
+body.theme-light .main-area .top-nav-btn.active{
+ background:rgba(84,36,59,.10)!important;color:#54243b!important;
+ box-shadow:inset 0 -2px #54243b!important;
+}
+body.theme-light .main-area .top-nav-btn.active *,
+body.theme-light .main-area .nav-symbol{
+ color:#54243b!important;text-shadow:none!important;
+}
+body.theme-light .main-area .top-nav-btn,
+body.theme-light .main-area .header-icon-btn,
+body.theme-light .main-area .account-settings-btn,
+body.theme-light .main-area .refresh-btn,
+body.theme-light .main-area .signout-btn{
+ box-shadow:none!important;text-shadow:none!important;filter:none!important;
+}
+body.theme-light .main-area button:hover,
+body.theme-light .main-area a:hover,
+body.theme-light .sidebar-nav button:hover{
+ box-shadow:none!important;text-shadow:none!important;filter:none!important;
+ transform:none!important;
+}
+body.theme-light .main-area :where(h1,h2,h3,h4,p,span,strong,small,label,time,button,a){
+ text-shadow:none!important;
+}
