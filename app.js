@@ -7,7 +7,7 @@ const PAGE_SIZE=50;let groupOffset=0,groupHasMore=false,personalOffset=0,persona
 function csvCell(v){const value=v&&typeof v==="object"?JSON.stringify(v):String(v??"");return '"'+value.replace(/"/g,'""')+'"'}
 function downloadCsv(name,rows){if(!rows.length){status("No records available to export.");return}const keys=[...new Set(rows.flatMap(r=>Object.keys(r)))],csv=[keys.map(csvCell).join(","),...rows.map(r=>keys.map(k=>csvCell(r[k])).join(","))].join("\r\n"),blob=new Blob(["\uFEFF",csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function setTheme(theme){const light=theme==="light";document.body.classList.toggle("theme-light",light);const b=$("themeToggle");if(b){b.setAttribute("aria-pressed",String(light));b.title=light?"Switch to dark theme":"Switch to light theme";b.setAttribute("aria-label",b.title);b.textContent=light?"☾":"☼"}if(user)try{localStorage.setItem("ctr_theme_"+user.id,light?"light":"dark")}catch{}}
-async function loadGroupPage(reset=false){if(reset){groupOffset=0;group=[]}const {data,error}=await db.from("ctr_group_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false}).range(groupOffset,groupOffset+PAGE_SIZE-1);if(error)throw error;const page=data||[];groupOffset+=page.length;groupHasMore=page.length===PAGE_SIZE;const {data:profiles,error:pe}=await db.from("ctr_profiles").select("user_id,chat_color");if(pe)throw pe;const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color])),mapped=page.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"})).reverse();group=reset?mapped:[...mapped,...group];return page.length}
+async function loadGroupPage(reset=false){if(reset){groupOffset=0;group=[]}const {data,error}=await db.from("ctr_group_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false}).range(groupOffset,groupOffset+PAGE_SIZE-1);if(error)throw error;const page=data||[];groupOffset+=page.length;groupHasMore=page.length===PAGE_SIZE;const mapped=page.map(n=>({...n,chat_color:n.chat_color||"#8E7CFF"})).reverse();group=reset?mapped:[...mapped,...group];return page.length}
 async function loadPersonalPage(reset=false){if(reset){personalOffset=0;personal=[]}const {data,error}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false}).range(personalOffset,personalOffset+PAGE_SIZE-1);if(error)throw error;const page=data||[];personalOffset+=page.length;personalHasMore=page.length===PAGE_SIZE;personal=reset?page:[...personal,...page];return page.length}
 
 let db,user,group=[],personal=[],direct=[],team=[],channel;
@@ -418,7 +418,7 @@ function realtime(){
  if(channel)db.removeChannel(channel);
  channel=db.channel("ctr-live-"+user.id)
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_group_notes"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("group",payload.new);adminAuditData=null;try{await loadGroupPage(true);renderGroup();renderAgentDashboard()}catch(e){status("Group history refresh failed: "+e.message)}})
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_profiles"},async()=>{const {data:profiles}=await db.from("ctr_profiles").select("user_id,chat_color");const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=group.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()})
+
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes"},async()=>{adminAuditData=null;try{await loadPersonalPage(true);renderPersonal();renderAgentDashboard()}catch(e){status("Personal notes refresh failed: "+e.message)}})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async(payload)=>{adminAuditData=null;if(payload.eventType==="INSERT")sendMessageNotification("direct",payload.new);await loadDirect()})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_followups"},async()=>{adminAuditData=null;await loadFollowups();if(isAdmin()&&adminAuditAgentId)renderAdminChatExplorer()})
@@ -566,7 +566,28 @@ document.addEventListener("click",async e=>{
 
 });
 $("followupForm").onsubmit=async e=>{e.preventDefault();if(!user)return;const customer_name=$("followupCustomer").value.trim(),phone=$("followupPhone").value.trim(),rawAt=$("followupAt").value,callback=new Date(rawAt);if(!customer_name||!phone||!rawAt||Number.isNaN(callback.getTime())){status("Enter customer name, phone and a valid callback date/time.");return}const submit=$("followupForm").querySelector("button[type=submit]");submit.disabled=true;const payload={user_id:user.id,customer_name,phone,callback_at:callback.toISOString(),details:$("followupDetails").value.trim(),status:"pending"};const r=await db.from("ctr_followups").insert(payload).select("id").single();submit.disabled=false;if(r.error){status("Could not schedule follow-up: "+r.error.message);return}$("followupForm").reset();$("followupForm").classList.add("hidden");$("newFollowupBtn").textContent="＋ Create Follow-up";await loadFollowups();status("Callback saved to the shared pending list.");};
-$("noteForm").onsubmit=async e=>{e.preventDefault();const body=$("noteInput").value.trim();if(!body||!user)return;const {error}=await db.from("ctr_group_notes").insert({user_id:user.id,author_email:user.email,body});if(error)status("Could not send: "+error.message);else {$("noteInput").value="";renderGroup(true)}};
+$("noteForm").onsubmit=async e=>{
+ e.preventDefault();
+ const body=$("noteInput").value.trim();
+ if(!body||!user||!db)return;
+ const send=$("noteForm").querySelector('button[type="submit"]');
+ send.disabled=true;
+ try{
+  const {data,error}=await db.from("ctr_group_notes").insert({user_id:user.id,author_email:user.email,body}).select("*").single();
+  if(error)throw error;
+  $("noteInput").value="";
+  groupFilter="";dateFilter="";
+  $("groupSearch").value="";$("groupDate").value="";
+  const saved={...data,chat_color:data.chat_color||"#8E7CFF"};
+  if(!group.some(n=>String(n.id)===String(saved.id)))group.push(saved);
+  group.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  renderGroup(true);
+  status("Update shared successfully.");
+ }catch(err){
+  console.error("Group note send failed",err);
+  status("Could not send update: "+(err.message||"Please try again."));
+ }finally{send.disabled=false}
+};
 $("personalForm").onsubmit=async e=>{
  e.preventDefault();
  const body=$("personalInput").value.trim();
