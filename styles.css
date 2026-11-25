@@ -4268,24 +4268,23 @@ body.theme-light .shell #directView{
 }
 
 
-/* CTR LIGHT THEME — final canvas-level wallpaper source.
-   Use the document canvas rather than body pseudo-elements; prior overrides
-   repeatedly disabled pseudo layers and produced inconsistent rendering. */
-html:has(body.theme-light){
+/* CTR LIGHT THEME — apply wallpaper directly to the body viewport.
+   The document canvas alone was not visible consistently on deployed Pages;
+   body now owns the image, while app containers remain transparent. */
+html{
   min-height:100%;
   background-color:#f3f1f0!important;
-  background-image:url("./light-theme-bg.webp?rev=20261125c")!important;
+}
+body.theme-light{
+  min-height:100vh!important;
+  background:#f3f1f0 url("/CTR/light-theme-bg.webp?rev=20261125d") center center / cover fixed no-repeat!important;
+  background-color:#f3f1f0!important;
+  background-image:url("/CTR/light-theme-bg.webp?rev=20261125d")!important;
   background-position:center center!important;
   background-size:cover!important;
   background-repeat:no-repeat!important;
   background-attachment:fixed!important;
-}
-body.theme-light{
-  min-height:100vh!important;
-  background:transparent!important;
-  background-color:transparent!important;
-  background-image:none!important;
-  isolation:auto!important;
+  isolation:isolate!important;
 }
 body.theme-light::before,
 body.theme-light::after{
