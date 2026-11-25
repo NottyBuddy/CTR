@@ -445,18 +445,8 @@ async function generateNotes(){
  finally{$("generateAI").disabled=false}
 }
 async function loadAll(){
- const [c]=await Promise.all([db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),loadGroupPage(true),loadPersonalPage(true)]);
- if(c.error)throw c.error;renderGroup(true);renderPersonal();renderColors(c.data?.chat_color||null);await loadFollowups();
-}
-
-function renderColors(chosen){
- $("colorChoices").innerHTML=palette.map(col=>`<button type="button" class="color-choice ${chosen===col?"selected":""}" data-color="${col}" style="--swatch:${col}" ${chosen?"disabled":""} aria-label="Choose ${col}"></button>`).join("");
- $("colorLock").textContent=chosen?"Your chat colour is locked and cannot be changed.":"Choose one available colour. Each colour can belong to only one user and cannot be changed.";
-}
-async function chooseColor(color){
- const {error}=await db.from("ctr_profiles").insert({user_id:user.id,chat_color:color});
- if(error){status(error.code==="23505"?"That colour is already taken. Choose another.":"Could not save colour: "+error.message);return}
- renderColors(color);status("Your chat colour is saved and locked.");
+ await Promise.all([loadGroupPage(true),loadPersonalPage(true)]);
+ renderGroup(true);renderPersonal();await loadFollowups();
 }
 function notificationPermission(){return ("Notification" in window)?Notification.permission:"unsupported"}
 function updateNotificationButton(){
@@ -536,7 +526,7 @@ function realtime(){
  if(channel)db.removeChannel(channel);
  channel=db.channel("ctr-live-"+user.id)
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_group_notes"},async(payload)=>{if(payload.eventType==="INSERT")sendMessageNotification("group",payload.new);adminAuditData=null;try{await loadGroupPage(true);renderGroup();renderAgentDashboard()}catch(e){status("Group history refresh failed: "+e.message)}})
- .on("postgres_changes",{event:"*",schema:"public",table:"ctr_profiles"},async()=>{const [{data:mine},{data:profiles}]=await Promise.all([db.from("ctr_profiles").select("chat_color").eq("user_id",user.id).maybeSingle(),db.from("ctr_profiles").select("user_id,chat_color")]);renderColors(mine?.chat_color||null);const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=group.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()})
+ .on("postgres_changes",{event:"*",schema:"public",table:"ctr_profiles"},async()=>{const {data:profiles}=await db.from("ctr_profiles").select("user_id,chat_color");const colors=Object.fromEntries((profiles||[]).map(x=>[x.user_id,x.chat_color]));group=group.map(n=>({...n,chat_color:colors[n.user_id]||"#8E7CFF"}));renderGroup()})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_personal_notes"},async()=>{adminAuditData=null;try{await loadPersonalPage(true);renderPersonal();renderAgentDashboard()}catch(e){status("Personal notes refresh failed: "+e.message)}})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async(payload)=>{adminAuditData=null;if(payload.eventType==="INSERT")sendMessageNotification("direct",payload.new);await loadDirect()})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_followups"},async()=>{adminAuditData=null;await loadFollowups();if(isAdmin()&&adminAuditAgentId)renderAdminChatExplorer()})
@@ -598,7 +588,6 @@ $("authSubmit").addEventListener("click",()=>{if(!db)status("Connecting to sign-
 $("authRetry")?.addEventListener("click",()=>boot().catch(err=>{console.error("CTR retry failed",err);status("Connection failed: "+(err?.message||"Please try again."),true)}));
 $("forgotPassword").onclick=async()=>{if(!db)return;const email=$("email").value.trim().toLowerCase();if(!email){status("Enter your registered email address first.",true);$("email").focus();return}const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:"https://nottybuddy.github.io/CTR/"});status(error?error.message:"If this email belongs to a CTR account, a password reset link will be sent.",true)};
 document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>showView(b.dataset.view));
-$("colorChoices").onclick=e=>{const b=e.target.closest("[data-color]");if(b&&!b.disabled)chooseColor(b.dataset.color)};
 $("generateAI").onclick=generateNotes;
 $("aiQuestions")?.addEventListener("click",e=>{
  const option=e.target.closest("[data-ai-answer]");if(!option)return;
