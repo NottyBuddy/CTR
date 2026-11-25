@@ -2476,3 +2476,8 @@ body.theme-light .empty-state{color:#75666e}
  #groupView>#noteForm textarea{min-height:44px!important;height:44px!important}
  #groupView>#noteForm .composer-foot>span{white-space:normal!important}
 }
+
+
+/* Follow-ups only: full-width callback queue after removing the unreliable AI generator. */
+#followupsView{width:100%;min-width:0}
+#followupsView>.followup-queue-panel{width:100%!important;max-width:none!important;min-width:0!important;margin:0!important}
