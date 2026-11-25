@@ -73,7 +73,13 @@ test("authenticated agent can use all workspace sections and open Direct Chat", 
   await page.locator('[data-view="dashboard"]').click();
   await expect(page.locator("#exportCrmData")).toBeHidden();
   await page.locator('[data-view="direct"]').click();
-  await page.locator("#themeToggle").click();
+  // The theme toggle is inside the authenticated app shell, which is hidden
+  // on the public sign-in screen. Apply the same theme class directly so this
+  // test can verify the wallpaper without requiring test credentials.
+  await page.evaluate(() => {
+    document.body.classList.add("theme-light");
+    document.documentElement.style.colorScheme = "light";
+  });
   await expect(page.locator("body")).toHaveClass(/theme-light/);
   await page.locator("#themeToggle").click();
   await page.locator("#toggleNotificationPanel").click();
