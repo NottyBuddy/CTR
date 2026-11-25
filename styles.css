@@ -46,3 +46,13 @@ body.theme-light input,body.theme-light textarea,body.theme-light select{backgro
 @media(max-width:390px){.top-nav-btn{padding:8px 5px;font-size:9px}.top-nav-btn .nav-label{font-size:9px}.top-nav-btn svg{display:none}.global-search-wrap{flex-basis:90px;width:90px;min-width:90px}.top-meta .refresh-btn,.top-meta .signout-btn{padding:7px 8px;font-size:9px}}
 @media(hover:hover){.note,.agent-card,.followup-item,.ai-result{transition:transform .2s var(--ease),box-shadow .2s,border-color .2s}.note:hover,.agent-card:hover,.followup-item:hover,.ai-result:hover{transform:translateY(-1px)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* IndiNext Orbit theme refresh: cool lavender, no orange; architecture wallpapers per theme. */
+body:before{background-image:linear-gradient(145deg,rgba(6,8,16,.94),rgba(13,11,25,.86) 52%,rgba(20,14,32,.9)),url("orbit-dark-bg.webp");background-position:center;background-size:cover;background-repeat:no-repeat}
+body.theme-light{--bg:#f7f6fc;--text:#222138;--muted:#77758f;--surface:rgba(255,255,255,.76);--surface-2:rgba(255,255,255,.84);--surface-3:rgba(250,248,255,.96);--border:rgba(111,94,165,.15);--shadow:0 16px 45px rgba(64,52,105,.10);--accent:#8b6de0;--accent-2:#a58bfa;--accent-soft:rgba(151,123,227,.13);background:#f7f6fc}
+body.theme-light:before{background-image:linear-gradient(145deg,rgba(251,250,255,.86),rgba(246,244,255,.78) 52%,rgba(239,236,252,.86)),url("orbit-light-bg.webp");background-position:center;background-size:cover;background-repeat:no-repeat}
+body.theme-light:after{opacity:.16;background-image:linear-gradient(rgba(82,67,132,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(82,67,132,.025) 1px,transparent 1px)}
+body.theme-light .brand-name{color:#27243e}body.theme-light .brand-sub{color:#77758f}
+body.theme-light .primary,body.theme-light .send-btn,body.theme-light .dm-send-btn{background:linear-gradient(120deg,#a58bfa,#8870df);color:#fff}
+body.theme-light input,body.theme-light textarea,body.theme-light select{background:rgba(255,255,255,.88);color:var(--text)}
+body.theme-light .composer{background:rgba(255,255,255,.74)}
