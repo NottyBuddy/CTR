@@ -286,7 +286,8 @@ async function loadDirect(){
   const {data:people,error:peopleError}=await db.from("ctr_team_directory").select("user_id,email,display_name").order("display_name");
   if(sequence!==directLoadSequence)return;
   if(peopleError)throw new Error("Team contacts: "+peopleError.message);
-  team=Array.isArray(people)?people.filter(p=>p&&p.user_id):[];\n  await loadAvatarProfiles();
+  team=Array.isArray(people)?people.filter(p=>p&&p.user_id):[];
+  await loadAvatarProfiles();
   if(isAdmin()){
    const logs=await fetchAllRows(()=>db.from("ctr_moderation_log").select("*").order("deleted_at",{ascending:false}).order("id",{ascending:false}));
    if(sequence!==directLoadSequence)return;
