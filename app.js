@@ -325,24 +325,7 @@ function renderPersonal(){
  if(personalHasMore)$("personalNotes").insertAdjacentHTML("beforeend",'<button type="button" class="older-page-btn" data-load-older-personal>Load older personal notes</button>');
 }
 $("newFollowupBtn")?.addEventListener("click",()=>{const form=$("followupForm");form.classList.toggle("hidden");if(!form.classList.contains("hidden"))$("followupCustomer").focus();$("newFollowupBtn").textContent=form.classList.contains("hidden")?"＋ Create Follow-up":"− Close form";});
-function setAIPanelCollapsed(collapsed){
- const view=$("followupsView"),button=$("toggleAIPanel");if(!view||!button)return;
- view.classList.toggle("ai-panel-collapsed",!!collapsed);
- button.setAttribute("aria-expanded",String(!collapsed));
- button.setAttribute("aria-label",collapsed?"Expand AI assistant panel":"Collapse AI assistant panel");
- button.title=collapsed?"Expand AI panel":"Collapse AI panel";
- button.textContent=collapsed?"›":"‹";
-}
-$("toggleAIPanel")?.addEventListener("click",()=>{
- const collapsed=!$("followupsView").classList.contains("ai-panel-collapsed");
- setAIPanelCollapsed(collapsed);
- if(user)try{localStorage.setItem("ctr_ai_panel_collapsed_"+user.id,collapsed?"1":"0")}catch{}
-});
 function showView(v){
- if(v==="followups"){
-  renderAIHistory();
-  setAIPanelCollapsed(user&&localStorage.getItem("ctr_ai_panel_collapsed_"+user.id)==="1");
- }
  $("groupView").classList.toggle("hidden",v!=="group");
  $("personalView").classList.toggle("hidden",v!=="personal");
  $("directView").classList.toggle("hidden",v!=="direct");
@@ -351,102 +334,6 @@ function showView(v){
  $("dashboardView").classList.toggle("hidden",v!=="dashboard");if(v==="dashboard")renderAgentDashboard();
  document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
  if(v==="direct"){mobileThreadOpen=false;$("directView").querySelector(".dm-inbox").classList.remove("mobile-thread-open");loadDirect();markSeen("direct")}if(v==="group")markSeen("group");
-}
-let generatedDrafts={group:"",crm:""};
-const aiHistoryKey=()=> "ctr_ai_history_"+(user?.id||"anonymous");
-function readAIHistory(){try{return JSON.parse(localStorage.getItem(aiHistoryKey())||"[]").slice(0,100)}catch{return []}}
-function saveAIHistory(entry){if(!user)return;const rows=readAIHistory();rows.unshift({...entry,id:Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7),createdAt:new Date().toISOString()});try{localStorage.setItem(aiHistoryKey(),JSON.stringify(rows.slice(0,100)))}catch(e){$("aiStatus").textContent="Draft generated, but browser storage is full. Copy the notes before leaving."}renderAIHistory()}
-function renderAIHistory(){
- const box=$("aiHistoryList");if(!box)return;const rows=readAIHistory();
- box.innerHTML=rows.length?rows.map(r=>'<article class="ai-history-item"><button class="ai-history-open" type="button" data-ai-history="'+esc(r.id)+'"><strong>'+esc((r.raw||"Untitled call").slice(0,68))+'</strong><small>'+esc(new Date(r.createdAt).toLocaleString())+' · '+esc(r.confidence||"review")+' confidence</small></button><div class="ai-history-actions"><button type="button" class="message-action" data-ai-edit="'+esc(r.id)+'">Edit</button><button type="button" class="delete-note" data-ai-delete="'+esc(r.id)+'">Delete</button></div></article>').join(""):'<p class="ai-history-empty">Your generated notes will appear here.</p>';
-}
-function renderAIQuestions(questions,uncertainties){
- const box=$("aiQuestions"),items=[...(questions||[]),...(uncertainties||[]).map(x=>"Review: "+x)];
- if(!items.length){box.innerHTML='<strong>Private AI draft ready</strong><p>Review customer facts before sharing.</p>';box.classList.remove("hidden");return}
- box.innerHTML='<strong>AI needs your confirmation</strong>'+items.map(q=>{
-  const text=String(q||"").trim();
-  const parts=[...text.matchAll(/(?:^|\s)([A-C])\)\s*([^|;]+?)(?=\s+[A-C]\)\s*|$)/g)];
-  const question=parts.length?text.slice(0,parts[0].index).replace(/[?:\s]+$/,"?"):text;
-  const options=parts.map(m=>({label:m[1],value:m[2].trim()}));
-  return '<div class="ai-question-card"><p>'+esc(question)+'</p>'+(options.length?'<div class="ai-option-list">'+options.map(o=>'<button type="button" class="ai-option" data-ai-answer="'+esc(o.value)+'">'+esc(o.label+") "+o.value)+'</button>').join("")+'</div>':'<p class="ai-question-hint">Please clarify this detail in the input above and generate again.</p>')+'</div>';
- }).join("");
- box.classList.remove("hidden");
-}
-function restoreAIHistory(id){
- const row=readAIHistory().find(x=>x.id===id);if(!row)return;
- $("aiInput").value=row.raw||"";generatedDrafts={group:row.group||"",crm:row.crm||""};
- $("aiGroup").innerHTML=formatNoteHtml(generatedDrafts.group);$("aiCrm").innerHTML=formatNoteHtml(generatedDrafts.crm);
- $("aiResults").classList.toggle("hidden",!generatedDrafts.group&&!generatedDrafts.crm);
- renderAIQuestions(row.questions||[],row.uncertainties||[]);
- $("aiStatus").textContent="Saved draft restored. Review before using.";
-}
-function smartDrafts(raw){
- const source=String(raw||"").replace(/[,;]+/g," ").replace(/\s+/g," ").trim();
- const notes=[],missing=[],alias={mum:"Mumbai",bom:"Mumbai",mh:"Maharashtra",ap:"Andhra Pradesh",hyd:"Hyderabad",blr:"Bengaluru",bangalore:"Bengaluru",chn:"Chennai",kol:"Kolkata",pune:"Pune",del:"Delhi",ts:"Telangana",ka:"Karnataka",tn:"Tamil Nadu",rj:"Rajasthan",up:"Uttar Pradesh",mp:"Madhya Pradesh",gj:"Gujarat"};
- const loc=/\bloc(?:ation)?\s+([a-z]+)(?:\s+([a-z]{2,3}))?/i.exec(source),pin=/\b(?:pin(?:\s*code)?\s*)?(\d{6})\b/i.exec(source),phone=/\b(?:\+91[-\s]?)?[6-9]\d{9}\b/.exec(source);
- const customer=/\b(?:customer|cx|cust)\s*[:=-]\s*([A-Za-z][A-Za-z .'-]{1,50}?)(?=\s+(?:phone|mob|mobile|contact|loc|location|req|requirement)\b|$)/i.exec(source);
- const name=customer?.[1]?.trim()||"";
- const windowContext=/\b(window|windows|sliding|casement|uPVC|upvc|aluminium|aluminum|glass|frame|sash)\b/i.test(source);
- const wifiContext=/\b(wi[\s-]?fi|wireless|router|internet|network|broadband|hotspot|signal)\b/i.test(source);
- const weekContext=/\b(week|weeks|weekly|callback|call\s*back|follow.?up|after|within|timeline|delivery|working days?)\b/i.test(source);
- const shorthandW=/\b(\d+)\s*w\b/gi;
- const wMatches=[...source.matchAll(shorthandW)];
- const ambiguousW=[];
- const durations=[...source.matchAll(/\b(\d+)\s*(weeks?|wks?|days?|d|months?|mos?|mo)\b/gi)];
- for(const m of wMatches){
-  const count=m[1];
-  if(windowContext){notes.push("Window quantity: "+count+" windows.");}
-  else if(wifiContext){notes.push("Wi-Fi-related quantity/reference: "+count+" (exact meaning should be confirmed).");}
-  else if(weekContext||/\b\d+\s*w\s*\d+\s*d\b/i.test(source)){durations.push(m); }
-  else ambiguousW.push(count+"w");
- }
- if(durations.length)notes.push("Customer timeline: "+durations.map(m=>m[1]+" "+(m[2].toLowerCase().startsWith("w")?"weeks":m[2].toLowerCase().startsWith("d")?"days":"months")).join(" and ")+".");
- if(ambiguousW.length)missing.push("Ambiguous shorthand "+ambiguousW.join(", ")+": could mean weeks, windows, Wi-Fi, or another term. Confirm the intended meaning before finalizing.");
- const construction=/\b(new\s*)?(constru|construction)\b/i.test(source),restaurant=/\b(restaurant|restro|hotel|cafe|café|food outlet)\b/i.test(source),commercial=/\b(commercial|comm(?:ercial)? property)\b/i.test(source),residential=/\b(residential|res property)\b/i.test(source);
- if(construction)notes.push("Project stage: New construction.");
- if(restaurant)notes.push("Project type: Restaurant.");
- if(commercial)notes.push("Property category: Commercial property.");else if(residential)notes.push("Property category: Residential property.");
- if(loc){const city=alias[loc[1].toLowerCase()]||loc[1].replace(/^\w/,c=>c.toUpperCase()),state=loc[2]?(alias[loc[2].toLowerCase()]||loc[2].toUpperCase()):"";notes.push("Location: "+[city,state].filter(Boolean).join(", ")+(pin?", PIN Code "+pin[1]:"")+".");}else if(pin)notes.push("PIN Code: "+pin[1]+".");
- const callback=/\b(call\s*back|callback|call\s*bck|cb)\b/i.test(source),after=/\b(?:after|in)\s+(one|1|two|2|three|3|four|4|a)\s+(day|week|month)s?\b/i.exec(source),dateMatch=/\b(\d{1,2})\s+(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{4})\b/i.exec(source);
- let followDate="";
- if(dateMatch){const parsed=new Date(dateMatch[1]+" "+dateMatch[2]+" "+dateMatch[3]+" 12:00:00");if(!Number.isNaN(parsed.getTime()))followDate=parsed.toLocaleDateString("en-IN",{day:"2-digit",month:"long",year:"numeric"});}
- else if(after){const amount=({one:1,a:1,two:2,three:3,four:4})[after[1].toLowerCase()]||Number(after[1]),d=new Date();d.setHours(12,0,0,0);if(after[2].toLowerCase().startsWith("day"))d.setDate(d.getDate()+amount);else if(after[2].toLowerCase().startsWith("week"))d.setDate(d.getDate()+7*amount);else d.setMonth(d.getMonth()+amount);followDate=d.toLocaleDateString("en-IN",{day:"2-digit",month:"long",year:"numeric"});}
- if(callback){notes.push("Customer requested a callback"+(after?" "+after[0]:"")+".");notes.push(followDate?"Follow-up required: "+followDate+".":"Follow-up required: Schedule a callback; exact date was not specified.");}
- if(name)notes.unshift("Customer Name: "+name+".");if(phone)notes.push("Contact Number: "+phone[0]+".");
- if(/\bclr\b/i.test(source))missing.push('"CLR" is unclear; its meaning has not been assumed.');
- if(!name)missing.push("Customer name was not provided.");if(!phone)missing.push("Contact number was not provided.");
- if(!loc&&!pin)missing.push("Specific city/state or PIN Code was not provided.");
- if(!restaurant&&!commercial&&!residential&&!construction)missing.push("Project type/category needs confirmation.");
- if(!callback)missing.push("Call outcome and next action need confirmation.");
- if(!notes.length)notes.push("Call details received: "+source+".");
- const crm=["CUSTOMER CALL NOTE","Customer Name | Contact Number",(name||"Not provided")+" | "+(phone?.[0]||"Not provided"),"","Call Summary:",...notes,"","Clarifications / Missing Information:",...missing.map(x=>"• "+x),"","Next Action: "+(callback?(followDate?"Reconnect with the customer on "+followDate+" and confirm the complete requirement.":"Schedule a callback and confirm the complete requirement."):"Confirm the call outcome and agree on the next action.")].join("\n");
- const group=["CRM UPDATE | "+(restaurant?"Restaurant project":commercial?"Commercial property":construction?"New construction":"Customer call update"),...notes,"","Pending information: "+(missing.length?missing.join(" "):"No key details flagged."),"Assigned to: Not specified"].join("\n");
- return {group,crm,clarifications:missing};
-}
-async function generateNotes(){
- const raw=$("aiInput").value.trim();
- if(!raw){$("aiStatus").textContent="Paste customer call details first.";return}
- if(!window.CTRLocalAI){$("aiStatus").textContent="Private local AI module did not load. Refresh and retry.";return}
- $("generateAI").disabled=true;$("aiStatus").textContent="Loading private AI model… First use downloads model files to this browser; this may take a few minutes.";
- try{
-  const result=await window.CTRLocalAI.generate(raw,(p)=>{
-   if(p?.status==="progress"&&Number.isFinite(p.progress))$("aiStatus").textContent="Downloading private AI model… "+Math.round(p.progress)+"%";
-   else if(p?.status==="done")$("aiStatus").textContent="Model file ready. Preparing your notes…";
-   else if(p?.status==="initiate")$("aiStatus").textContent="Preparing model file: "+(p.file||"");
-  });
-  generatedDrafts={group:result.group,crm:result.crm};
-  saveAIHistory({raw,group:result.group,crm:result.crm,questions:result.questions||[],uncertainties:result.uncertainties||[],confidence:result.confidence});
-  $("aiGroup").innerHTML=formatNoteHtml(result.group);
-  $("aiCrm").innerHTML=formatNoteHtml(result.crm);
-  renderAIQuestions(result.questions||[],result.uncertainties||[]);
-  $("aiResults").classList.remove("hidden");
-  $("aiStatus").textContent="On-device AI · "+result.confidence+" confidence · Customer prompt processed in this browser only.";
- }catch(e){$("aiStatus").textContent="Private AI: "+(e?.message||"Could not prepare notes. Check browser memory and connection.");}
- finally{$("generateAI").disabled=false}
-}
-async function loadAll(){
- await Promise.all([loadGroupPage(true),loadPersonalPage(true)]);
- renderGroup(true);renderPersonal();await loadFollowups();
 }
 function notificationPermission(){return ("Notification" in window)?Notification.permission:"unsupported"}
 function updateNotificationButton(){
@@ -567,26 +454,40 @@ async function ensureSupabaseLibrary(){
  }
  return false;
 }
+let authBootPromise=null;
 async function boot(){
  status("Connecting to sign-in service…",true);$("authRetry")?.classList.add("hidden");
  if(!await ensureSupabaseLibrary()){status("Could not connect to the sign-in service. Check internet and tap Retry connection.",true);$("authRetry")?.classList.remove("hidden");return}
- db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
- const {data,error}=await db.auth.getSession();if(error){status("Session error: "+error.message,true);return}
+ if(!db)db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+ const {data,error}=await db.auth.getSession();if(error){status("Session error: "+error.message,true);$("authRetry")?.classList.remove("hidden");return}
  if(data.session)await enter(data.session.user);
- db.auth.onAuthStateChange(async(_e,s)=>{if(s?.user){if(!user||user.id!==s.user.id)await enter(s.user)}else{user=null;$("appView").classList.add("hidden");$("authView").classList.remove("hidden")}});
+ if(!authListenerReady){
+  authListenerReady=true;
+  db.auth.onAuthStateChange(async(_e,s)=>{if(s?.user){if(!user||user.id!==s.user.id)await enter(s.user)}else{user=null;$("appView").classList.add("hidden");$("authView").classList.remove("hidden")}});
+ }
+}
+let authListenerReady=false;
+async function connectAuth(){
+ if(db)return true;
+ if(!authBootPromise)authBootPromise=boot().finally(()=>{authBootPromise=null});
+ await authBootPromise;
+ return !!db;
 }
 $("authForm").addEventListener("submit",async e=>{
  e.preventDefault();
- if(!db){status("Sign-in service is still connecting. Wait a few seconds and try again.",true);return;}
+ if(!db){
+  $("authSubmit").disabled=true;status("Connecting to sign-in service…",true);
+  try{await connectAuth()}catch(err){console.error("Sign-in connection failed",err)}
+  if(!db){$("authSubmit").disabled=false;status("Could not connect to sign-in service. Check internet and tap Retry connection.",true);$("authRetry")?.classList.remove("hidden");return}
+ }
  const email=$("email").value.trim().toLowerCase(),password=$("password").value;
  $("authSubmit").disabled=true;status("Signing in…",true);
  try{const r=await db.auth.signInWithPassword({email,password});if(r.error)status("Sign-in failed: "+r.error.message,true);else if(r.data.user)await enter(r.data.user)}
  catch(err){status("Sign-in error: "+(err.message||"Please try again."),true)}
  finally{$("authSubmit").disabled=false}
 });
-$("authSubmit").addEventListener("click",()=>{if(!db)status("Connecting to sign-in service…",true)});
-$("authRetry")?.addEventListener("click",()=>boot().catch(err=>{console.error("CTR retry failed",err);status("Connection failed: "+(err?.message||"Please try again."),true)}));
-$("forgotPassword").onclick=async()=>{if(!db)return;const email=$("email").value.trim().toLowerCase();if(!email){status("Enter your registered email address first.",true);$("email").focus();return}const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:"https://nottybuddy.github.io/CTR/"});status(error?error.message:"If this email belongs to a CTR account, a password reset link will be sent.",true)};
+$("authRetry")?.addEventListener("click",()=>connectAuth().catch(err=>{console.error("CTR retry failed",err);status("Connection failed: "+(err?.message||"Please try again."),true)}));
+$("forgotPassword").onclick=async()=>{if(!db){status("Connecting to sign-in service…",true);try{await connectAuth()}catch(err){status("Could not connect to sign-in service: "+(err?.message||"Please try again."),true);return}}if(!db){status("Could not connect to sign-in service. Please retry.",true);$("authRetry")?.classList.remove("hidden");return}const email=$("email").value.trim().toLowerCase();if(!email){status("Enter your registered email address first.",true);$("email").focus();return}const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:"https://nottybuddy.github.io/CTR/"});status(error?error.message:"If this email belongs to a CTR account, a password reset link will be sent.",true)};
 document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>showView(b.dataset.view));
 $("generateAI").onclick=generateNotes;
 $("aiQuestions")?.addEventListener("click",e=>{
@@ -717,7 +618,7 @@ if(pin&&isAdmin()){const n=group.find(x=>x.id===pin);if(n){target.disabled=true;
 if(rid&&emoji){target.disabled=true;const {error}=await db.rpc("ctr_toggle_group_reaction",{p_note_id:rid,p_emoji:emoji});target.disabled=false;if(error){status("Reaction failed: "+error.message)}else{try{await loadGroupPage(true)}catch(readError){status("Reaction saved, refresh failed: "+readError.message);return}renderGroup();status("Reaction updated.")}}
 if(g&&isAdmin()){if(!confirm("Admin: permanently delete this group message?"))return;const {error}=await db.from("ctr_group_notes").delete().eq("id",g);if(error)status("Delete failed: "+error.message);else{await loadGroupPage(true);renderGroup();status("Group message deleted by admin.")}}if(p&&isAdmin()){if(!confirm("Admin: permanently delete this personal note?"))return;const {error}=await db.from("ctr_personal_notes").delete().eq("id",p);if(error)status("Delete failed: "+error.message);else{await loadPersonalPage(true);renderPersonal();status("Personal note deleted by admin.")}}if(d&&isAdmin()){if(!confirm("Admin: permanently delete this direct message?"))return;const {error}=await db.from("ctr_direct_messages").delete().eq("id",d);if(error)status("Delete failed: "+error.message);else{await loadDirect();renderDirect();status("Direct message deleted by admin.")}}});
 $("signOut").onclick=async()=>{if(channel)await db.removeChannel(channel);await db.auth.signOut()};
-boot().catch(err=>{console.error("CTR startup failed",err);status("App startup failed: "+(err?.message||"Please refresh the page."),true)});
+connectAuth().catch(err=>{console.error("CTR startup failed",err);status("App startup failed: "+(err?.message||"Please refresh the page."),true)});
 
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&user){if(!$("groupView").classList.contains("hidden"))markSeen("group");if(!$("directView").classList.contains("hidden"))markSeen("direct")}});
 let holdTimer;document.addEventListener("touchstart",e=>{const card=e.target.closest(".note[data-note-id]");if(!card)return;holdTimer=setTimeout(()=>{const n=group.find(x=>x.id===card.dataset.noteId);if(n&&confirm("Quote this message in Group Chat?")){$("noteInput").value="↪ "+displayName(n.author_email)+": "+n.body+"\n\n";$("noteInput").focus()}},650)},{passive:true});document.addEventListener("touchend",()=>clearTimeout(holdTimer),{passive:true});document.addEventListener("touchmove",()=>clearTimeout(holdTimer),{passive:true});
