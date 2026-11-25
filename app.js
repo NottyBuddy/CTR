@@ -549,7 +549,7 @@ function timeoutTask(promise,ms,label){return Promise.race([promise,new Promise(
  setTheme(localStorage.getItem("ctr_theme_"+u.id)||"dark");
  $("exportCrmData")?.classList.toggle("hidden",!isAdmin());
  const name=displayName(u.email);$("userEmail").textContent=name;updateNotificationButton();
- try{await loadAll();realtime();await loadDirect();await loadNotifications()}catch(e){status("Database error: "+(e.message||"Unable to load records."))}
+ try{await timeoutTask(loadAll(),18000,"Initial records");realtime();await Promise.all([timeoutTask(loadDirect(),18000,"Chats"),timeoutTask(loadNotifications(),12000,"Notifications")])}catch(e){status("Database load issue: "+(e.message||"Unable to load records.")+" — tap Refresh to retry.")}
 }
 async function ensureSupabaseLibrary(){
  if(window.supabase?.createClient)return true;
