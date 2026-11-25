@@ -4021,3 +4021,34 @@ body.theme-light .shell{
  background-color:transparent!important;
  background-image:none!important;
 }
+
+
+/* DEFINITIVE LIGHT WALLPAPER FIX — render on the document canvas, not a pseudo layer.
+   The earlier stylesheet had conflicting ::before rules that hid/covered the uploaded art. */
+html:has(body.theme-light){
+ background-color:#f4f3f2!important;
+ background-image:url("/CTR/light-theme-bg.webp")!important;
+ background-position:center center!important;
+ background-size:cover!important;
+ background-repeat:no-repeat!important;
+ background-attachment:fixed!important;
+}
+body.theme-light{
+ background:transparent!important;
+ background-color:transparent!important;
+ background-image:none!important;
+}
+body.theme-light::before,
+body.theme-light::after{
+ content:none!important;
+ display:none!important;
+ background:none!important;
+ opacity:0!important;
+}
+body.theme-light .shell{
+ position:relative!important;
+ z-index:1!important;
+ background:transparent!important;
+ background-color:transparent!important;
+ background-image:none!important;
+}
