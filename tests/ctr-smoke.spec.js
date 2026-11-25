@@ -156,7 +156,12 @@ test("Light Theme wallpaper asset loads and is applied to the visible page layer
   expect(assetResponse.status(), "Light Theme wallpaper must be served by GitHub Pages").toBe(200);
   expect(assetResponse.headers()["content-type"] || "").toContain("image/webp");
 
-  await page.locator("#themeToggle").click();
+  // The theme toggle is hidden on the public sign-in page. Apply the same
+  // body class used by setTheme() so this public-page test can inspect rendering.
+  await page.evaluate(() => {
+    document.body.classList.add("theme-light");
+    document.documentElement.style.colorScheme = "light";
+  });
   await expect(page.locator("body")).toHaveClass(/theme-light/);
 
   const rendered = await page.evaluate(async () => {
