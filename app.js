@@ -544,7 +544,8 @@ function realtime(){
  .on("postgres_changes",{event:"UPDATE",schema:"public",table:"ctr_notifications",filter:"recipient_id=eq."+user.id},loadNotifications)
  .subscribe(s=>{if(s==="SUBSCRIBED")status("Live sync connected · group updates appear automatically.");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")status("Live sync interrupted. Refresh to reconnect.")});
 }
-function timeoutTask(promise,ms,label){return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+\" timed out. Check your connection and retry.\")),ms))])}\nasync function enter(u){
+function timeoutTask(promise,ms,label){return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+" timed out. Check your connection and retry.")),ms))])}
+async function enter(u){
  user=u;$("authView").classList.add("hidden");$("appView").classList.remove("hidden");setupAccountSettings();
  setTheme(localStorage.getItem("ctr_theme_"+u.id)||"dark");
  $("exportCrmData")?.classList.toggle("hidden",!isAdmin());
