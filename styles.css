@@ -129,3 +129,25 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:.78}input:fo
  .account-avatar-choice{font-size:20px;border-radius:11px}
 }
 @media(max-width:390px){.dashboard-total-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.account-avatar-choices{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* Person-to-person chat identity and globally reserved avatar states */
+.dm-avatar{position:relative;display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:50%;background:var(--accent-soft);border:1px solid var(--border);font-size:19px;color:var(--accent)}
+.dm-avatar-large{width:42px;height:42px;flex-basis:42px;font-size:21px}
+.dm-message{display:flex;flex-direction:column;gap:6px;padding:11px 12px;max-width:min(84%,620px)}
+.dm-message-person{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--muted);min-width:0}
+.dm-message-person strong{font-size:10px;color:var(--text);overflow-wrap:anywhere}
+.dm-message-avatar{width:23px;height:23px;flex-basis:23px;font-size:13px;border-radius:50%}
+.dm-message-body{line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.dm-conversation{display:flex;align-items:center;gap:10px;width:100%;padding:10px;border:0;border-bottom:1px solid var(--border);background:transparent;text-align:left;min-width:0}
+.dm-conversation:hover,.dm-conversation.selected{background:var(--accent-soft)}
+.dm-convo-copy{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.dm-convo-copy strong{font-size:11px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.dm-convo-copy>span{font-size:10px;color:var(--muted);white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.dm-convo-meta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;color:var(--muted);font-size:9px;flex:0 0 auto}
+.account-avatar-status{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 12px;padding:10px 12px;background:var(--accent-soft);border-radius:11px;font-size:11px;flex-wrap:wrap}
+.account-avatar-status span{color:var(--muted);font-size:10px}
+.account-avatar-choice:disabled{opacity:.42;cursor:not-allowed;transform:none!important}
+.account-avatar-choice.taken{position:relative;opacity:.35;filter:grayscale(.75)}
+.avatar-taken-mark,.avatar-selected-mark{position:absolute;right:2px;bottom:2px;width:15px;height:15px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:900;background:var(--danger);color:#fff}
+.avatar-selected-mark{background:var(--success);color:#13231d}
+@media(max-width:700px){.dm-message{max-width:94%;padding:9px}.dm-message-person strong{font-size:10px}.dm-avatar-large{width:37px;height:37px;flex-basis:37px}}
