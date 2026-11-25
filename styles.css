@@ -3986,3 +3986,38 @@ body.theme-light .shell :where(h1,h2,h3,h4,p,span,strong,small,label,time){
 body.theme-light .shell :where(.eyebrow,.head-count,.followup-status,.note-meta,.note-time){
  color:#51474d!important;
 }
+
+
+/* FINAL FIX: uploaded samurai wallpaper must sit behind the entire Light UI */
+html:has(body.theme-light){background:#f4f3f2!important}
+body.theme-light{
+ position:relative!important;
+ min-height:100vh!important;
+ background:#f4f3f2!important;
+ background-image:none!important;
+}
+body.theme-light::before{
+ content:""!important;
+ display:block!important;
+ position:fixed!important;
+ inset:0!important;
+ z-index:0!important;
+ pointer-events:none!important;
+ opacity:1!important;
+ filter:none!important;
+ transform:none!important;
+ background-image:url("/CTR/light-theme-bg.webp")!important;
+ background-position:center center!important;
+ background-size:cover!important;
+ background-repeat:no-repeat!important;
+ background-attachment:fixed!important;
+}
+body.theme-light::after{content:none!important;display:none!important}
+body.theme-light .shell{
+ position:relative!important;
+ z-index:1!important;
+ min-height:100vh!important;
+ background:transparent!important;
+ background-color:transparent!important;
+ background-image:none!important;
+}
