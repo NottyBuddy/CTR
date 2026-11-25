@@ -4095,3 +4095,63 @@ body.theme-light .shell #followupsView .followup-queue-panel{
  background:transparent!important;
  background-color:transparent!important;
 }
+
+
+/* LIGHT THEME — render the uploaded wallpaper on BODY itself.
+   Keep the document and app surfaces clear so the artwork remains visible. */
+html:has(body.theme-light){
+ background:#f3f1f0!important;
+ background-image:none!important;
+}
+body.theme-light{
+ min-height:100vh!important;
+ background-color:#f3f1f0!important;
+ background-image:url("/CTR/light-theme-bg.webp?v=20261125")!important;
+ background-position:center center!important;
+ background-size:cover!important;
+ background-repeat:no-repeat!important;
+ background-attachment:fixed!important;
+ background-blend-mode:normal!important;
+}
+body.theme-light::before,
+body.theme-light::after{
+ content:none!important;
+ display:none!important;
+ background:none!important;
+ opacity:0!important;
+}
+body.theme-light .shell,
+body.theme-light #appView,
+body.theme-light .app-view,
+body.theme-light .notes-view,
+body.theme-light #followupsView,
+body.theme-light #groupView,
+body.theme-light #personalView,
+body.theme-light #directView,
+body.theme-light .followups-workspace,
+body.theme-light .main-area,
+body.theme-light .workspace{
+ background:transparent!important;
+ background-color:transparent!important;
+ background-image:none!important;
+ box-shadow:none!important;
+}
+body.theme-light .followup-panel,
+body.theme-light .followup-queue-panel,
+body.theme-light .followup-item,
+body.theme-light .note,
+body.theme-light .note-card,
+body.theme-light .note-item,
+body.theme-light .dm-inbox,
+body.theme-light .dm-thread,
+body.theme-light .dm-message,
+body.theme-light .chat-bubble,
+body.theme-light .workspace-card,
+body.theme-light .module-card{
+ background:transparent!important;
+ background-color:transparent!important;
+ background-image:none!important;
+ box-shadow:none!important;
+ backdrop-filter:none!important;
+ -webkit-backdrop-filter:none!important;
+}
