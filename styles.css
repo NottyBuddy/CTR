@@ -2851,3 +2851,62 @@ body.theme-light table,body.theme-light th,body.theme-light td{color:#30262b!imp
 body.theme-light tr:nth-child(even){background:rgba(248,242,245,.7)!important}
 body.theme-light ::selection{background:#f0cbd7!important;color:#351a25!important}
 @media(prefers-reduced-motion:reduce){body.theme-light:before{animation:none!important}}
+
+
+/* Shared Channel visibility fix: keep the page artwork behind the workspace,
+   never behind message text. Earlier global transparent-surface rules must not
+   make message cards disappear into the Samurai background. */
+body:not(.theme-light) #groupView,
+body:not(.theme-light) #groupView>#notes{
+  background:rgba(5,5,7,.42)!important;
+  background-image:none!important;
+}
+body:not(.theme-light) #groupView>#notes{
+  gap:10px!important;
+  padding:12px 9px 18px!important;
+  align-items:stretch!important;
+  justify-content:flex-start!important;
+}
+body:not(.theme-light) #groupView>#notes>.note{
+  display:block!important;
+  flex:0 0 auto!important;
+  width:max-content!important;
+  max-width:min(88%,900px)!important;
+  min-width:190px!important;
+  margin:0!important;
+  padding:12px 15px!important;
+  background:linear-gradient(135deg,rgba(30,15,20,.97),rgba(13,10,13,.97))!important;
+  background-color:rgba(22,12,16,.97)!important;
+  background-image:linear-gradient(135deg,rgba(30,15,20,.97),rgba(13,10,13,.97))!important;
+  border:1px solid rgba(255,105,135,.2)!important;
+  border-radius:15px!important;
+  box-shadow:0 7px 22px rgba(0,0,0,.36)!important;
+  -webkit-backdrop-filter:blur(10px)!important;
+  backdrop-filter:blur(10px)!important;
+}
+body:not(.theme-light) #groupView>#notes>.note.mine{
+  align-self:flex-end!important;
+  background:linear-gradient(135deg,rgba(77,15,34,.98),rgba(43,9,21,.98))!important;
+  background-color:rgba(58,12,27,.98)!important;
+}
+body:not(.theme-light) #groupView>#notes>.note .note-body{
+  color:#f5edf0!important;
+  opacity:1!important;
+  white-space:pre-wrap!important;
+  overflow-wrap:anywhere!important;
+}
+body:not(.theme-light) #groupView>#notes>.note .note-author{color:#fff!important}
+body:not(.theme-light) #groupView>#notes>.note .note-time{color:#c7aeb7!important}
+body:not(.theme-light) #groupView>#notes>.date-separator,
+body:not(.theme-light) #groupView>#notes>.unread-divider{
+  flex:0 0 auto!important;
+  align-self:stretch!important;
+  margin:5px 0!important;
+}
+body.theme-light #groupView>#notes>.note{
+  background:#fff!important;
+  background-image:none!important;
+  border:1px solid #e9dfe3!important;
+  box-shadow:0 5px 18px rgba(45,24,32,.06)!important;
+}
+body.theme-light #groupView>#notes>.note.mine{background:#f9e8ed!important}
