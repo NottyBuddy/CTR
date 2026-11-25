@@ -4052,3 +4052,46 @@ body.theme-light .shell{
  background-color:transparent!important;
  background-image:none!important;
 }
+
+
+/* Light theme typography + logo cleanup requested */
+body.theme-light .shell .eyebrow,
+body.theme-light .shell #followupsView .followup-queue-panel > .eyebrow{
+ text-shadow:none!important;
+ filter:none!important;
+ -webkit-text-stroke:0!important;
+ box-shadow:none!important;
+ font-weight:700!important;
+ letter-spacing:.16em!important;
+ color:#54243b!important;
+}
+body.theme-light .shell :where(h1,h2,h3,h4,h5,p,span,strong,small,label,time,a,button){
+ text-shadow:none!important;
+ filter:none!important;
+}
+body.theme-light .shell .brand-mark{
+ border:0!important;
+ outline:0!important;
+ background:transparent!important;
+ background-color:transparent!important;
+ background-image:none!important;
+ box-shadow:none!important;
+ padding:0!important;
+}
+body.theme-light .shell .brand-mark .ctr-emblem{
+ display:block!important;
+ border:0!important;
+ outline:0!important;
+ background:transparent!important;
+ background-color:transparent!important;
+ box-shadow:none!important;
+ filter:none!important;
+ object-fit:contain!important;
+}
+body.theme-light .shell #followupsView .followup-queue-panel{
+ border:0!important;
+ outline:0!important;
+ box-shadow:none!important;
+ background:transparent!important;
+ background-color:transparent!important;
+}
