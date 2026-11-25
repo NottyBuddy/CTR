@@ -2291,3 +2291,58 @@ body.theme-light .empty-state{color:#75666e}
  #groupView>#noteForm{position:sticky!important;bottom:0!important;z-index:5!important;flex:0 0 auto!important;margin-top:8px!important;background:rgba(8,7,9,.9)!important;backdrop-filter:blur(25px)!important;-webkit-backdrop-filter:blur(25px)!important}
  #groupView>#noteForm textarea{resize:none!important;min-height:62px!important;max-height:100px!important;overflow-y:auto!important}
 }
+
+
+/* Follow-ups workspace: CRM Note Generator on the left, callback queue on the right. */
+#followupsView{width:100%;min-width:0}
+#followupsView .followups-workspace{
+ display:grid!important;
+ grid-template-columns:minmax(320px,0.9fr) minmax(0,1.1fr);
+ gap:18px;
+ align-items:start;
+ width:100%;
+ min-width:0;
+ padding:16px 0 22px;
+}
+#followupsView .followup-generator-panel{
+ position:sticky!important;
+ top:14px!important;
+ align-self:start!important;
+ width:100%!important;
+ max-height:calc(100vh - 150px)!important;
+ overflow-y:auto!important;
+ margin:0!important;
+ padding:20px!important;
+ border-radius:18px!important;
+}
+#followupsView .followup-queue-panel{
+ min-width:0;
+ width:100%;
+ margin:0!important;
+ padding:20px!important;
+ border-radius:18px!important;
+}
+#followupsView .followup-panel h3{font-size:18px;margin:8px 0}
+#followupsView .followup-panel>p{font-size:12px;margin:5px 0 14px}
+#followupsView .followup-list{max-width:none!important;width:100%}
+#followupsView .followup-form{max-width:none!important}
+#followupsView.ai-panel-collapsed .followups-workspace{grid-template-columns:64px minmax(0,1fr)}
+#followupsView.ai-panel-collapsed .followup-generator-panel{width:64px!important;min-width:64px!important;padding:12px 9px!important;overflow:hidden!important}
+#followupsView.ai-panel-collapsed .followup-generator-panel .right-panel-head{justify-content:center;align-items:center}
+#followupsView.ai-panel-collapsed .followup-generator-panel .ai-panel-title,
+#followupsView.ai-panel-collapsed .followup-generator-panel>*:not(.right-panel-head){display:none!important}
+#followupsView.ai-panel-collapsed .followup-generator-panel .ai-panel-toggle{margin:0;transform:none}
+@media(max-width:900px){
+ #followupsView .followups-workspace{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+ #followupsView .followup-generator-panel,#followupsView .followup-queue-panel{padding:15px!important}
+}
+@media(max-width:760px){
+ #followupsView .followups-workspace{display:flex!important;flex-direction:column;gap:14px;padding:10px 0 18px}
+ #followupsView .followup-generator-panel{position:static!important;top:auto!important;width:100%!important;max-height:none!important;overflow:visible!important;padding:17px 14px!important}
+ #followupsView .followup-queue-panel{width:100%;padding:17px 14px!important}
+ #followupsView.ai-panel-collapsed .followups-workspace{display:flex!important}
+ #followupsView.ai-panel-collapsed .followup-generator-panel{width:100%!important;min-width:0!important;padding:17px 14px!important}
+ #followupsView.ai-panel-collapsed .followup-generator-panel .ai-panel-title,
+ #followupsView.ai-panel-collapsed .followup-generator-panel>*:not(.right-panel-head){display:block!important}
+ #followupsView .ai-panel-toggle{display:none}
+}
