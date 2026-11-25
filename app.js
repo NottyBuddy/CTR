@@ -468,7 +468,7 @@ async function boot(){
 }
 let authListenerReady=false;
 async function connectAuth(){
- if(db)return true;
+ if(db&&authListenerReady)return true;
  if(!authBootPromise)authBootPromise=boot().finally(()=>{authBootPromise=null});
  await authBootPromise;
  return !!db;
