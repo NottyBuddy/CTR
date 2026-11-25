@@ -3234,3 +3234,204 @@ body.theme-light #groupView button{
 body.theme-light #groupView .send-btn{
  background:#54243b!important;color:#fff!important;
 }
+
+
+/* LIGHT MODE COMPLETE UI PASS — override legacy transparent/dark !important rules.
+   Apply to the actual app shell and every module, including Private Chats. */
+body.theme-light{
+ color-scheme:light!important;
+ background:#f7f5f4!important;color:#21171c!important;
+ --text:#21171c!important;--muted:#685b62!important;
+ --bg:#f7f5f4!important;--panel:#fff!important;--panel2:#faf6f7!important;
+}
+html:has(body.theme-light){background:#f7f5f4!important}
+body.theme-light::before{
+ display:block!important;opacity:1!important;filter:none!important;
+ background:
+ linear-gradient(rgba(250,248,247,.84),rgba(250,248,247,.90)),
+ url("https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=2000&q=80") center/cover fixed no-repeat!important;
+}
+body.theme-light::after{display:none!important;opacity:0!important}
+body.theme-light .shell,
+body.theme-light .app-view,
+body.theme-light .main-area,
+body.theme-light .workspace,
+body.theme-light .notes-view,
+body.theme-light .direct-inbox-view,
+body.theme-light .dm-inbox{
+ background:transparent!important;background-color:transparent!important;
+ background-image:none!important;color:#21171c!important;
+}
+body.theme-light .shell .topbar,
+body.theme-light .shell .sidebar-nav,
+body.theme-light .shell .chat,
+body.theme-light .shell .right-panel,
+body.theme-light .shell .glass,
+body.theme-light .shell .panel,
+body.theme-light .shell .dm-list-pane,
+body.theme-light .shell .dm-thread-pane,
+body.theme-light .shell .dm-thread-header,
+body.theme-light .shell .dm-thread-messages,
+body.theme-light .shell .dm-compose-wrap,
+body.theme-light .shell .dm-list-tools,
+body.theme-light .shell .inbox-heading,
+body.theme-light .shell .composer,
+body.theme-light .shell .followup-panel,
+body.theme-light .shell .followup-item,
+body.theme-light .shell .dashboard-summary,
+body.theme-light .shell .dashboard-filters,
+body.theme-light .shell .modal-card,
+body.theme-light .shell .account-settings-card,
+body.theme-light .shell .notification-panel,
+body.theme-light .shell .global-search-results{
+ background:#fff!important;background-color:#fff!important;
+ background-image:none!important;color:#21171c!important;
+ border:1px solid #e8dfe2!important;
+ box-shadow:0 4px 18px rgba(49,27,36,.07)!important;
+ -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+}
+body.theme-light .shell .topbar{
+ min-height:72px!important;background:rgba(255,255,255,.97)!important;
+ border-radius:16px!important;
+}
+body.theme-light .shell .sidebar-nav{
+ background:rgba(255,255,255,.96)!important;
+}
+body.theme-light .shell .dm-inbox{
+ display:grid!important;grid-template-columns:minmax(280px,34%) minmax(0,1fr)!important;
+ gap:0!important;overflow:hidden!important;
+ background:#fff!important;border:1px solid #e8dfe2!important;
+ border-radius:16px!important;
+}
+body.theme-light .shell .dm-list-pane{
+ background:#fff!important;border-right:1px solid #e8dfe2!important;
+}
+body.theme-light .shell .dm-thread-pane{
+ background:#fff!important;min-width:0!important;
+}
+body.theme-light .shell .dm-thread-header{
+ background:#faf7f8!important;border-bottom:1px solid #e8dfe2!important;
+}
+body.theme-light .shell .dm-thread-messages{
+ background:#f8f6f6!important;min-width:0!important;
+}
+body.theme-light .shell .dm-conversation{
+ background:#fff!important;background-image:none!important;
+ color:#21171c!important;border-bottom:1px solid #eee7e9!important;
+ box-shadow:none!important;
+}
+body.theme-light .shell .dm-conversation.active,
+body.theme-light .shell .dm-conversation:hover{
+ background:#f8edf1!important;color:#21171c!important;
+}
+body.theme-light .shell .dm-message{
+ background:#fff!important;background-image:none!important;
+ color:#21171c!important;border:1px solid #e7dfe2!important;
+ box-shadow:0 2px 8px rgba(49,27,36,.05)!important;
+}
+body.theme-light .shell .dm-message.mine{
+ background:#f8e9ee!important;color:#21171c!important;
+ border-color:#ecd6df!important;
+}
+body.theme-light .shell .dm-message time{color:#75666e!important}
+body.theme-light .shell .dm-message-sender{color:#54243b!important}
+body.theme-light .shell .dm-composer{
+ background:#f8f5f6!important;border:1px solid #e5d9de!important;
+}
+body.theme-light .shell .dm-composer textarea,
+body.theme-light .shell .dm-composer input{
+ background:#fff!important;color:#21171c!important;
+}
+body.theme-light .shell .dm-empty-thread,
+body.theme-light .shell .dm-empty-thread strong,
+body.theme-light .shell .dm-empty-thread span,
+body.theme-light .shell .empty-state,
+body.theme-light .shell .empty-state h3,
+body.theme-light .shell .empty-state p{
+ color:#685b62!important;text-shadow:none!important;
+}
+body.theme-light .shell .dm-empty-mark{
+ background:#f6e9ee!important;color:#54243b!important;box-shadow:none!important;
+}
+body.theme-light .shell .note,
+body.theme-light .shell .personal-note,
+body.theme-light .shell .agent-card,
+body.theme-light .shell .dm-conversation,
+body.theme-light .shell .notification-item,
+body.theme-light .shell [class*="card"],
+body.theme-light .shell [class*="panel"]{
+ background-color:#fff!important;background-image:none!important;
+ color:#21171c!important;border-color:#e8dfe2!important;
+}
+body.theme-light .shell .note-body,
+body.theme-light .shell .followup-info,
+body.theme-light .shell .dm-convo-copy,
+body.theme-light .shell .dm-convo-copy strong,
+body.theme-light .shell .dm-thread-header strong,
+body.theme-light .shell .brand-name,
+body.theme-light .shell h1,
+body.theme-light .shell h2,
+body.theme-light .shell h3,
+body.theme-light .shell h4,
+body.theme-light .shell strong,
+body.theme-light .shell label{
+ color:#21171c!important;text-shadow:none!important;
+}
+body.theme-light .shell p,
+body.theme-light .shell small,
+body.theme-light .shell .muted,
+body.theme-light .shell .brand-sub,
+body.theme-light .shell .note-time,
+body.theme-light .shell .dm-thread-header small,
+body.theme-light .shell .dm-convo-meta,
+body.theme-light .shell .dm-compose-hint,
+body.theme-light .shell .app-footer,
+body.theme-light .shell .chat-head p{
+ color:#685b62!important;text-shadow:none!important;
+}
+body.theme-light .shell input,
+body.theme-light .shell textarea,
+body.theme-light .shell select{
+ color:#21171c!important;background:#fff!important;
+ background-color:#fff!important;background-image:none!important;
+ border:1px solid #ded3d8!important;box-shadow:none!important;
+}
+body.theme-light .shell input::placeholder,
+body.theme-light .shell textarea::placeholder{color:#887b82!important;opacity:1!important}
+body.theme-light .shell button,
+body.theme-light .shell .top-nav-btn,
+body.theme-light .shell .header-icon-btn,
+body.theme-light .shell .refresh-btn,
+body.theme-light .shell .signout-btn,
+body.theme-light .shell .dm-filter,
+body.theme-light .shell .message-action,
+body.theme-light .shell .reaction-btn{
+ color:#54243b!important;background:#f7edf1!important;
+ background-image:none!important;border:1px solid #ead9e0!important;
+ box-shadow:none!important;text-shadow:none!important;
+}
+body.theme-light .shell .top-nav-btn.active,
+body.theme-light .shell .dm-filter.active{
+ color:#fff!important;background:#54243b!important;border-color:#54243b!important;
+}
+body.theme-light .shell .primary,
+body.theme-light .shell .send-btn,
+body.theme-light .shell .dm-send-btn{
+ color:#fff!important;background:#54243b!important;border-color:#54243b!important;
+}
+body.theme-light .shell .live-dot{box-shadow:none!important}
+body.theme-light .shell .divider{background:#e8dfe2!important}
+body.theme-light .shell .account-settings-btn{
+ color:#54243b!important;background:#f7edf1!important;border:1px solid #ead9e0!important;
+}
+body.theme-light .shell .account-current-avatar{box-shadow:none!important}
+body.theme-light .shell .note-avatar,
+body.theme-light .shell .dm-avatar,
+body.theme-light .shell .dm-avatar-large,
+body.theme-light .shell .avatar{
+ color:#fff!important;background:#54243b!important;
+}
+@media(max-width:760px){
+ body.theme-light .shell .dm-inbox{display:block!important}
+ body.theme-light .shell .dm-list-pane{border-right:0!important}
+}
