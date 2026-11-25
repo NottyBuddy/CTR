@@ -4334,3 +4334,37 @@ body.theme-light > .ctr-theme-wallpaper{position:fixed!important;inset:0!importa
 body.theme-light > .ctr-theme-wallpaper[hidden]{display:none!important;}
 body.theme-light > .shell{position:relative!important;z-index:0!important;background:transparent!important;background-image:none!important;}
 body.theme-light .shell .main-area,body.theme-light .shell .workspace,body.theme-light .shell .chat,body.theme-light .shell .notes-view,body.theme-light .shell #groupView,body.theme-light .shell #personalView,body.theme-light .shell #dashboardView,body.theme-light .shell #followupsView,body.theme-light .shell #directView{background:transparent!important;background-image:none!important;}
+
+/* CTR LIGHT THEME — coherent contrast and controls */
+body.theme-light{
+ --bg:#f6f2f4;--panel:rgba(255,255,255,.80);--panel2:rgba(255,255,255,.68);
+ --text:#271b22;--muted:#695963;--red:#c61d48;--red2:#e74768;--reddeep:#87142f;--gold:#9c5969;--danger:#b42343;
+ color:#271b22!important;
+}
+body.theme-light .ctr-theme-wallpaper{background-color:#f6f2f4!important;background-image:url("./light-theme-bg.webp?rev=20261125f")!important;background-size:cover!important;background-position:center!important;opacity:.6!important}
+body.theme-light .shell,body.theme-light .main-area,body.theme-light .workspace,body.theme-light .chat,body.theme-light .notes-view,body.theme-light #groupView,body.theme-light #personalView,body.theme-light #directView,body.theme-light #followupsView,body.theme-light #dashboardView{color:#271b22!important}
+body.theme-light .glass,body.theme-light .auth-card,body.theme-light .topbar,body.theme-light .right-panel,body.theme-light .chat-head,body.theme-light .followup-panel,body.theme-light .dashboard-summary,body.theme-light .agent-card,body.theme-light .dm-inbox,body.theme-light .dm-thread,body.theme-light .notification-panel,body.theme-light .settings-panel,body.theme-light .modal,body.theme-light .workspace-card,body.theme-light .module-card{
+ background:rgba(255,255,255,.78)!important;background-color:rgba(255,255,255,.78)!important;color:#271b22!important;border:1px solid rgba(112,55,76,.14)!important;box-shadow:0 8px 26px rgba(66,28,43,.09)!important;backdrop-filter:blur(14px) saturate(125%)!important;-webkit-backdrop-filter:blur(14px) saturate(125%)!important
+}
+body.theme-light .note,body.theme-light .note-card,body.theme-light .note-item,body.theme-light .followup-item,body.theme-light .dm-message,body.theme-light .chat-bubble,body.theme-light .agent-dashboard,body.theme-light .followup-list,body.theme-light .notes{
+ color:#271b22!important;background:rgba(255,255,255,.66)!important;border-color:rgba(112,55,76,.15)!important;box-shadow:0 4px 16px rgba(66,28,43,.06)!important
+}
+body.theme-light p,body.theme-light span,body.theme-light div,body.theme-light li,body.theme-light strong,body.theme-light small,body.theme-light h1,body.theme-light h2,body.theme-light h3,body.theme-light h4,body.theme-light .note-body,body.theme-light .note-author,body.theme-light .note-time,body.theme-light .muted,body.theme-light label{color:inherit}
+body.theme-light .muted,body.theme-light .brand-sub,body.theme-light .note-time,body.theme-light .empty-state,body.theme-light .hint,body.theme-light .status-text{color:#695963!important}
+body.theme-light input,body.theme-light textarea,body.theme-light select,body.theme-light button:not(.primary):not(.send-btn):not(.danger):not(.active){
+ color:#271b22!important;background:rgba(255,255,255,.86)!important;border:1px solid rgba(112,55,76,.20)!important
+}
+body.theme-light input::placeholder,body.theme-light textarea::placeholder{color:#897983!important;opacity:1}
+body.theme-light button{color:#38232c}
+body.theme-light .primary,body.theme-light .send-btn,body.theme-light .active,body.theme-light .nav-btn.active,body.theme-light .color-choice.selected{color:#fff!important}
+body.theme-light a{color:#a51a3c!important}
+body.theme-light .nav-btn,body.theme-light .topbar button,body.theme-light .icon-btn{color:#39242d!important}
+body.theme-light .nav-btn.active{background:linear-gradient(135deg,#c61d48,#e74768)!important}
+body.theme-light .note-actions,body.theme-light .toolbar,body.theme-light .search-toolbar,body.theme-light .chat-footer,body.theme-light .composer,body.theme-light .form-actions{background:rgba(255,255,255,.78)!important;color:#271b22!important}
+body.theme-light .chat-footer,body.theme-light #noteForm,body.theme-light .note-form,body.theme-light .composer{border-color:rgba(112,55,76,.16)!important}
+body.theme-light .divider,body.theme-light hr{border-color:rgba(112,55,76,.18)!important}
+body.theme-light .status,body.theme-light .toast,body.theme-light .notification-item{color:#271b22!important;background:rgba(255,255,255,.9)!important}
+body.theme-light .notification-badge,body.theme-light .badge{color:white!important}
+body.theme-light .dropdown-menu,body.theme-light .popover,body.theme-light .menu-panel{background:#fff!important;color:#271b22!important;border:1px solid #e5d6dc!important;box-shadow:0 12px 32px rgba(66,28,43,.14)!important}
+body.theme-light .dropdown-menu *,body.theme-light .popover *,body.theme-light .menu-panel *{color:#271b22!important}
+body.theme-light :focus-visible{outline:2px solid #c61d48!important;outline-offset:2px}
