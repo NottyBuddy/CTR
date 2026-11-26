@@ -3,7 +3,7 @@ const SUPABASE_URL="https://icootmtssyergamuxlxb.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_qgEIXxXXBq2TaNxLMZPkwg_fcwKcdGW";
 const $=id=>document.getElementById(id);
 async function fetchAllRows(queryFactory,pageSize=500){const rows=[];for(let from=0;;from+=pageSize){const {data,error}=await queryFactory().range(from,from+pageSize-1);if(error)throw error;const page=data||[];rows.push(...page);if(page.length<pageSize)break;}return rows;}
-const PAGE_SIZE=50;let groupOffset=0,groupHasMore=false,personalOffset=0,personalHasMore=false,directOffset=0,directHasMore=false;let notifications=[],notificationUnread=0,notificationLoading=false;
+const PAGE_SIZE=50;let groupOffset=0,groupHasMore=false,personalOffset=0,personalHasMore=false,directOffset=0,directHasMore=false;let notifications=[],notificationUnread=0,notificationLoading=false,notificationRefreshPending=false;
 function csvCell(v){const value=v&&typeof v==="object"?JSON.stringify(v):String(v??"");return '"'+value.replace(/"/g,'""')+'"'}
 function downloadCsv(name,rows){if(!rows.length){status("No records available to export.");return}const keys=[...new Set(rows.flatMap(r=>Object.keys(r)))],csv=[keys.map(csvCell).join(","),...rows.map(r=>keys.map(k=>csvCell(r[k])).join(","))].join("\r\n"),blob=new Blob(["\uFEFF",csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function setTheme(theme){const light=theme==="light";document.body.classList.toggle("theme-light",light);document.documentElement.style.colorScheme=light?"light":"dark";const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=light?"#f7f6fc":"#100d1b";const b=$("themeToggle");if(b){b.setAttribute("aria-pressed",String(light));b.title=light?"Switch to dark theme":"Switch to light theme";b.setAttribute("aria-label",b.title);b.textContent=light?"☾":"☼"}try{if(user)localStorage.setItem("ctr_theme_"+user.id,light?"light":"dark");localStorage.setItem("ctr_theme_preference",light?"light":"dark")}catch{}}
@@ -383,10 +383,10 @@ function renderNotificationCentre(){
  list.innerHTML=notifications.length?notifications.map(n=>'<button type="button" class="notification-item '+(!n.read_at?"unread":"")+'" data-notification-id="'+esc(n.id)+'" data-notification-kind="'+esc(n.kind)+'" data-notification-actor="'+esc(n.actor_id||"")+'"><span class="notification-item-dot"></span><span class="notification-item-copy"><strong>'+esc(n.title||"New update")+'</strong><small>'+esc(n.body||"You have a new CTR update.")+'</small><time>'+esc(time(n.created_at))+'</time></span></button>').join(""):'<div class="empty-state">No notifications yet. New group updates and direct messages will appear here.</div>';
 }
 async function loadNotifications(){
- if(!user||notificationLoading)return;notificationLoading=true;
+ if(!user)return;if(notificationLoading){notificationRefreshPending=true;return}notificationLoading=true;notificationRefreshPending=false;
  try{const [list,count]=await Promise.all([db.from("ctr_notifications").select("*").order("created_at",{ascending:false}).limit(50),db.from("ctr_notifications").select("id",{count:"exact",head:true}).eq("recipient_id",user.id).is("read_at",null)]);if(list.error)throw list.error;if(count.error)throw count.error;notifications=list.data||[];notificationUnread=count.count||0;renderNotificationCentre()}
  catch(e){const list=$("notificationList");if(list)list.innerHTML='<div class="empty-state">Notifications unavailable. '+esc(e.message)+'</div>';console.warn("CTR notification centre unavailable",e)}
- finally{notificationLoading=false}
+ finally{notificationLoading=false;if(notificationRefreshPending){notificationRefreshPending=false;queueMicrotask(()=>loadNotifications())}}
 }
 async function markAllNotificationsRead(){
  if(!user||!notificationUnread)return;
@@ -428,7 +428,7 @@ function realtime(){
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_direct_messages"},async(payload)=>{adminAuditData=null;if(payload.eventType==="INSERT")sendMessageNotification("direct",payload.new);await loadDirect()})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_user_avatars"},async()=>{try{await loadAvatarProfiles();renderDirect();renderAccountAvatars()}catch{}})
  .on("postgres_changes",{event:"*",schema:"public",table:"ctr_followups"},async()=>{adminAuditData=null;await loadFollowups();if(isAdmin()&&adminAuditAgentId)renderAdminChatExplorer()})
- .on("postgres_changes",{event:"INSERT",schema:"public",table:"ctr_notifications",filter:"recipient_id=eq."+user.id},async(payload)=>{notifications=[payload.new,...notifications.filter(n=>n.id!==payload.new.id)].slice(0,50);renderNotificationCentre();loadNotifications()})
+ .on("postgres_changes",{event:"INSERT",schema:"public",table:"ctr_notifications",filter:"recipient_id=eq."+user.id},async(payload)=>{const exists=notifications.some(n=>n.id===payload.new.id);notifications=[payload.new,...notifications.filter(n=>n.id!==payload.new.id)].slice(0,50);if(!exists&&!payload.new.read_at)notificationUnread++;renderNotificationCentre();await loadNotifications()})
  .on("postgres_changes",{event:"UPDATE",schema:"public",table:"ctr_notifications",filter:"recipient_id=eq."+user.id},loadNotifications)
  .subscribe(s=>{if(s==="SUBSCRIBED")status("Live sync connected · group updates appear automatically.");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")status("Live sync interrupted. Refresh to reconnect.")});
 }
