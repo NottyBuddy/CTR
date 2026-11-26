@@ -1028,3 +1028,25 @@ body.theme-light .account-avatar-choice.selected{
 .dm-image-attachment img,.dm-image-lightbox img{ -webkit-touch-callout:default!important; user-select:auto!important;-webkit-user-select:auto!important; touch-action:pan-y!important; }
 .dm-image-attachment img{ pointer-events:auto!important; }
 .dm-composer textarea{ -webkit-user-select:text!important;user-select:text!important; }
+
+/* Individual transparent avatar PNGs */
+.avatar-art{display:block;width:100%;height:100%;object-fit:contain;background:transparent!important;border:0!important;border-radius:inherit;box-shadow:none!important;filter:drop-shadow(0 2px 4px rgba(0,0,0,.22))}
+.avatar-initials{display:inline-grid;place-items:center;width:100%;height:100%;font:700 12px Manrope,sans-serif}
+.account-avatar-choices{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important}
+.account-avatar-choice{display:grid!important;place-items:center!important;overflow:hidden!important;background:transparent!important;border:1px solid rgba(180,165,190,.24)!important;border-radius:16px!important;box-shadow:none!important;padding:8px!important;min-height:66px;transition:none!important;transform:none!important}
+.account-avatar-choice .avatar-art{width:100%;height:100%;max-width:54px;max-height:54px;object-fit:contain}
+.account-avatar-choice.selected{outline:2px solid var(--accent)!important;outline-offset:2px;background:transparent!important;box-shadow:none!important}
+.account-avatar-choice.taken{opacity:.32!important;filter:grayscale(.7)}
+.agent-profile-avatar{overflow:hidden!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:3px}
+.agent-profile-avatar .avatar-art{width:100%;height:100%;object-fit:contain}
+.dm-avatar{overflow:hidden!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:4px}
+.dm-avatar .avatar-art,.note-avatar .avatar-art{width:100%;height:100%;object-fit:contain}
+.note-avatar{overflow:hidden!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:3px}
+.account-current-avatar{overflow:hidden!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:2px}
+.account-current-avatar .avatar-art{width:100%;height:100%;object-fit:contain}
+.dm-image-button.disabled{opacity:.45;pointer-events:none}
+.dm-image-preview{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dm-image-preview button{margin-left:auto}
+.dm-image-attachment img{display:block;max-width:min(360px,100%);max-height:320px;object-fit:contain;border-radius:12px;cursor:zoom-in}
+.dm-image-lightbox{z-index:10000}
+@media(max-width:700px){.account-avatar-choice{min-height:56px;padding:6px!important}.account-avatar-choice .avatar-art{max-width:46px;max-height:46px}}
