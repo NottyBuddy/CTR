@@ -40,16 +40,16 @@ jobs:
           grep -q "themeToggle" index.html
           grep -q "exportCrmData" app.js
           for attempt in $(seq 1 24); do
-            status=$(curl --silent --show-error --output /tmp/ctr-home.html --write-out "%{http_code}" https://nottybuddy.github.io/CTR/ 2>/dev/null || true)
+            status=$(curl --silent --show-error --output /tmp/ctr-home.html --write-out "%{http_code}" https://nottybuddy.github.io/Orbit/ 2>/dev/null || true)
             if [ "$status" = "200" ] && grep -q "INDINEXT ORBIT" /tmp/ctr-home.html; then
-              echo "CTR page is live (HTTP $status)."
+              echo "Orbit page is live (HTTP $status)."
               exit 0
             fi
             echo "Pages not ready (attempt $attempt/24; HTTP ${status:-no-response})."
             if [ -s /tmp/ctr-home.html ]; then head -c 240 /tmp/ctr-home.html; echo; fi
             sleep 15
           done
-          echo "::error::GitHub Pages did not return the CTR index.html with HTTP 200 after 6 minutes."
+          echo "::error::GitHub Pages did not return the Orbit index.html with HTTP 200 after 6 minutes."
           exit 1
       - name: Install Playwright
         run: npm install --no-save @playwright/test
