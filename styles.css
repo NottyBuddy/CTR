@@ -1199,3 +1199,48 @@ body.theme-light .account-avatar-choice.selected{
 .account-current-avatar .avatar-art{width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;max-width:24px!important;max-height:24px!important}
 .account-avatar-choice{width:60px!important;height:60px!important;min-height:60px!important;padding:0!important;display:grid!important;place-items:center!important;background:transparent!important;border:0!important;box-shadow:none!important}
 .account-avatar-choice .avatar-art{width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important;max-width:52px!important;max-height:52px!important;object-fit:contain!important}
+
+
+/* Final requested composer scale — all three writing panels */
+#noteInput,#personalInput,#directInput{
+ box-sizing:border-box!important;width:100%!important;
+ font-size:28px!important;line-height:1.6!important;
+ min-height:132px!important;padding:18px 18px!important;
+ letter-spacing:.005em!important;
+}
+#directInput{min-height:112px!important;max-height:220px!important}
+#noteInput::placeholder,#personalInput::placeholder,#directInput::placeholder{
+ font-size:20px!important;line-height:1.4!important;opacity:.86!important
+}
+@media(max-width:700px){
+ #noteInput,#personalInput,#directInput{
+  font-size:22px!important;line-height:1.55!important;
+  min-height:108px!important;padding:14px 15px!important
+ }
+ #directInput{min-height:92px!important;max-height:180px!important}
+ #noteInput::placeholder,#personalInput::placeholder,#directInput::placeholder{font-size:17px!important}
+}
+
+/* Avatar frame 78px; transparent artwork 52px, centered */
+.note-top .note-avatar,.note-avatar,.agent-profile-avatar,.dm-avatar{
+ box-sizing:border-box!important;width:78px!important;height:78px!important;
+ min-width:78px!important;min-height:78px!important;flex:0 0 78px!important;
+ display:grid!important;place-items:center!important;align-content:center!important;
+ margin:0!important;padding:0!important;overflow:hidden!important;
+ background:transparent!important;background-image:none!important;
+ border:0!important;box-shadow:none!important;border-radius:50%!important;
+}
+.note-avatar .avatar-art,.agent-profile-avatar .avatar-art,.dm-avatar .avatar-art{
+ display:block!important;position:static!important;box-sizing:contain!important;
+ width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important;
+ max-width:52px!important;max-height:52px!important;object-fit:contain!important;
+ object-position:center center!important;margin:0 auto!important;padding:0!important;
+ border:0!important;border-radius:0!important;background:transparent!important;
+ background-image:none!important;box-shadow:none!important;filter:none!important;flex:none!important;
+}
+.dm-message-avatar{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;flex:0 0 34px!important}
+.dm-message-avatar .avatar-art{width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;max-width:28px!important;max-height:28px!important}
+.account-current-avatar{width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important;flex:0 0 32px!important}
+.account-current-avatar .avatar-art{width:26px!important;height:26px!important;min-width:26px!important;min-height:26px!important;max-width:26px!important;max-height:26px!important}
+.account-avatar-choice{width:78px!important;height:78px!important;min-width:78px!important;min-height:78px!important;padding:0!important;display:grid!important;place-items:center!important;overflow:hidden!important;background:transparent!important;border:0!important;box-shadow:none!important}
+.account-avatar-choice .avatar-art{width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important;max-width:52px!important;max-height:52px!important;object-fit:contain!important;object-position:center!important}

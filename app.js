@@ -199,30 +199,36 @@ function cleanAvatarPng(img){
  if(!img||img.dataset.avatarCleaned||img.dataset.avatarCleaning||!img.naturalWidth)return;
  img.dataset.avatarCleaning="1";
  try{
-  const w=img.naturalWidth,h=img.naturalHeight,canvas=document.createElement("canvas"),ctx=canvas.getContext("2d",{willReadFrequently:true});
+  const w=img.naturalWidth,h=img.naturalHeight,total=w*h;
+  const canvas=document.createElement("canvas"),ctx=canvas.getContext("2d",{willReadFrequently:true});
   canvas.width=w;canvas.height=h;ctx.drawImage(img,0,0);
-  const frame=ctx.getImageData(0,0,w,h),px=frame.data,bins=new Map();
-  const sample=(x,y)=>{const p=(y*w+x)*4,r=px[p],g=px[p+1],b=px[p+2],hi=Math.max(r,g,b),lo=Math.min(r,g,b);if(px[p+3]<200||hi-lo>22||lo<105||hi>248)return;const key=[r>>3,g>>3,b>>3].join(":");const v=bins.get(key)||{n:0,r:0,g:0,b:0};v.n++;v.r+=r;v.g+=g;v.b+=b;bins.set(key,v)};
-  const band=Math.max(3,Math.min(12,Math.round(Math.min(w,h)*.04)));
-  for(let y=0;y<band;y++)for(let x=0;x<w;x++){sample(x,y);sample(x,h-1-y)}
-  for(let x=0;x<band;x++)for(let y=band;y<h-band;y++){sample(x,y);sample(w-1-x,y)}
-  const palette=[...bins.values()].sort((a,b)=>b.n-a.n).slice(0,2).map(v=>({r:v.r/v.n,g:v.g/v.n,b:v.b/v.n}));
-  if(!palette.length){delete img.dataset.avatarCleaning;img.dataset.avatarCleaned="1";return}
-  let minX=w,minY=h,maxX=-1,maxY=-1,removed=0;
-  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-   const p=(y*w+x)*4;if(px[p+3]<10)continue;
+  const frame=ctx.getImageData(0,0,w,h),px=frame.data,seen=new Uint8Array(total),queue=new Int32Array(total);
+  // The uploaded PNGs contain a baked-in grey/white checkerboard. Remove only
+  // neutral, bright pixels connected to the image edges, not isolated artwork.
+  const isBackdrop=n=>{
+   const p=n*4;if(px[p+3]<16)return false;
    const r=px[p],g=px[p+1],b=px[p+2],hi=Math.max(r,g,b),lo=Math.min(r,g,b);
-   const isBackdrop=hi-lo<=24&&palette.some(c=>Math.max(Math.abs(r-c.r),Math.abs(g-c.g),Math.abs(b-c.b))<=16);
-   if(isBackdrop){px[p+3]=0;removed++;continue}
-   if(px[p+3]>12){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y}
+   return hi-lo<=30 && (r+g+b)/3>=118;
+  };
+  let head=0,tail=0;
+  const seed=(x,y)=>{if(x<0||y<0||x>=w||y>=h)return;const n=y*w+x;if(!seen[n]&&isBackdrop(n)){seen[n]=1;queue[tail++]=n}};
+  for(let x=0;x<w;x++){seed(x,0);seed(x,h-1)}
+  for(let y=1;y<h-1;y++){seed(0,y);seed(w-1,y)}
+  while(head<tail){
+   const n=queue[head++],x=n%w,y=(n/w)|0,p=n*4;
+   px[p+3]=0;
+   seed(x-1,y);seed(x+1,y);seed(x,y-1);seed(x,y+1);
   }
-  if(maxX<minX||maxY<minY||removed<w*h*.02){delete img.dataset.avatarCleaning;img.dataset.avatarCleaned="1";return}
+  if(tail<total*.025){delete img.dataset.avatarCleaning;img.dataset.avatarCleaned="1";return}
+  let minX=w,minY=h,maxX=-1,maxY=-1;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(px[(y*w+x)*4+3]>12){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y}
+  if(maxX<minX||maxY<minY){delete img.dataset.avatarCleaning;img.dataset.avatarCleaned="1";return}
   ctx.putImageData(frame,0,0);
-  const bw=maxX-minX+1,bh=maxY-minY+1,pad=Math.max(3,Math.round(Math.max(bw,bh)*.06)),side=Math.max(bw,bh)+pad*2;
+  const bw=maxX-minX+1,bh=maxY-minY+1,pad=Math.max(4,Math.round(Math.max(bw,bh)*.07)),side=Math.max(bw,bh)+pad*2;
   const output=document.createElement("canvas");output.width=side;output.height=side;
   output.getContext("2d").drawImage(canvas,minX,minY,bw,bh,pad+(side-2*pad-bw)/2,pad+(side-2*pad-bh)/2,bw,bh);
   img.dataset.avatarCleaned="1";delete img.dataset.avatarCleaning;img.src=output.toDataURL("image/png");
- }catch(e){delete img.dataset.avatarCleaning;img.dataset.avatarCleaned="1";console.warn("Avatar background removal skipped",e)}
+ }catch(e){delete img.dataset.avatarCleaning;img.dataset.avatarCleaned="1";console.warn("Avatar transparency cleanup skipped",e)}
 }
 window.cleanAvatarPng=cleanAvatarPng;
 function directAvatar(name,userId=""){const chosen=userId?avatarFor(userId):"",src=CTR_AVATAR_IMAGES[chosen];if(src)return '<img class="avatar-art" src="./'+src+'" alt="" aria-hidden="true" loading="lazy" onload="window.cleanAvatarPng(this)">';const parts=String(name||"CTR Member").trim().split(/\s+/);return '<span class="avatar-initials">'+esc((parts[0]?.[0]||"C")+(parts.length>1?parts[parts.length-1][0]:""))+'</span>'}
