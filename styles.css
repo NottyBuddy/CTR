@@ -826,3 +826,10 @@ body:not(.theme-light) .theme-pull{color:#F5F3FB!important}
 .theme-pull.is-pulled .pull-cord{height:28px!important;transition:height 180ms ease-out!important}
 .theme-pull.is-pulled .pull-handle{transform:translate(-50%,0)!important;transition:transform 180ms ease-out!important}
 @media(max-width:700px){.pull-cord{height:calc(25px + var(--pull-distance,0px))!important}}
+
+/* Keep the pull knob attached to the end of the expanding cord (no double travel). */
+.pull-handle,
+.theme-pull.is-pulled .pull-handle{
+  transform:translateX(-50%)!important;
+  transition:none!important;
+}
