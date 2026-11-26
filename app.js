@@ -672,11 +672,46 @@ document.addEventListener("touchstart",e=>{const c=e.target.closest(".note[data-
  });
 })();
 
-// Pull-cord light switch: drag the hanging handle down to toggle themes.
-(()=>{const sw=$("themePull");if(!sw)return;let startY=null,moved=false;
+// Smooth, reliable pull-cord theme switch (mouse, pen and touch).
+(()=> {
+ const sw=$("themePull");
+ if(!sw || sw.dataset.pullReady==="1") return;
+ sw.dataset.pullReady="1";
  const cord=sw.querySelector(".pull-cord");
- cord?.addEventListener("pointerdown",e=>{startY=e.clientY;moved=false;cord.setPointerCapture?.(e.pointerId);e.preventDefault();});
- cord?.addEventListener("pointerup",e=>{if(startY===null)return;const distance=e.clientY-startY;startY=null;if(distance>12){moved=true;sw.classList.add("is-pulled");setTheme(document.body.classList.contains("theme-light")?"dark":"light");setTimeout(()=>sw.classList.remove("is-pulled"),260);}});
- cord?.addEventListener("pointercancel",()=>{startY=null;});
- sw.addEventListener("click",e=>{if(e.detail===0){setTheme(document.body.classList.contains("theme-light")?"dark":"light");}});
+ if(!cord) return;
+ let startY=null, pointerId=null, distance=0;
+ const reset=()=>{
+   startY=null; pointerId=null; distance=0;
+   sw.style.setProperty("--pull-distance","0px");
+   sw.classList.remove("is-pulling");
+ };
+ const toggle=()=>{
+   setTheme(document.body.classList.contains("theme-light")?"dark":"light");
+   sw.classList.add("is-pulled");
+   window.setTimeout(()=>sw.classList.remove("is-pulled"),220);
+ };
+ cord.addEventListener("pointerdown",e=>{
+   if(startY!==null) return;
+   startY=e.clientY; pointerId=e.pointerId; distance=0;
+   sw.classList.add("is-pulling");
+   try{sw.setPointerCapture(e.pointerId)}catch{}
+   e.preventDefault();
+ });
+ sw.addEventListener("pointermove",e=>{
+   if(startY===null || e.pointerId!==pointerId) return;
+   distance=Math.max(0,Math.min(72,e.clientY-startY));
+   sw.style.setProperty("--pull-distance",distance+"px");
+   e.preventDefault();
+ });
+ sw.addEventListener("pointerup",e=>{
+   if(startY===null || e.pointerId!==pointerId) return;
+   const pulled=distance>=18;
+   reset();
+   if(pulled) toggle();
+ });
+ sw.addEventListener("pointercancel",reset);
+ sw.addEventListener("lostpointercapture",reset);
+ sw.addEventListener("keydown",e=>{
+   if(e.key==="Enter" || e.key===" "){e.preventDefault();toggle();}
+ });
 })();
