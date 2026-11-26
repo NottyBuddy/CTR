@@ -16,12 +16,6 @@ create table if not exists public.ctr_notifications (
 );
 create index if not exists ctr_notifications_recipient_created_idx on public.ctr_notifications(recipient_id,created_at desc);
 alter table public.ctr_notifications enable row level security;
-drop policy if exists "Users read own notifications" on public.ctr_notifications;
-create policy "Users read own notifications" on public.ctr_notifications for select to authenticated using(auth.uid()=recipient_id and public.ctr_has_avatar());
-drop policy if exists "Users mark own notifications read" on public.ctr_notifications;
-create policy "Users mark own notifications read" on public.ctr_notifications for update to authenticated using(auth.uid()=recipient_id and public.ctr_has_avatar()) with check(auth.uid()=recipient_id and public.ctr_has_avatar());
-drop policy if exists "Users delete own notifications" on public.ctr_notifications;
-create policy "Users delete own notifications" on public.ctr_notifications for delete to authenticated using(auth.uid()=recipient_id and public.ctr_has_avatar());
 revoke all on public.ctr_notifications from anon,authenticated;
 grant select,update,delete on public.ctr_notifications to authenticated;
 
@@ -57,6 +51,13 @@ create or replace function public.ctr_has_avatar() returns boolean language sql 
 select public.ctr_session_is_active() and exists(select 1 from public.ctr_team_directory t join public.ctr_user_avatars a on a.user_id=t.user_id where t.user_id=auth.uid() and a.avatar is not null);$$;
 revoke all on function public.ctr_has_avatar() from public,anon;
 grant execute on function public.ctr_has_avatar() to authenticated;
+
+drop policy if exists "Users read own notifications" on public.ctr_notifications;
+create policy "Users read own notifications" on public.ctr_notifications for select to authenticated using(auth.uid()=recipient_id and public.ctr_has_avatar());
+drop policy if exists "Users mark own notifications read" on public.ctr_notifications;
+create policy "Users mark own notifications read" on public.ctr_notifications for update to authenticated using(auth.uid()=recipient_id and public.ctr_has_avatar()) with check(auth.uid()=recipient_id and public.ctr_has_avatar());
+drop policy if exists "Users delete own notifications" on public.ctr_notifications;
+create policy "Users delete own notifications" on public.ctr_notifications for delete to authenticated using(auth.uid()=recipient_id and public.ctr_has_avatar());
 
 -- Team-only directory/avatar access.
 drop policy if exists "Authenticated users can view team directory" on public.ctr_team_directory;
