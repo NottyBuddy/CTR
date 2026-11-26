@@ -1,3 +1,13 @@
+async function completeAvatarGate(page) {
+  const modal = page.locator("#accountSettingsModal");
+  if (await modal.isVisible().catch(() => false)) {
+    const choice = page.locator("#accountAvatarChoices button:not([disabled])").first();
+    await expect(choice).toBeVisible({ timeout: 15000 });
+    await choice.click();
+    await expect(modal).toBeHidden({ timeout: 15000 });
+  }
+}
+
 const { test, expect } = require("@playwright/test");
 
 test("CTR public page, assets and sign-in form load without JavaScript errors", async ({ page, request }) => {
@@ -5,12 +15,11 @@ test("CTR public page, assets and sign-in form load without JavaScript errors", 
   page.on("pageerror", error => pageErrors.push(error.message));
   const response = await page.goto("./");
   expect(response && response.status()).toBe(200);
-  await expect(page).toHaveTitle(/CTR — Calling Team Records/);
+  await expect(page).toHaveTitle(/IndiNext Orbit — Sales Workspace/i);
   await expect(page.locator("#authView")).toBeVisible();
   await expect(page.locator("#email")).toBeVisible();
   await expect(page.locator("#password")).toBeVisible();
   await expect(page.locator("#authSubmit")).toBeEnabled();
-  await expect(page.locator("#toggleAIPanel")).toBeAttached();
   await expect(page.locator("#dashboardFrom")).toBeAttached();
   await expect(page.locator("#toggleNotificationPanel")).toBeAttached();
   await expect(page.locator("#themeToggle")).toBeAttached();
@@ -22,9 +31,9 @@ test("CTR public page, assets and sign-in form load without JavaScript errors", 
   const appSource = await (await request.get(new URL("./app.js?v=ctr-admin-centre-20261124-6", "https://nottybuddy.github.io/CTR/").toString())).text();
   expect(appSource).toContain("data-dm-edit");
   expect(appSource).not.toContain("data-clear-dm");
-  expect(appSource).toContain("data-ai-edit");
-  expect(appSource).toContain("data-ai-delete");
-  expect(appSource).toContain("setAIPanelCollapsed");
+  expect(appSource).toContain("ctr_choose_avatar");
+  expect(appSource).toContain("ctr_session_is_active");
+  expect(appSource).toContain("setupPresence");
   expect(appSource).toContain("data-reply-note");
   expect(appSource).toContain("data-dm-reply");
   expect(appSource).toContain("dashboardFrom");
@@ -47,6 +56,7 @@ test("authenticated agent can use all workspace sections and open Direct Chat", 
   await page.locator("#password").fill(password);
   await page.locator("#authSubmit").click();
   await expect(page.locator("#appView")).toBeVisible({ timeout: 30000 });
+  await completeAvatarGate(page);
 
   const sections = [
     ["group", "#groupView"],
@@ -95,8 +105,16 @@ test("authenticated agent can use all workspace sections and open Direct Chat", 
   expect(pageErrors, "Uncaught JavaScript errors during workspace navigation").toEqual([]);
 });
 
-test("view switching hides inactive notes and keeps CRM assistant on Group Notes only", async ({ page }) => {
+test("authenticated view switching hides inactive workspace sections", async ({ page }) => {
+  const email = process.env.CTR_TEST_EMAIL;
+  const password = process.env.CTR_TEST_PASSWORD;
+  test.skip(!email || !password, "Set CTR_TEST_EMAIL and CTR_TEST_PASSWORD for authenticated navigation checks.");
   await page.goto("./");
+  await page.locator("#email").fill(email);
+  await page.locator("#password").fill(password);
+  await page.locator("#authSubmit").click();
+  await expect(page.locator("#appView")).toBeVisible({ timeout: 30000 });
+  await completeAvatarGate(page);
   const group = page.locator("#groupView");
   await expect(group).toBeVisible();
   for (const view of ["personal", "direct", "followups", "dashboard"]) {
@@ -106,9 +124,7 @@ test("view switching hides inactive notes and keeps CRM assistant on Group Notes
   }
   await page.locator('[data-view="group"]').click();
   await expect(group).toBeVisible();
-  await expect(page.locator("#crmGenerator")).toBeVisible();
 });
-
 test("authenticated admin can inspect agent conversations and activity", async ({ page }) => {
   const email = process.env.CTR_ADMIN_TEST_EMAIL;
   const password = process.env.CTR_ADMIN_TEST_PASSWORD;
