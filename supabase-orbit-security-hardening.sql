@@ -125,5 +125,12 @@ create policy "CTR members can complete followups" on public.ctr_followups for u
 drop policy if exists "Admin can read moderation log" on public.ctr_moderation_log;
 create policy "Admin can read moderation log" on public.ctr_moderation_log for select to authenticated using(lower(coalesce(auth.jwt()->>'email',''))='mahesh.s@hrhnext.com' and public.ctr_has_avatar());
 
+drop policy if exists "Signed in users can see colours" on public.ctr_profiles;
+create policy "Signed in users can see colours" on public.ctr_profiles for select to authenticated using(public.ctr_is_team_member());
+drop policy if exists "Users choose own colour once" on public.ctr_profiles;
+create policy "Users choose own colour once" on public.ctr_profiles for insert to authenticated with check(auth.uid()=user_id and public.ctr_is_team_member());
+drop policy if exists "No profile colour changes" on public.ctr_profiles;
+create policy "No profile colour changes" on public.ctr_profiles for update to authenticated using(false) with check(false);
+
 -- Revoke all currently issued sessions to force every user through fresh login + avatar gate.
 delete from auth.sessions;
