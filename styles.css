@@ -637,3 +637,10 @@ body:after,body.theme-light:after{background:none!important;}
 .brand-mark{display:none!important;}
 .brand,.brand.compact{gap:0!important;}
 .brand-name{ text-shadow:none!important; }
+
+
+/* Theme-specific user wallpapers — preserve full image framing without stretching. */
+body:before{background-image:url("./Dark%20bg.png")!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important;filter:none!important;}
+body.theme-light:before{background-image:url("./light%20bg.png")!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important;filter:none!important;}
+body:after{background:linear-gradient(180deg,rgba(7,7,15,.18),rgba(7,7,15,.34))!important;}
+body.theme-light:after{background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.30))!important;}
