@@ -903,5 +903,48 @@ body.theme-light .account-settings-card{
 .agent-record-list{display:flex;flex-direction:column;min-width:0;overflow-wrap:anywhere;word-break:break-word}
 .agent-record-row,.agent-record-row p,.agent-record-meta,.agent-record-meta strong{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}.agent-record-row p{white-space:pre-wrap;overflow-x:hidden}
 @media(max-width:700px){.agent-audit-controls{grid-template-columns:1fr 1fr;top:65px}.agent-audit-controls input[type=search]{grid-column:1/-1}.agent-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
-/* Remove both theme wallpaper images entirely; use clean solid theme surfaces. */
-body:before,body.theme-light:before{background-image:none!important;background-color:var(--bg)!important;filter:none!important}body:after,body.theme-light:after{background:none!important}body{background:var(--bg)!important}
+
+
+/* User-provided theme wallpapers: exact GitHub asset names */
+body:before,body.theme-light:before{
+ background-image:url("./Dark.png")!important;background-position:center center!important;
+ background-size:cover!important;background-repeat:no-repeat!important;
+ background-color:transparent!important;filter:none!important
+}
+body.theme-light:before{background-image:url("./Light.png")!important}
+body:after{background:linear-gradient(180deg,rgba(5,7,13,.22),rgba(5,7,13,.42))!important}
+body.theme-light:after{background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.20))!important}
+body{background:var(--bg)!important}
+.brand-mark{display:grid!important;visibility:visible!important}
+.brand,.brand.compact{gap:9px!important}
+
+/* Premium monogram avatars instead of cartoon emoji artwork */
+.agent-profile-avatar,.dm-avatar,.note-avatar,.account-current-avatar{
+ border-radius:50%!important;display:inline-flex!important;align-items:center!important;
+ justify-content:center!important;overflow:hidden;font-family:Manrope,"DM Sans",sans-serif!important;
+ font-weight:700!important;letter-spacing:.035em;color:#fff!important;
+ background:linear-gradient(145deg,#6d536e 0%,#302b43 52%,#171925 100%)!important;
+ border:1px solid rgba(255,255,255,.28)!important;
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.20),0 4px 12px rgba(0,0,0,.18)!important
+}
+.agent-profile-avatar{font-size:13px!important}
+.agent-profile-avatar-large{width:48px!important;height:48px!important}
+.dm-avatar{font-size:12px!important}.dm-message-avatar{font-size:9px!important}
+.note-avatar{font-size:12px!important}.account-current-avatar{font-size:10px!important}
+.account-avatar-choices{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important}
+.account-avatar-choice{
+ position:relative;aspect-ratio:1;min-height:62px;border:1px solid rgba(255,255,255,.18)!important;
+ border-radius:50%!important;background:linear-gradient(145deg,#76607a,#343047 58%,#171925)!important;
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.22),0 5px 14px rgba(0,0,0,.16)!important;color:#fff!important
+}
+.account-avatar-choice:nth-child(4n+2){background:linear-gradient(145deg,#607b83,#354653 58%,#18242c)!important}
+.account-avatar-choice:nth-child(4n+3){background:linear-gradient(145deg,#9a765c,#594438 58%,#2a211f)!important}
+.account-avatar-choice:nth-child(4n+4){background:linear-gradient(145deg,#657b68,#3b5145 58%,#1d2925)!important}
+.avatar-monogram-sample{font:700 15px Manrope,sans-serif;letter-spacing:.06em;color:#fff}
+.account-avatar-choice.selected{outline:2px solid rgba(255,255,255,.85);outline-offset:3px}
+body.theme-light .agent-profile-avatar,body.theme-light .dm-avatar,body.theme-light .note-avatar,body.theme-light .account-current-avatar{
+ color:#282331!important;background:linear-gradient(145deg,#f0e9df 0%,#c9b9ad 55%,#9d8d8b 100%)!important;
+ border-color:rgba(67,48,54,.22)!important;box-shadow:inset 0 1px 1px rgba(255,255,255,.8),0 4px 12px rgba(40,30,40,.12)!important
+}
+body.theme-light .account-avatar-choice{color:#fff!important}
+@media(max-width:700px){.account-avatar-choices{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:9px!important}.account-avatar-choice{min-height:54px}}
