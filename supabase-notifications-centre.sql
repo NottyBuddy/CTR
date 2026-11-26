@@ -16,14 +16,14 @@ create index if not exists ctr_notifications_recipient_created_idx
 alter table public.ctr_notifications enable row level security;
 drop policy if exists "Users read own notifications" on public.ctr_notifications;
 create policy "Users read own notifications" on public.ctr_notifications
- for select to authenticated using(auth.uid()=recipient_id);
+ for select to authenticated using(auth.uid()=recipient_id and public.ctr_has_avatar());
 drop policy if exists "Users mark own notifications read" on public.ctr_notifications;
 create policy "Users mark own notifications read" on public.ctr_notifications
  for update to authenticated using(auth.uid()=recipient_id)
- with check(auth.uid()=recipient_id);
+ with check(auth.uid()=recipient_id and public.ctr_has_avatar());
 drop policy if exists "Users delete own notifications" on public.ctr_notifications;
 create policy "Users delete own notifications" on public.ctr_notifications
- for delete to authenticated using(auth.uid()=recipient_id);
+ for delete to authenticated using(auth.uid()=recipient_id and public.ctr_has_avatar());
 revoke all on public.ctr_notifications from anon,authenticated;
 grant select,update,delete on public.ctr_notifications to authenticated;
 
