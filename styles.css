@@ -816,3 +816,13 @@ body:not(.theme-light) svg [fill]:not([fill="none"]) { fill:#F5F3FB; }
 body.theme-light .theme-pull{color:#17171B!important}
 body:not(.theme-light) .theme-pull{color:#F5F3FB!important}
 @media(max-width:700px){.theme-pull{width:32px!important;min-width:32px!important;height:56px!important}.pull-bulb{width:22px;height:22px}.pull-bulb svg{width:21px;height:21px}.pull-cord{height:25px}}
+
+
+/* Pull-cord motion refinement: track finger movement continuously and avoid touch-scroll cancellation. */
+.theme-pull{touch-action:none!important;user-select:none;-webkit-user-select:none;cursor:grab!important}
+.theme-pull.is-pulling{cursor:grabbing!important}
+.pull-cord{height:calc(28px + var(--pull-distance,0px))!important;transform-origin:top center;transition:height 90ms linear!important;will-change:height}
+.pull-handle{bottom:-5px;transition:transform 90ms linear!important;transform:translate(-50%,var(--pull-distance,0px))!important;will-change:transform}
+.theme-pull.is-pulled .pull-cord{height:28px!important;transition:height 180ms ease-out!important}
+.theme-pull.is-pulled .pull-handle{transform:translate(-50%,0)!important;transition:transform 180ms ease-out!important}
+@media(max-width:700px){.pull-cord{height:calc(25px + var(--pull-distance,0px))!important}}
