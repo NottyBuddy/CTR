@@ -192,7 +192,7 @@ test("Light Theme wallpaper is rendered behind the app surfaces", async ({ page,
     let decoded = false;
     try { await image.decode(); decoded = true; } catch {}
     return {
-      wallpaperLayer: (() => { const el = document.querySelector("#ctrThemeWallpaper"); return el ? {backgroundImage:getComputedStyle(el).backgroundImage,backgroundSize:getComputedStyle(el).backgroundSize,position:getComputedStyle(el).position,zIndex:getComputedStyle(el).zIndex} : null })(),
+      wallpaperLayer: (() => { const style=getComputedStyle(document.body,"::before"); return {backgroundImage:style.backgroundImage,backgroundSize:style.backgroundSize,position:style.position,zIndex:style.zIndex} })(),
       canvasBackground: htmlStyle.backgroundImage,
       canvasSize: htmlStyle.backgroundSize,
       canvasPosition: htmlStyle.backgroundPosition,
