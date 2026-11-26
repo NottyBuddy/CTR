@@ -611,3 +611,21 @@ body.theme-light:before{background-image:url("orbit-dark-wallpaper.svg")!importa
 body.theme-light:after{background:rgba(255,255,255,.04)!important;}
 .glass,.topbar,.chat,.right-panel,.auth-card,.notification-panel,.modal,.modal-card{background:rgba(17,15,28,.22)!important;border-color:rgba(205,190,255,.13)!important;backdrop-filter:blur(5px) saturate(120%)!important;-webkit-backdrop-filter:blur(5px) saturate(120%)!important;}
 body.theme-light .glass,body.theme-light .topbar,body.theme-light .chat,body.theme-light .right-panel,body.theme-light .auth-card,body.theme-light .notification-panel,body.theme-light .modal,body.theme-light .modal-card{background:rgba(248,249,255,.20)!important;border-color:rgba(89,112,150,.14)!important;backdrop-filter:blur(5px) saturate(130%)!important;-webkit-backdrop-filter:blur(5px) saturate(130%)!important;}
+
+
+/* Reference-inspired IndiNext Orbit brand lockup */
+.brand{gap:9px}
+.brand-mark{width:48px;height:48px;flex:0 0 48px;border-radius:50%;overflow:visible}
+.ctr-emblem{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 7px rgba(160,91,255,.42))}
+.brand-name{font:800 17px/.98 Manrope,sans-serif;letter-spacing:.045em;color:#f7f2ff;text-shadow:0 1px 12px rgba(151,91,255,.28)}
+.brand-sub{display:none}
+.brand.compact{gap:8px}
+.brand.compact .brand-mark{width:42px;height:42px;flex-basis:42px}
+.brand.compact .brand-name{font-size:14px;line-height:1.02;letter-spacing:.04em}
+body.theme-light .brand-name{color:#29213e;text-shadow:none}
+@media(max-width:700px){
+ .brand-mark{width:40px;height:40px;flex-basis:40px}
+ .brand-name{font-size:14px}
+ .brand.compact .brand-mark{width:37px;height:37px;flex-basis:37px}
+ .brand.compact .brand-name{font-size:12px}
+}
