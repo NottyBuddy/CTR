@@ -86,7 +86,9 @@ async function renderAgentDashboard(){
   return;
  }
  box.classList.remove("hidden");
- summaryPanel?.classList.remove("hidden");
+ summaryPanel?.classList.toggle("hidden",isAdmin());
+ $("dashboardView")?.querySelector(".dashboard-filters")?.classList.toggle("hidden",isAdmin());
+ $("dashboardView")?.querySelector(".dashboard-export")?.classList.toggle("hidden",isAdmin());
  auditPanel?.classList.add("hidden");
  const agents=(isAdmin()?team.filter(t=>String(t.email||"").toLowerCase()!==ADMIN_EMAIL):team.filter(t=>t.user_id===user.id));
  if(!isAdmin()&&!agents.length)agents.push({user_id:user.id,email:user.email,display_name:displayName(user.email)});
@@ -159,7 +161,7 @@ function renderAdminChatExplorer(){
   return '<article class="agent-record-row"><div class="agent-record-meta"><strong>'+esc(category==="group"?"Group message":"Personal note")+'</strong><time>'+esc(time(date))+'</time></div><p>'+esc(x.body||"")+'</p></article>';
  };
  panel.innerHTML='<div class="agent-audit-head"><div><div class="eyebrow">ADMIN ONLY · AGENT MONITORING</div><h3>'+esc(agentName)+'</h3><p>Select an activity card to review records created by this agent.</p></div><button type="button" class="message-action" data-audit-back-agents>← All agents</button></div>'+
- '<div class="agent-activity-cards">'+categories.map(c=>'<button type="button" class="agent-activity-card '+(category===c.id?"active":"")+'" data-audit-category="'+c.id+'"><span class="agent-activity-icon">'+c.icon+'</span><strong>'+c.title+'</strong><b>'+c.count+'</b><small>'+c.desc+'</small></button>').join("")+'</div>'+
+ (category?'':'<div class="agent-activity-cards">'+categories.map(c=>'<button type="button" class="agent-activity-card" data-audit-category="'+c.id+'"><span class="agent-activity-icon">'+c.icon+'</span><strong>'+c.title+'</strong><b>'+c.count+'</b><small>'+c.desc+'</small></button>').join("")+'</div>')+
  (category?'<section class="agent-records-panel"><div class="agent-audit-section-title"><h4>'+title+' · '+filtered.length+'</h4><button type="button" class="message-action" data-audit-category-back>← Activity cards</button></div><div class="agent-audit-controls"><input id="agentChatAuditSearch" type="search" value="'+esc(adminAuditSearch)+'" placeholder="Search '+title.toLowerCase()+'…"><input id="agentChatAuditDate" type="date" value="'+esc(adminAuditDate)+'" aria-label="Filter by date"></div><div class="agent-record-list">'+(filtered.map(renderRow).join("")||'<div class="empty-state">No '+title.toLowerCase()+' found for this agent.</div>')+'</div></section>':'');
 }
 let globalSearchRequest=0;
