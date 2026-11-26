@@ -345,3 +345,8 @@ button:hover,.top-nav-btn:hover,.header-icon-btn:hover,.account-settings-btn:hov
 }
 .dm-conversation{border:0!important}
 .note,.dm-message,.agent-card,.followup-item{transition:none!important}
+
+/* Mobile keyboard + safe viewport sizing */
+:root{--app-viewport-height:100dvh}
+@media(max-width:700px){.chat{height:calc(var(--app-viewport-height,100dvh) - 158px);max-height:none;min-height:300px}.notes{max-height:calc(var(--app-viewport-height,100dvh) - 245px)}.dm-inbox{min-height:0;height:calc(var(--app-viewport-height,100dvh) - 180px)}.dm-thread-pane{min-height:0;max-height:100%;height:100%}.dm-thread-messages{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.dm-compose-wrap{padding-bottom:calc(10px + env(safe-area-inset-bottom))}.composer{padding-bottom:calc(8px + env(safe-area-inset-bottom))}.app-view{min-height:calc(var(--app-viewport-height,100dvh) - 18px)}}
+@media(max-width:390px){.chat{height:calc(var(--app-viewport-height,100dvh) - 150px);min-height:300px}}
