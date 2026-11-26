@@ -208,7 +208,7 @@ test("Light Theme wallpaper is rendered behind the app surfaces", async ({ page,
   expect(rendered.wallpaperLayer?.backgroundImage, "Explicit wallpaper layer must load the image").toContain("light-theme-bg.webp");
   expect(rendered.wallpaperLayer?.position).toBe("fixed");
   expect(rendered.wallpaperLayer?.backgroundSize).toBe("cover");
-  expect(rendered.canvasSize + " " + rendered.bodySize).toContain("cover");
+  expect(rendered.wallpaperLayer.backgroundSize).toBe("cover");
   expect(rendered.shellBackground).toBe("none");
   expect(rendered.imageDecoded, "Wallpaper image must decode in Chromium").toBe(true);
   expect(rendered.imageWidth).toBeGreaterThan(0);
