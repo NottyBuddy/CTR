@@ -1,11 +1,64 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-<defs>
- <radialGradient id="planet" cx="35%" cy="28%" r="75%"><stop stop-color="#f5eaff"/><stop offset=".35" stop-color="#b9a0ff"/><stop offset=".72" stop-color="#7137d8"/><stop offset="1" stop-color="#27104e"/></radialGradient>
- <linearGradient id="orbit" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".35" stop-color="#cbb2ff"/><stop offset=".7" stop-color="#8b43ff"/><stop offset="1" stop-color="#f2d7ff"/></linearGradient>
- <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-</defs>
-<circle cx="60" cy="60" r="24" fill="url(#planet)"/>
-<ellipse cx="60" cy="60" rx="51" ry="22" transform="rotate(-48 60 60)" fill="none" stroke="url(#orbit)" stroke-width="5.5" filter="url(#glow)"/>
-<path d="M20 91C37 76 75 43 99 25" fill="none" stroke="#e7d4ff" stroke-width="1.6" opacity=".72"/>
-<circle cx="60" cy="60" r="5" fill="#fff" opacity=".75"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="IndiNext Orbit">
+  <defs>
+    <radialGradient id="core" cx="32%" cy="24%" r="78%">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".12" stop-color="#eee5ff"/>
+      <stop offset=".34" stop-color="#a98aff"/>
+      <stop offset=".62" stop-color="#6840b8"/>
+      <stop offset=".86" stop-color="#292044"/>
+      <stop offset="1" stop-color="#100d1d"/>
+    </radialGradient>
+    <linearGradient id="ringMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset=".16" stop-color="#c8b8ff"/>
+      <stop offset=".32" stop-color="#7655bd"/>
+      <stop offset=".48" stop-color="#f8f1ff"/>
+      <stop offset=".62" stop-color="#8c65e8"/>
+      <stop offset=".82" stop-color="#3a2a68"/>
+      <stop offset="1" stop-color="#f1dcff"/>
+    </linearGradient>
+    <linearGradient id="ringEdge" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0" stop-color="#fff" stop-opacity=".95"/>
+      <stop offset=".42" stop-color="#a78bfa" stop-opacity=".8"/>
+      <stop offset="1" stop-color="#37245f" stop-opacity=".95"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="28%" cy="18%" r="60%">
+      <stop offset="0" stop-color="#fff" stop-opacity=".85"/>
+      <stop offset=".3" stop-color="#fff" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0.65 0 0 0 0.25  0 0.45 0 0 0.12  0 0 1 0 0.55  0 0 0 0.8 0"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+
+  <!-- soft reflected halo -->
+  <ellipse cx="80" cy="82" rx="60" ry="18" fill="#9b72ff" opacity=".13" filter="url(#shadow)" transform="rotate(-36 80 82)"/>
+  <!-- rear orbital arc -->
+  <path d="M23 106C39 72 82 35 132 27" fill="none" stroke="#2b1d4d" stroke-width="13" stroke-linecap="round" opacity=".8"/>
+  <path d="M23 106C39 72 82 35 132 27" fill="none" stroke="url(#ringMetal)" stroke-width="7.5" stroke-linecap="round" opacity=".95"/>
+  <path d="M25 103C44 69 87 38 130 29" fill="none" stroke="#fff" stroke-width="1.1" stroke-linecap="round" opacity=".78"/>
+
+  <!-- dimensional planet -->
+  <circle cx="80" cy="78" r="32" fill="#100b20" opacity=".65" transform="translate(1 3)"/>
+  <circle cx="80" cy="76" r="31" fill="url(#core)" stroke="#d9c9ff" stroke-opacity=".6" stroke-width="1.2"/>
+  <circle cx="80" cy="76" r="30" fill="url(#shine)"/>
+  <path d="M56 62C67 48 91 44 106 58" fill="none" stroke="#fff" stroke-width="1.2" opacity=".55" stroke-linecap="round"/>
+  <path d="M57 92C69 105 92 108 105 94" fill="none" stroke="#100b20" stroke-width="2" opacity=".35" stroke-linecap="round"/>
+
+  <!-- foreground orbital band -->
+  <path d="M18 98C39 119 83 124 126 82" fill="none" stroke="#21163c" stroke-width="13" stroke-linecap="round" opacity=".9"/>
+  <path d="M18 98C39 119 83 124 126 82" fill="none" stroke="url(#ringMetal)" stroke-width="8" stroke-linecap="round" filter="url(#softGlow)"/>
+  <path d="M20 96C43 114 83 117 124 81" fill="none" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".88"/>
+  <path d="M18 98C39 119 83 124 126 82" fill="none" stroke="#6e4bb7" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+
+  <!-- precision glints -->
+  <circle cx="22" cy="97" r="3.2" fill="#fff" filter="url(#softGlow)"/>
+  <circle cx="129" cy="28" r="2.6" fill="#fff" filter="url(#softGlow)"/>
+  <path d="M111 34l3-7 3 7 7 3-7 3-3 7-3-7-7-3z" fill="#fff" opacity=".9"/>
 </svg>
