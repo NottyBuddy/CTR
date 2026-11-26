@@ -1015,3 +1015,11 @@ body.theme-light .account-avatar-choice.selected{
  background:transparent!important;border:0!important;border-radius:0!important;
  box-shadow:none!important
 }
+
+/* Private direct-chat image attachments */
+.dm-image-button{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;min-width:42px;height:40px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border);color:var(--accent);cursor:pointer;flex:0 0 42px}
+.dm-image-button span{font-size:20px;line-height:18px}.dm-image-button small{font-size:8px}.dm-image-button:hover{border-color:var(--accent);background:var(--accent-soft)}.dm-image-button:has(input:disabled){opacity:.4;pointer-events:none}
+.dm-image-preview{display:flex;align-items:center;gap:9px;padding:7px 10px;margin-top:7px;border-radius:10px;background:var(--surface-2);font-size:10px;color:var(--muted)}.dm-image-preview.hidden{display:none}.dm-image-preview button{margin-left:auto;width:24px;height:24px;border-radius:50%;background:var(--surface);color:var(--text);font-size:17px}
+.dm-image-attachment{display:grid;gap:5px;margin-top:8px;max-width:min(360px,100%)}.dm-image-attachment img{display:block;width:auto;max-width:100%;max-height:300px;object-fit:contain;border-radius:12px;border:1px solid var(--border);cursor:zoom-in;background:rgba(0,0,0,.08)}.dm-image-attachment span{font-size:9px;color:var(--muted);overflow-wrap:anywhere}
+.dm-image-lightbox{position:fixed;inset:0;z-index:150;display:none;place-items:center;padding:20px;background:rgba(0,0,0,.88);backdrop-filter:blur(12px)}.dm-image-lightbox.open{display:grid}.dm-image-lightbox img{max-width:96vw;max-height:90svh;object-fit:contain}.dm-image-lightbox button{position:absolute;top:16px;right:18px;width:40px;height:40px;border-radius:50%;font-size:26px;color:#fff;background:rgba(255,255,255,.13)}
+@media(max-width:700px){.dm-image-attachment img{max-height:240px}.dm-composer{flex-wrap:wrap}.dm-composer select{order:1}.dm-composer textarea{order:2;min-width:0}.dm-image-button{order:3}.dm-send-btn{order:4}.dm-image-preview{margin-top:4px}}
