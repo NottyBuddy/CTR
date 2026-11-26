@@ -451,3 +451,81 @@ body.theme-light #groupView #noteForm button:hover{
 }
 body.theme-light #groupView #notes{background:transparent!important}
 body.theme-light #groupView #noteForm{background:transparent!important;border:0!important;box-shadow:none!important}
+
+
+/* Orbit transparent UI: keep surfaces unboxed, use typography for state */
+#groupView #notes>.note,
+#groupView #notes>.note.mine,
+#directNotes .dm-message,
+#directNotes .dm-message.mine,
+.notes-view .note,
+.notes-view .dm-message{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  border-color:transparent!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  outline:0!important;
+}
+#groupView #notes>.note *,
+#directNotes .dm-message *{
+  box-shadow:none!important;
+}
+.top-nav-btn.active,
+.dm-filter.active{
+  color:var(--accent)!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  position:relative;
+}
+.top-nav-btn.active::after,
+.dm-filter.active::after{
+  content:"";
+  position:absolute;
+  left:12px;
+  right:12px;
+  bottom:3px;
+  height:2px;
+  border-radius:2px;
+  background:var(--accent);
+  opacity:.9;
+}
+.dm-conversation.selected{
+  background:transparent!important;
+}
+.dm-conversation.selected .dm-convo-copy strong,
+.dm-conversation.selected .dm-convo-copy>span{
+  color:var(--accent)!important;
+}
+.delete-note,
+.note-actions .delete-note,
+.message-actions .delete-note,
+.dm-message-actions .delete-note,
+#groupView .note-tools [data-gdelete],
+#directNotes [data-ddelete]{
+  color:var(--danger)!important;
+  background:transparent!important;
+}
+.send-btn,.dm-send-btn,.composer .send-btn,
+#noteForm .send-btn,#personalForm .send-btn{
+  color:var(--accent)!important;
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.send-btn b,.dm-send-btn svg,.dm-send-btn{
+  color:var(--accent)!important;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible{
+  outline:1px solid color-mix(in srgb,var(--accent) 65%,transparent)!important;
+  outline-offset:3px!important;
+  box-shadow:none!important;
+}
