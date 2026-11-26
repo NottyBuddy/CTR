@@ -833,3 +833,39 @@ body:not(.theme-light) .theme-pull{color:#F5F3FB!important}
   transform:translateX(-50%)!important;
   transition:none!important;
 }
+
+
+/* LIGHT THEME: keep the uploaded wallpaper crisp and unobscured. */
+body.theme-light:before{
+  filter:none!important;
+  -webkit-filter:none!important;
+  opacity:1!important;
+  transform:none!important;
+}
+body.theme-light:after{
+  background:rgba(255,255,255,.025)!important;
+  opacity:1!important;
+  filter:none!important;
+  -webkit-filter:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+/* Disable every backdrop blur in light mode, including dialogs and menus. */
+body.theme-light *,
+body.theme-light *::before,
+body.theme-light *::after{
+  -webkit-backdrop-filter:none!important;
+}
+body.theme-light .glass,
+body.theme-light .topbar,
+body.theme-light .chat,
+body.theme-light .right-panel,
+body.theme-light .auth-card,
+body.theme-light .notification-panel,
+body.theme-light .modal,
+body.theme-light .modal-card,
+body.theme-light .account-settings-modal,
+body.theme-light .account-settings-card{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
