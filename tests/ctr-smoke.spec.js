@@ -168,7 +168,7 @@ test("CTR layout fits desktop and mobile viewports without horizontal overflow",
 
 test("Light Theme wallpaper is rendered behind the app surfaces", async ({ page, request }) => {
   await page.goto("./");
-  const assetUrl = new URL("./light-theme-bg.webp?rev=20261125e", "https://nottybuddy.github.io/CTR/").toString();
+  const assetUrl = new URL("./orbit-light-bg.webp?rev=20261125e", "https://nottybuddy.github.io/CTR/").toString();
   const assetResponse = await request.get(assetUrl);
   expect(assetResponse.status(), "Light Theme wallpaper must be served by GitHub Pages").toBe(200);
   expect(assetResponse.headers()["content-type"] || "").toContain("image/webp");
@@ -188,7 +188,7 @@ test("Light Theme wallpaper is rendered behind the app surfaces", async ({ page,
     const bodyStyle = getComputedStyle(document.body);
     const shell = document.querySelector("body > .shell");
     const image = new Image();
-    image.src = "/CTR/light-theme-bg.webp?rev=20261125e";
+    image.src = "/CTR/orbit-light-bg.webp?rev=20261125e";
     let decoded = false;
     try { await image.decode(); decoded = true; } catch {}
     return {
@@ -205,7 +205,7 @@ test("Light Theme wallpaper is rendered behind the app surfaces", async ({ page,
     };
   });
   console.log("CTR_LIGHT_WALLPAPER_CANVAS_DIAGNOSTIC", JSON.stringify(rendered));
-  expect(rendered.wallpaperLayer?.backgroundImage, "Explicit wallpaper layer must load the image").toContain("light-theme-bg.webp");
+  expect(rendered.wallpaperLayer?.backgroundImage, "Light theme pseudo-background must load the actual wallpaper").toContain("orbit-light-bg.webp");
   expect(rendered.wallpaperLayer?.position).toBe("fixed");
   expect(rendered.wallpaperLayer?.backgroundSize).toBe("cover");
   expect(rendered.wallpaperLayer.backgroundSize).toBe("cover");
