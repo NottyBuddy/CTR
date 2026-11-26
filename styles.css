@@ -352,3 +352,57 @@ button:hover,.top-nav-btn:hover,.header-icon-btn:hover,.account-settings-btn:hov
 @media(max-width:390px){.chat{height:calc(var(--app-viewport-height,100dvh) - 150px);min-height:300px}}
 
 .dm-online-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px color-mix(in srgb,var(--success) 16%,transparent);vertical-align:middle;margin-right:4px}.dm-presence-status{font-size:10px}.dm-presence-status.online{color:var(--success)}.dm-presence-status.offline{color:var(--muted)}
+
+
+/* Final Light Theme correction: remove dark note slabs and remaining filled controls */
+html:has(body.theme-light) #groupView #notes>.note,
+body.theme-light #groupView #notes>.note,
+html:has(body.theme-light) #groupView #notes>.note.mine,
+body.theme-light #groupView #notes>.note.mine{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+html:has(body.theme-light) #groupView #notes>.note *,
+body.theme-light #groupView #notes>.note *{
+  box-shadow:none!important;
+}
+html:has(body.theme-light) #groupView #noteForm .send-btn,
+body.theme-light #groupView #noteForm .send-btn,
+html:has(body.theme-light) #groupView #noteForm .send-btn:hover,
+body.theme-light #groupView #noteForm .send-btn:hover{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  color:var(--text)!important;
+  filter:none!important;
+}
+html:has(body.theme-light) #groupView #noteForm #noteInput,
+body.theme-light #groupView #noteForm #noteInput{
+  background:transparent!important;
+  background-color:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  outline:0!important;
+}
+html:has(body.theme-light) #groupView #notes .note-tools button,
+body.theme-light #groupView #notes .note-tools button,
+html:has(body.theme-light) #groupView #notes .reaction-btn,
+body.theme-light #groupView #notes .reaction-btn{
+  background:transparent!important;
+  background-color:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  color:var(--text)!important;
+}
+html:has(body.theme-light) #groupView #notes .note-tools button:hover,
+body.theme-light #groupView #notes .note-tools button:hover,
+html:has(body.theme-light) #groupView #notes .reaction-btn:hover,
+body.theme-light #groupView #notes .reaction-btn:hover{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+}
