@@ -629,3 +629,11 @@ body.theme-light .brand-name{color:#29213e;text-shadow:none}
  .brand.compact .brand-mark{width:37px;height:37px;flex-basis:37px}
  .brand.compact .brand-name{font-size:12px}
 }
+
+
+/* Temporary clean slate before the user's replacement wallpaper and logo are added. */
+body:before,body.theme-light:before{background-image:none!important;background-color:transparent!important;filter:none!important;}
+body:after,body.theme-light:after{background:none!important;}
+.brand-mark{display:none!important;}
+.brand,.brand.compact{gap:0!important;}
+.brand-name{ text-shadow:none!important; }
