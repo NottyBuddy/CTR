@@ -225,6 +225,8 @@ function openDirectConversation(id){
  $("directInput").focus();
  status("Chat opened: "+(person.display_name||"team member"));
 }
+function openDmImage(src,alt){let modal=$("dmImageLightbox");if(!modal){modal=document.createElement("div");modal.id="dmImageLightbox";modal.className="dm-image-lightbox";modal.innerHTML='<button type="button" aria-label="Close image preview">×</button><img alt="">';document.body.append(modal);modal.onclick=e=>{if(e.target===modal||e.target.closest("button"))modal.classList.remove("open")}}modal.querySelector("img").src=src;modal.querySelector("img").alt=alt||"Shared image";modal.classList.add("open")}
+async function hydrateDirectAttachments(container=$("directNotes")){if(!container)return;const imgs=[...container.querySelectorAll("img[data-dm-attachment]")];for(const img of imgs){const path=img.dataset.dmAttachment;if(!path||img.dataset.loading==="1")continue;img.dataset.loading="1";try{const {data,error}=await db.storage.from("orbit-dm-images").createSignedUrl(path,3600);if(error)throw error;if(img.isConnected)img.src=data.signedUrl}catch(err){if(img.isConnected)img.alt="Image unavailable";console.warn("Direct attachment preview failed",err)}}}
 function renderDirect(){
  const admin=isAdmin(),people=team.filter(p=>p.user_id!==user.id);
  $("directAdminHint")?.classList.add("hidden");
@@ -272,8 +274,9 @@ function renderDirect(){
   const box=$("directNotes"),near=box.scrollHeight-box.scrollTop-box.clientHeight<120;
   box.innerHTML=active.messages.map(m=>{
    const mine=m.sender_id===user.id,from=team.find(p=>p.user_id===m.sender_id)?.display_name||"CTR Member";
-   return `<article class="dm-message ${mine?"mine":""}" data-dm-message="${m.id}"><div class="dm-message-person"><span class="dm-avatar dm-message-avatar">${directAvatar(from,m.sender_id)}</span><strong>${esc(from)}</strong></div><div class="dm-message-body">${esc(m.body||"")}</div><time>${esc(time(m.created_at))}${m.edited_at?" · edited":mine?" · ✓✓":""}</time><div class="dm-message-actions">${mine?`<button type="button" class="message-action" data-dm-edit="${m.id}">Edit</button>`:""}<button type="button" class="message-action" data-dm-reply="${m.id}">Reply</button>${mine||admin?`<button class="delete-note" data-ddelete="${m.id}">Delete</button>`:""}</div></article>`;
+   return `<article class="dm-message ${mine?"mine":""}" data-dm-message="${m.id}"><div class="dm-message-person"><span class="dm-avatar dm-message-avatar">${directAvatar(from,m.sender_id)}</span><strong>${esc(from)}</strong></div><div class="dm-message-body">${esc(m.body||"")}</div>${m.attachment_path?`<div class="dm-image-attachment"><img data-dm-attachment="${esc(m.attachment_path)}" alt="${esc(m.attachment_name||"Shared image")}" loading="lazy"><span>${esc(m.attachment_name||"Image attachment")}</span></div>`:""}<time>${esc(time(m.created_at))}${m.edited_at?" · edited":mine?" · ✓✓":""}</time><div class="dm-message-actions">${mine?`<button type="button" class="message-action" data-dm-edit="${m.id}">Edit</button>`:""}<button type="button" class="message-action" data-dm-reply="${m.id}">Reply</button>${mine||admin?`<button class="delete-note" data-ddelete="${m.id}">Delete</button>`:""}</div></article>`;
   }).join("")||'<div class="dm-empty-thread"><div class="dm-empty-mark">✉</div><strong>Start a private conversation</strong><span>Write a message below to begin chatting.</span></div>';
+  hydrateDirectAttachments(box);
   let lastDay="";
   [...box.querySelectorAll(".dm-message")].forEach((card,index)=>{
    const msg=active.messages[index],label=dayLabel(msg.created_at);
@@ -557,18 +560,29 @@ $("dashboardTo")?.addEventListener("change",e=>{dashboardTo=e.target.value||"";i
 $("dashboardReset")?.addEventListener("click",()=>{dashboardFrom=dashboardTo="";$("dashboardFrom").value="";$("dashboardTo").value="";renderAgentDashboard()});
 $("globalSearch")?.addEventListener("input",e=>globalSearch(e.target.value));
 $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value||"";renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
+$("dmImageInput").onchange=e=>{const f=e.target.files?.[0];if(!f)return;if(!/^image\/(jpeg|png|webp|gif)$/i.test(f.type)){status("Choose a JPG, PNG, WEBP or GIF image.");e.target.value="";return}if(f.size>8*1024*1024){status("Image must be 8 MB or smaller.");e.target.value="";return}pendingDmImage=f;$("dmImagePreview").innerHTML=`<span>${esc(f.name)} · ${(f.size/1024/1024).toFixed(1)} MB</span><button type="button" id="dmImageRemove" aria-label="Remove selected image">×</button>`;$("dmImagePreview").classList.remove("hidden")};
+$("dmImagePreview").onclick=e=>{if(e.target.closest("#dmImageRemove")){pendingDmImage=null;$("dmImageInput").value="";$("dmImagePreview").classList.add("hidden");$("dmImagePreview").innerHTML=""}};
+let pendingDmImage=null;
 $("directForm").onsubmit=async e=>{
  e.preventDefault();
- const body=$("directInput").value.trim();
+ const body=$("directInput").value.trim(),image=pendingDmImage;
  const recipient=selectedDirectRecipient||$("directRecipient").value||(team.find(p=>directPairKey(user.id,p.user_id)===selectedDirectKey)?.user_id)||"";
  if(!user||!recipient||recipient===user.id){status("Open a team member chat before sending.");return}
- if(!body)return;
+ if(!body&&!image)return;
  const send=$("directForm").querySelector('button[type="submit"]');
- send.disabled=true;
+ const imageBtn=$("dmImageButton");
+ send.disabled=true;if(imageBtn)imageBtn.disabled=true;
+ let attachmentPath=null;
  try{
-  const {error}=await db.from("ctr_direct_messages").insert({sender_id:user.id,recipient_id:recipient,sender_email:user.email,body});
-  if(error){status("Message could not be sent: "+error.message);return}
-  $("directInput").value="";
+  if(image){
+   const ext=(image.name.split(".").pop()||"img").toLowerCase().replace(/[^a-z0-9]/g,"")||"img";
+   attachmentPath=`${user.id}/${recipient}/${crypto.randomUUID()}.${ext}`;
+   const {error:uploadError}=await db.storage.from("orbit-dm-images").upload(attachmentPath,image,{contentType:image.type,upsert:false});
+   if(uploadError)throw uploadError;
+  }
+  const {error}=await db.from("ctr_direct_messages").insert({sender_id:user.id,recipient_id:recipient,sender_email:user.email,body,attachment_path:attachmentPath,attachment_name:image?.name||null,attachment_type:image?.type||null,attachment_size:image?.size||null});
+  if(error){if(attachmentPath)await db.storage.from("orbit-dm-images").remove([attachmentPath]);status("Message could not be sent: "+error.message);return}
+  $("directInput").value="";pendingDmImage=null;$("dmImageInput").value="";$("dmImagePreview").classList.add("hidden");$("dmImagePreview").innerHTML="";
   selectedDirectRecipient=String(recipient);
   selectedDirectKey=directPairKey(user.id,recipient);
   $("directRecipient").value=recipient;
@@ -577,9 +591,9 @@ $("directForm").onsubmit=async e=>{
   markSeen("direct");
   status("Message sent.");
  }catch(err){status("Message failed: "+(err?.message||"Please try again."))}
- finally{send.disabled=false}
+ finally{send.disabled=false;if(imageBtn)imageBtn.disabled=false}
 };
-$("directNotes").addEventListener("click",e=>{if(e.target.closest("[data-load-older-direct]")){loadOlderDirect();return}});
+$("directNotes").addEventListener("click",e=>{const image=e.target.closest(".dm-image-attachment img");if(image?.src){openDmImage(image.src,image.alt);return}if(e.target.closest("[data-load-older-direct]")){loadOlderDirect();return}});
 $("notes").addEventListener("click",e=>{if(e.target.closest("[data-load-older-group]"))loadOlderGroup()});
 $("personalNotes").addEventListener("click",e=>{if(e.target.closest("[data-load-older-personal]"))loadOlderPersonal()});
 $("directNotes").addEventListener("click",async e=>{const reply=e.target.closest("[data-dm-reply]");if(reply){const msg=direct.find(m=>String(m.id)===String(reply.dataset.dmReply));if(msg){const sender=team.find(p=>p.user_id===msg.sender_id)?.display_name||"CTR Member";$("directInput").value="↪ "+sender+": "+msg.body+"\n\n";$("directInput").focus()}return}const edit=e.target.closest("[data-dm-edit]");if(edit){const msg=direct.find(m=>String(m.id)===String(edit.dataset.dmEdit));if(!msg||msg.sender_id!==user.id)return;const body=prompt("Edit your message",msg.body||"");if(body===null)return;if(!body.trim()){status("Message cannot be empty.");return}edit.disabled=true;const {error}=await db.from("ctr_direct_messages").update({body:body.trim(),edited_at:new Date().toISOString()}).eq("id",msg.id).eq("sender_id",user.id);edit.disabled=false;if(error){status("Edit failed. Apply the direct-message edit permission migration in Supabase: "+error.message);return}await loadDirect();renderDirect();status("Message updated.");}});
