@@ -991,3 +991,27 @@ body.theme-light .account-avatar-choice{
 body.theme-light .account-avatar-choice.selected{border-color:rgba(65,39,62,.72)!important;box-shadow:0 0 0 2px rgba(100,67,97,.16),0 7px 18px rgba(50,38,55,.16)!important}
 body.theme-light .account-current-avatar{background:linear-gradient(145deg,#fff,#d9d0d9)!important;border-color:rgba(65,39,62,.2)!important}
 @media(max-width:700px){.account-avatar-choices{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:9px!important}.account-avatar-choice{min-height:56px;font-size:26px!important;border-radius:15px!important}}
+
+
+/* Keep the original avatar icons; remove every tile/container background */
+.account-avatar-choice,
+body.theme-light .account-avatar-choice{
+ background:transparent!important;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ text-shadow:0 2px 3px rgba(0,0,0,.38),0 0 9px rgba(255,255,255,.22)!important;
+}
+.account-avatar-choice.selected,
+body.theme-light .account-avatar-choice.selected{
+ background:transparent!important;
+ border:0!important;
+ outline:1px solid rgba(255,255,255,.72)!important;
+ outline-offset:3px!important;
+ box-shadow:none!important;
+}
+.account-avatar-choice.taken{opacity:.32!important;filter:grayscale(.55)!important}
+.account-current-avatar{
+ background:transparent!important;border:0!important;border-radius:0!important;
+ box-shadow:none!important
+}
