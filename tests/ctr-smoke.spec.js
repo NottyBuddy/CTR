@@ -22,16 +22,16 @@ test("CTR public page, assets and sign-in form load without JavaScript errors", 
   await expect(page.locator("#authSubmit")).toBeEnabled();
   await expect(page.locator("#dashboardFrom")).toBeAttached();
   await expect(page.locator("#toggleNotificationPanel")).toBeAttached();
-  await expect(page.locator("#themeToggle")).toBeAttached();
+  await expect(page.locator("#themePull")).toBeAttached();
   await expect(page.locator("#exportCrmData")).toBeAttached();
-  const assets = await Promise.all(["./styles.css?v=orbit-theme-bg-fix-20261126a", "./app.js?v=orbit-edit-refresh-fix-20261126a", "./crm-local-ai.js?v=ctr-local-qwen-clarify-3", "./file_000000003bf88208a1f705b3f6395db2.png", "./file_000000005f188208adc8f107a4f7bc8b.png", "./assets/ctr-samurai-icons.png", "./orbit-dark-bg.webp", "./orbit-light-bg.webp"].map(url => request.get(new URL(url, "https://nottybuddy.github.io/Orbit/").toString())));
+  const assets = await Promise.all(["./styles.css?v=chat-28-22-avatar-78-bfs-20261126", "./app.js?v=chat-28-22-avatar-78-bfs-20261126", "./crm-local-ai.js", "./01_crossed_swords.png", "./09_tiger.png", "./16_yin_yang.png", "./Dark.png", "./Light.png", "./orbit-logo-transparent.png"].map(url => request.get(new URL(url, "https://nottybuddy.github.io/Orbit/").toString())));
   console.log("ORBIT_ASSET_STATUS", JSON.stringify(assets.map(x => x.status())));
-  expect(assets.map(x => x.status())).toEqual([200, 200, 200, 200, 200, 200, 200, 200]);
-  const cssSource=await (await request.get(new URL("./styles.css?v=orbit-theme-bg-fix-20261126a","https://nottybuddy.github.io/Orbit/").toString())).text();
-  expect(cssSource).toContain("orbit-dark-bg.webp");
-  expect(cssSource).toContain("orbit-light-bg.webp");
+  expect(assets.map(x => x.status())).toEqual([200, 200, 200, 200, 200, 200, 200, 200, 200]);
+  const cssSource=await (await request.get(new URL("./styles.css?v=chat-28-22-avatar-78-bfs-20261126","https://nottybuddy.github.io/Orbit/").toString())).text();
+  expect(cssSource).toContain("Dark.png");
+  expect(cssSource).toContain("Light.png");
   expect(pageErrors, "Uncaught JavaScript errors").toEqual([]);
-  const appSource = await (await request.get(new URL("./app.js?v=orbit-edit-refresh-fix-20261126a", "https://nottybuddy.github.io/Orbit/").toString())).text();
+  const appSource = await (await request.get(new URL("./app.js?v=chat-28-22-avatar-78-bfs-20261126", "https://nottybuddy.github.io/Orbit/").toString())).text();
   expect(appSource).toContain("data-dm-edit");
   expect(appSource).not.toContain("data-clear-dm");
   expect(appSource).toContain("ctr_choose_avatar");
@@ -94,7 +94,7 @@ test("authenticated agent can use all workspace sections and open Direct Chat", 
     document.documentElement.style.colorScheme = "light";
   });
   await expect(page.locator("body")).toHaveClass(/theme-light/);
-  await page.locator("#themeToggle").click();
+  await page.locator("#themePull").click();
   await page.locator("#toggleNotificationPanel").click();
   await expect(page.locator("#notificationPanel")).toBeVisible();
 
@@ -171,10 +171,10 @@ test("CTR layout fits desktop and mobile viewports without horizontal overflow",
 
 test("Light Theme wallpaper is rendered behind the app surfaces", async ({ page, request }) => {
   await page.goto("./");
-  const assetUrl = new URL("./orbit-light-bg.webp?rev=20261125e", "https://nottybuddy.github.io/Orbit/").toString();
+  const assetUrl = new URL("./Light.png?rev=20261125e", "https://nottybuddy.github.io/Orbit/").toString();
   const assetResponse = await request.get(assetUrl);
   expect(assetResponse.status(), "Light Theme wallpaper must be served by GitHub Pages").toBe(200);
-  expect(assetResponse.headers()["content-type"] || "").toContain("image/webp");
+  expect(assetResponse.headers()["content-type"] || "").toContain("image/png");
 
   // The public sign-in page hides the theme control; apply the same theme class
   // that the app's setTheme() function applies after sign-in.
@@ -191,7 +191,7 @@ test("Light Theme wallpaper is rendered behind the app surfaces", async ({ page,
     const bodyStyle = getComputedStyle(document.body);
     const shell = document.querySelector("body > .shell");
     const image = new Image();
-    image.src = "/Orbit/orbit-light-bg.webp?rev=20261126a";
+    image.src = "/Orbit/Light.png?rev=20261126a";
     let decoded = false;
     try { await image.decode(); decoded = true; } catch {}
     return {
@@ -208,7 +208,7 @@ test("Light Theme wallpaper is rendered behind the app surfaces", async ({ page,
     };
   });
   console.log("ORBIT_LIGHT_WALLPAPER_DIAGNOSTIC", JSON.stringify(rendered));
-  expect(rendered.wallpaperLayer?.backgroundImage, "Light theme pseudo-background must load the actual wallpaper").toContain("orbit-light-bg.webp");
+  expect(rendered.wallpaperLayer?.backgroundImage, "Light theme pseudo-background must load the actual wallpaper").toContain("Light.png");
   expect(rendered.wallpaperLayer?.position).toBe("fixed");
   expect(rendered.wallpaperLayer?.backgroundSize).toContain("cover");
   expect(rendered.wallpaperLayer.backgroundSize).toContain("cover");
