@@ -567,3 +567,12 @@ select:focus-visible{
 .agent-record-row p{white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0 0;color:var(--text);font-size:13px;line-height:1.6}
 @media(max-width:850px){.agent-activity-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.agent-activity-cards{grid-template-columns:1fr 1fr;gap:8px}.agent-activity-card{min-height:128px;padding:12px 8px!important;grid-template-columns:24px 1fr auto;gap:6px}.agent-activity-card strong{font-size:12px}.agent-activity-card small{font-size:10px}.agent-record-meta{align-items:flex-start;flex-direction:column;gap:4px}}
+
+/* Orbit facade scene + logo concept test: keep the original CTR emblem file untouched. */
+body:before{background-image:url("orbit-dark-wallpaper.svg");background-position:center center;background-size:cover;}
+body:after{background:linear-gradient(180deg,rgba(8,7,17,.12),rgba(8,7,17,.28));}
+body.theme-light:before{background-image:url("orbit-light-wallpaper.svg");background-position:center center;background-size:cover;}
+body.theme-light:after{background:linear-gradient(180deg,rgba(248,248,255,.12),rgba(248,248,255,.2));}
+.glass,.topbar,.chat,.right-panel,.auth-card,.notification-panel,.modal,.modal-card{backdrop-filter:blur(18px) saturate(125%);-webkit-backdrop-filter:blur(18px) saturate(125%);}
+.brand-mark{width:clamp(48px,4vw,64px);height:clamp(48px,4vw,64px);flex-basis:clamp(48px,4vw,64px);border-radius:0;}
+.brand-mark .ctr-emblem{filter:drop-shadow(0 3px 10px rgba(139,102,255,.32));}
