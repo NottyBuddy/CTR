@@ -13,7 +13,7 @@ async function loadPersonalPage(reset=false){if(reset){personalOffset=0;personal
 let db,user,group=[],personal=[],direct=[],team=[],channel,presenceChannel,onlineUserIds=new Set(),avatarProfiles=[],avatarGateActive=false;
 let groupFilter="",dateFilter="",personalFilter="",directFilter="",followupSearchFilter="";
 let selectedDirectKey="",selectedDirectRecipient="",directInboxFilter="all",mobileThreadOpen=false;
-let adminAuditAgentId="",adminAuditPairKey="",adminAuditSearch="",adminAuditDate="";
+let adminAuditAgentId="",adminAuditPairKey="",adminAuditSearch="",adminAuditDate="",adminAuditCategory="";
 let adminAuditData=null,adminAuditRequest=0;
 let dashboardFrom="",dashboardTo="";
 const seenKey=k=>"ctr_seen_"+k+"_"+(user?.id||"");const markSeen=k=>{if(user)localStorage.setItem(seenKey(k),new Date().toISOString());updateUnread()};let unreadSeq=0;function updateUnread(){if(!user||!db)return;const seq=++unreadSeq,gSeen=localStorage.getItem(seenKey("group"))||"1970-01-01T00:00:00.000Z",dSeen=localStorage.getItem(seenKey("direct"))||"1970-01-01T00:00:00.000Z";Promise.all([db.from("ctr_group_notes").select("id",{count:"exact",head:true}).neq("user_id",user.id).gt("created_at",gSeen),db.from("ctr_direct_messages").select("id",{count:"exact",head:true}).eq("recipient_id",user.id).gt("created_at",dSeen)]).then(([g,d])=>{if(seq!==unreadSeq)return;for(const [id,n] of [["groupUnread",g.count||0],["directUnread",d.count||0]]){const e=$(id);if(e){e.textContent=n;e.classList.toggle("hidden",!n)}}}).catch(()=>{})}
@@ -119,29 +119,37 @@ async function loadAdminAuditData(agentId){
 function renderAdminChatExplorer(){
  const panel=$("agentChatAudit");if(!panel||!isAdmin())return;
  panel.classList.remove("hidden");
- const name=id=>team.find(t=>t.user_id===id)?.display_name||"CTR Member";
  const active=team.find(t=>t.user_id===adminAuditAgentId&&String(t.email||"").toLowerCase()!==ADMIN_EMAIL);
- if(!active){panel.innerHTML='<div class="agent-audit-empty">Select an agent card above to inspect their conversations and activity.</div>';return}
+ if(!active){panel.innerHTML='<div class="agent-audit-empty">Select an agent card above to inspect their activity.</div>';return}
  const audit=adminAuditData?.agentId===active.user_id?adminAuditData:null;
- if(!audit){panel.innerHTML='<div class="empty-state">Loading complete conversation history…</div>';loadAdminAuditData(active.user_id).then(()=>renderAdminChatExplorer()).catch(e=>{panel.innerHTML='<div class="empty-state">Admin history could not be loaded: '+esc(e.message)+'</div>'});return}
- const agentMessages=audit.direct;
- const pairs=new Map();
- agentMessages.forEach(m=>{const other=m.sender_id===active.user_id?m.recipient_id:m.sender_id;const key=directPairKey(active.user_id,other);if(!pairs.has(key))pairs.set(key,{key,other,messages:[]});pairs.get(key).messages.push(m)});
- const conversations=[...pairs.values()].map(c=>{c.messages.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));c.last=c.messages[c.messages.length-1];return c}).sort((a,b)=>new Date(b.last.created_at)-new Date(a.last.created_at));
+ if(!audit){panel.innerHTML='<div class="empty-state">Loading '+esc(active.display_name||displayName(active.email))+' activity…</div>';loadAdminAuditData(active.user_id).then(()=>renderAdminChatExplorer()).catch(e=>{panel.innerHTML='<div class="empty-state">Agent records could not be loaded: '+esc(e.message)+'</div>'});return}
+ const agentName=active.display_name||displayName(active.email);
+ const category=adminAuditCategory;
+ const directSent=audit.direct.filter(m=>m.sender_id===active.user_id);
+ const categories=[
+  {id:"group",title:"Group Chats",desc:"Messages this agent posted in the shared group",count:audit.group.length,icon:"▤"},
+  {id:"personal",title:"Personal Notes",desc:"Private notes created by this agent",count:audit.personal.length,icon:"✎"},
+  {id:"direct",title:"Direct Messages",desc:"Messages this agent sent to other agents",count:directSent.length,icon:"↗"},
+  {id:"followups",title:"Follow-ups",desc:"Callbacks and follow-ups created by this agent",count:audit.followups.length,icon:"◷"}
+ ];
+ const rows=category==="group"?audit.group:category==="personal"?audit.personal:category==="direct"?directSent:category==="followups"?audit.followups:[];
+ const title=categories.find(x=>x.id===category)?.title||"";
  const q=adminAuditSearch.trim().toLowerCase();
- const filtered=conversations.filter(c=>[name(c.other),...c.messages.map(m=>m.body)].join(" ").toLowerCase().includes(q));
- const chosen=conversations.find(c=>c.key===adminAuditPairKey);
- const activities=[
-  ...audit.group.map(x=>({kind:"Group Chat",body:x.body,created_at:x.created_at,status:x.is_pinned?"Pinned":""})),
-  ...audit.personal.map(x=>({kind:"Personal Note",body:x.body,created_at:x.created_at,status:"Private note"})),
-  ...audit.followups.map(x=>({kind:"Follow-up",body:[x.customer_name,x.phone,x.details].filter(Boolean).join(" · "),created_at:x.created_at||x.callback_at,status:x.status==="completed"?"Completed":"Pending"}))
- ].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
- const activityRows=activities.filter(x=>!q||[x.kind,x.body,x.status].join(" ").toLowerCase().includes(q)).filter(x=>!adminAuditDate||new Date(x.created_at).toLocaleDateString("en-CA")===adminAuditDate);
- panel.innerHTML=`<div class="agent-audit-head"><div><div class="eyebrow">ADMIN ONLY · COMPLETE TEAM RECORDS</div><h3>${esc(active.display_name||name(active.user_id))} — Activity & conversations</h3><p>${agentMessages.length} direct messages · ${conversations.length} conversations · ${activities.length} activity records. Full history is loaded from the database.</p></div><button type="button" class="message-action" data-audit-back-agents>All agents</button></div>
- <div class="agent-audit-controls"><input id="agentChatAuditSearch" type="search" value="${esc(adminAuditSearch)}" placeholder="Search contacts, messages or activity…"><input id="agentChatAuditDate" type="date" value="${esc(adminAuditDate)}" aria-label="Filter messages and activity by date"></div>
- ${chosen?`<section class="agent-audit-thread"><div class="agent-audit-thread-head"><button type="button" class="message-action" data-audit-back-list>← Conversations</button><div><strong>${esc(active.display_name||name(active.user_id))} ↔ ${esc(name(chosen.other))}</strong><small>${chosen.messages.length} messages · complete conversation</small></div></div><div class="agent-audit-thread-messages">${chosen.messages.filter(m=>(!adminAuditDate||new Date(m.created_at).toLocaleDateString("en-CA")===adminAuditDate)&&(!q||[name(m.sender_id),m.body].join(" ").toLowerCase().includes(q))).map(m=>`<article class="agent-audit-message ${m.sender_id===active.user_id?"agent-sent":"agent-received"}"><div class="agent-audit-message-meta"><strong>${esc(name(m.sender_id))}</strong><time>${esc(time(m.created_at))}</time></div><p>${esc(m.body||"")}</p></article>`).join("")||'<div class="empty-state">No messages match these filters.</div>'}</div></section>`
- :`<section class="agent-audit-section"><div class="agent-audit-section-title"><h4>People this agent chatted with</h4><span>${filtered.length} contacts</span></div><div class="agent-audit-conversations">${filtered.map(c=>`<button type="button" class="agent-audit-conversation" data-audit-pair="${esc(c.key)}"><span class="dm-avatar">${directAvatar(name(c.other),c.other)}</span><span class="agent-audit-conversation-copy"><strong>${esc(name(c.other))}</strong><small>${esc(c.last.body||"")}</small></span><span class="agent-audit-conversation-meta"><time>${esc(time(c.last.created_at))}</time><b>${c.messages.length} messages</b></span></button>`).join("")||'<div class="empty-state">No conversations match your search.</div>'}</div></section>
- <section class="agent-audit-activity"><div class="agent-audit-section-title"><h4>Activity records</h4><span>${activityRows.length} records</span></div><div class="agent-audit-activity-list">${activityRows.map(x=>`<article class="agent-audit-activity-item"><div><strong>${esc(x.kind)}</strong>${x.status?`<small>${esc(x.status)}</small>`:""}</div><time>${esc(time(x.created_at))}</time><p>${esc(x.body||"")}</p></article>`).join("")||'<div class="empty-state">No activity records match these filters.</div>'}</div></section>`}`;
+ const filtered=rows.filter(x=>{
+  const recipient=team.find(t=>t.user_id===x.recipient_id);
+  const body=category==="followups"?[x.customer_name,x.phone,x.details,x.status].join(" "):category==="direct"?[x.body,recipient?.display_name||displayName(recipient?.email)].join(" "):[x.body].join(" ");
+  const date=x.created_at||x.callback_at;
+  return (!q||body.toLowerCase().includes(q))&&(!adminAuditDate||new Date(date).toLocaleDateString("en-CA")===adminAuditDate);
+ });
+ const renderRow=x=>{
+  const date=x.created_at||x.callback_at;
+  if(category==="followups")return '<article class="agent-record-row"><div class="agent-record-meta"><strong>'+esc(x.customer_name||"Customer")+'</strong><time>'+esc(time(date))+'</time></div><p>'+esc([x.phone,x.details].filter(Boolean).join(" · "))+'</p><small class="agent-record-status">'+(x.status==="completed"?"Completed":"Pending")+'</small></article>';
+  if(category==="direct"){const recipient=team.find(t=>t.user_id===x.recipient_id);return '<article class="agent-record-row"><div class="agent-record-meta"><strong>To: '+esc(recipient?.display_name||displayName(recipient?.email)||"Team member")+'</strong><time>'+esc(time(date))+'</time></div><p>'+esc(x.body||"")+'</p></article>'}
+  return '<article class="agent-record-row"><div class="agent-record-meta"><strong>'+esc(category==="group"?"Group message":"Personal note")+'</strong><time>'+esc(time(date))+'</time></div><p>'+esc(x.body||"")+'</p></article>';
+ };
+ panel.innerHTML='<div class="agent-audit-head"><div><div class="eyebrow">ADMIN ONLY · AGENT MONITORING</div><h3>'+esc(agentName)+'</h3><p>Select an activity card to review records created by this agent.</p></div><button type="button" class="message-action" data-audit-back-agents>← All agents</button></div>'+
+ '<div class="agent-activity-cards">'+categories.map(c=>'<button type="button" class="agent-activity-card '+(category===c.id?"active":"")+'" data-audit-category="'+c.id+'"><span class="agent-activity-icon">'+c.icon+'</span><strong>'+c.title+'</strong><b>'+c.count+'</b><small>'+c.desc+'</small></button>').join("")+'</div>'+
+ (category?'<section class="agent-records-panel"><div class="agent-audit-section-title"><h4>'+title+' · '+filtered.length+'</h4><button type="button" class="message-action" data-audit-category-back>← Activity cards</button></div><div class="agent-audit-controls"><input id="agentChatAuditSearch" type="search" value="'+esc(adminAuditSearch)+'" placeholder="Search '+title.toLowerCase()+'…"><input id="agentChatAuditDate" type="date" value="'+esc(adminAuditDate)+'" aria-label="Filter by date"></div><div class="agent-record-list">'+(filtered.map(renderRow).join("")||'<div class="empty-state">No '+title.toLowerCase()+' found for this agent.</div>')+'</div></section>':'');
 }
 let globalSearchRequest=0;
 async function globalSearch(query){
@@ -525,8 +533,10 @@ $("dmThreadHeader").addEventListener("click",()=>{if(window.matchMedia("(max-wid
 document.querySelectorAll("[data-dm-filter]").forEach(b=>b.addEventListener("click",()=>{directInboxFilter=b.dataset.dmFilter;document.querySelectorAll("[data-dm-filter]").forEach(x=>x.classList.toggle("active",x===b));renderDirect()}));
  document.addEventListener("click",e=>{
  const t=e.target instanceof Element?e.target:null;if(!t)return;
- const agent=t.closest("[data-audit-agent]");if(agent){adminAuditAgentId=agent.dataset.auditAgent;adminAuditPairKey="";renderAgentDashboard();return}
- if(t.closest("[data-audit-back-agents]")){adminAuditAgentId="";adminAuditPairKey="";renderAgentDashboard();return}
+ const agent=t.closest("[data-audit-agent]");if(agent){adminAuditAgentId=agent.dataset.auditAgent;adminAuditPairKey="";adminAuditCategory="";adminAuditSearch="";adminAuditDate="";adminAuditData=null;renderAgentDashboard();return}
+ if(t.closest("[data-audit-back-agents]")){adminAuditAgentId="";adminAuditPairKey="";adminAuditCategory="";renderAgentDashboard();return}
+ const category=t.closest("[data-audit-category]");if(category){adminAuditCategory=category.dataset.auditCategory;adminAuditSearch="";adminAuditDate="";renderAdminChatExplorer();return}
+ if(t.closest("[data-audit-category-back]")){adminAuditCategory="";adminAuditSearch="";adminAuditDate="";renderAdminChatExplorer();return}
  if(t.closest("[data-audit-back-list]")){adminAuditPairKey="";renderAdminChatExplorer();return}
  const pair=t.closest("[data-audit-pair]");if(pair){adminAuditPairKey=pair.dataset.auditPair;renderAdminChatExplorer()}
 });
