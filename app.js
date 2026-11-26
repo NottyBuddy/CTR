@@ -466,16 +466,19 @@ async function ensureSupabaseLibrary(){
  return false;
 }
 let authBootPromise=null;
+async function sessionIsActive(){
+ try{const {data,error}=await db.rpc("ctr_session_is_active");if(error)throw error;return data===true}catch(e){console.warn("Session validation failed",e);return false}
+}
 async function boot(){
  status("Connecting to sign-in service…",true);$("authRetry")?.classList.add("hidden");
  if(!await ensureSupabaseLibrary()){status("Could not connect to the sign-in service. Check internet and tap Retry connection.",true);$("authRetry")?.classList.remove("hidden");return}
  if(!db)db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
  const {data,error}=await db.auth.getSession();if(error){status("Session error: "+error.message,true);$("authRetry")?.classList.remove("hidden");return}
- if(data.session)await enter(data.session.user);
  if(!authListenerReady){
   authListenerReady=true;
-  db.auth.onAuthStateChange(async(_e,s)=>{if(s?.user){if(!user||user.id!==s.user.id)await enter(s.user)}else{user=null;$("appView").classList.add("hidden");$("authView").classList.remove("hidden")}});
+  db.auth.onAuthStateChange((_e,s)=>{setTimeout(async()=>{if(s?.user){if(await sessionIsActive()){if(!user||user.id!==s.user.id)await enter(s.user)}else{await db.auth.signOut({scope:"local"});status("Your previous session has expired. Please sign in again.",true)}}else{user=null;avatarGateActive=false;$("appView").classList.add("hidden");$("authView").classList.remove("hidden")}},0)});
  }
+ if(data.session){if(await sessionIsActive())await enter(data.session.user);else{await db.auth.signOut({scope:"local"});status("Your previous session has expired. Please sign in again.",true)}}
 }
 let authListenerReady=false;
 async function connectAuth(){
@@ -493,7 +496,7 @@ $("authForm").addEventListener("submit",async e=>{
  }
  const email=$("email").value.trim().toLowerCase(),password=$("password").value;
  $("authSubmit").disabled=true;status("Signing in…",true);
- try{const r=await db.auth.signInWithPassword({email,password});if(r.error)status("Sign-in failed: "+r.error.message,true);else if(r.data.user)await enter(r.data.user)}
+ try{const r=await db.auth.signInWithPassword({email,password});if(r.error)status("Sign-in failed: "+r.error.message,true);else if(r.data.user)status("Signed in. Loading your workspace…",true)}
  catch(err){status("Sign-in error: "+(err.message||"Please try again."),true)}
  finally{$("authSubmit").disabled=false}
 });
