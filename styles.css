@@ -795,3 +795,24 @@ body:not(.theme-light) svg [fill]:not([fill="none"]) { fill:#F5F3FB; }
   .header-icon-btn { width:36px!important;height:36px!important; }
   .header-icon-btn svg { width:20px!important;height:20px!important; }
 }
+
+
+/* Pull-cord theme switch: compact hanging bulb at the far-right of the top bar. */
+.theme-pull{
+  position:relative!important;display:flex!important;flex-direction:column!important;
+  align-items:center!important;justify-content:flex-start!important;
+  width:38px!important;height:62px!important;min-width:38px!important;
+  padding:2px 0 0!important;margin:0 2px!important;overflow:visible!important;
+  border:0!important;border-radius:0!important;background:transparent!important;
+  box-shadow:none!important;cursor:grab!important;touch-action:pan-y!important;
+}
+.theme-pull:focus-visible{outline:1px solid currentColor!important;outline-offset:2px!important}
+.pull-bulb{display:flex;align-items:center;justify-content:center;width:25px;height:25px;z-index:2}
+.pull-bulb svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pull-cord{position:relative;display:block;width:2px;height:28px;margin-top:-1px;background:currentColor;opacity:.85;cursor:grab;touch-action:none}
+.pull-handle{position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);width:9px;height:9px;border:1.7px solid currentColor;border-radius:50%;background:transparent}
+.theme-pull.is-pulled .pull-cord{height:36px;transition:height .16s ease}
+.theme-pull.is-light .pull-bulb svg{fill:currentColor;fill-opacity:.12}
+body.theme-light .theme-pull{color:#17171B!important}
+body:not(.theme-light) .theme-pull{color:#F5F3FB!important}
+@media(max-width:700px){.theme-pull{width:32px!important;min-width:32px!important;height:56px!important}.pull-bulb{width:22px;height:22px}.pull-bulb svg{width:21px;height:21px}.pull-cord{height:25px}}
