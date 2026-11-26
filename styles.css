@@ -1050,3 +1050,27 @@ body.theme-light .account-avatar-choice.selected{
 .dm-image-attachment img{display:block;max-width:min(360px,100%);max-height:320px;object-fit:contain;border-radius:12px;cursor:zoom-in}
 .dm-image-lightbox{z-index:10000}
 @media(max-width:700px){.account-avatar-choice{min-height:56px;padding:6px!important}.account-avatar-choice .avatar-art{max-width:46px;max-height:46px}}
+
+
+/* Avatar art must remain a compact profile icon, never expand to source-image dimensions */
+.note-top .note-avatar,.note-avatar{
+ width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;
+ flex:0 0 38px!important;aspect-ratio:1/1!important;border-radius:50%!important;
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ overflow:hidden!important;padding:2px!important;background:transparent!important;
+ border:0!important;box-shadow:none!important
+}
+.note-avatar .avatar-art{width:32px!important;height:32px!important;max-width:32px!important;max-height:32px!important;object-fit:contain!important;flex:0 0 32px!important}
+.agent-profile-avatar{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;flex:0 0 38px!important}
+.agent-profile-avatar .avatar-art{width:32px!important;height:32px!important;max-width:32px!important;max-height:32px!important}
+.dm-avatar .avatar-art{width:30px!important;height:30px!important;max-width:30px!important;max-height:30px!important}
+.dm-message-avatar .avatar-art{width:18px!important;height:18px!important;max-width:18px!important;max-height:18px!important}
+.account-current-avatar .avatar-art{width:18px!important;height:18px!important;max-width:18px!important;max-height:18px!important}
+.account-avatar-choice .avatar-art{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important}
+.dm-image-preview{align-items:center!important;min-width:0}
+.dm-image-preview img{width:auto!important;height:auto!important;max-width:116px!important;max-height:82px!important;object-fit:contain!important;border-radius:8px!important}
+.dm-image-button{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;min-width:54px!important;min-height:40px!important;padding:7px 9px!important;border:1px solid var(--border)!important;border-radius:10px!important;background:var(--surface-2)!important;color:var(--text)!important;cursor:pointer!important}
+.dm-image-button input{display:none!important}
+.dm-image-button.is-uploading{opacity:.5;pointer-events:none}
+.dm-image-button.disabled{opacity:.45;pointer-events:none}
+.dm-composer textarea{min-width:0}
