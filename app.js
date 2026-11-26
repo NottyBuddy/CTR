@@ -565,7 +565,33 @@ $("globalSearch")?.addEventListener("input",e=>globalSearch(e.target.value));
 $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value||"";renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
 function setPendingDmImage(file){if(!file)return;if(!/^image\/(jpeg|png|webp|gif)$/i.test(file.type)){status("Choose a JPG, PNG, WEBP or GIF image.");return}if(file.size>8*1024*1024){status("Image must be 8 MB or smaller.");return}pendingDmImage=file;$("dmImagePreview").innerHTML=`<span>${esc(file.name||"Pasted image")} · ${(file.size/1024/1024).toFixed(1)} MB</span><button type="button" id="dmImageRemove" aria-label="Remove selected image">×</button>`;$("dmImagePreview").classList.remove("hidden");status("Image ready to send.")};
 $("dmImageInput").onchange=e=>{setPendingDmImage(e.target.files?.[0]);e.target.value=""};
-async function imageFromClipboard(clipboard){let file=[...(clipboard?.files||[])].find(f=>/^image\//i.test(f.type));if(!file){const item=[...(clipboard?.items||[])].find(i=>i.kind==="file"&&/^image\//i.test(i.type));file=item?.getAsFile()||null}if(file)return file;try{if(navigator.clipboard?.read){for(const entry of await navigator.clipboard.read()){for(const type of entry.types||[]){if(/^image\//i.test(type)){const blob=await entry.getType(type);return new File([blob],"pasted-image-"+Date.now()+"."+(type.split("/")[1]||"png").replace("jpeg","jpg"),{type})}}}}catch{}return null}document.addEventListener("paste",async e=>{const input=$("directInput");if(input.disabled||!(e.target===input||document.activeElement===input))return;let file=imageFromClipboard(e.clipboardData);if(file&&typeof file.then==="function")file=await file;if(!file)return;e.preventDefault();e.stopPropagation();if(!file.name)file=new File([file],"pasted-image-"+Date.now()+"."+(file.type.split("/")[1]||"png").replace("jpeg","jpg"),{type:file.type||"image/png"});setPendingDmImage(file)},true);
+async function imageFromClipboard(clipboard){
+ let file=[...(clipboard?.files||[])].find(f=>/^image\\//i.test(f.type));
+ if(!file){const item=[...(clipboard?.items||[])].find(i=>i.kind==="file"&&/^image\\//i.test(i.type));file=item?.getAsFile()||null}
+ if(file)return file;
+ try{
+  if(navigator.clipboard&&navigator.clipboard.read){
+   const entries=await navigator.clipboard.read();
+   for(const entry of entries){
+    for(const type of entry.types){
+     if(/^image\\//i.test(type)){
+      const blob=await entry.getType(type);
+      return new File([blob],"pasted-image-"+Date.now()+"."+(type.split("/")[1]||"png").replace("jpeg","jpg"),{type});
+     }
+    }
+   }
+  }
+ }catch(error){}
+ return null;
+}
+document.addEventListener("paste",async e=>{
+ const input=$("directInput");
+ if(input.disabled||!(e.target===input||document.activeElement===input))return;
+ const file=await imageFromClipboard(e.clipboardData);
+ if(!file)return;
+ e.preventDefault();e.stopPropagation();
+ setPendingDmImage(file);
+},true);
 $("dmImagePreview").onclick=e=>{if(e.target.closest("#dmImageRemove")){pendingDmImage=null;$("dmImageInput").value="";$("dmImagePreview").classList.add("hidden");$("dmImagePreview").innerHTML=""}};
 let pendingDmImage=null;
 $("directForm").onsubmit=async e=>{
