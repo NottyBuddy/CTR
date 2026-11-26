@@ -2,10 +2,10 @@ const { test, expect } = require("@playwright/test");
 
 test("GitHub Pages project URL responds on the canonical path", async ({ request }) => {
   const candidates = [
-    "https://nottybuddy.github.io/CTR/",
-    "https://nottybuddy.github.io/ctr/",
-    "https://nottybuddy.github.io/CTR/index.html",
-    "https://nottybuddy.github.io/ctr/index.html",
+    "https://nottybuddy.github.io/Orbit/",
+    "https://nottybuddy.github.io/orbit/",
+    "https://nottybuddy.github.io/Orbit/index.html",
+    "https://nottybuddy.github.io/orbit/index.html",
   ];
   const results = [];
   for (const url of candidates) {
@@ -18,6 +18,6 @@ test("GitHub Pages project URL responds on the canonical path", async ({ request
       results.push({ url, error: String(error) });
     }
   }
-  console.log("CTR_PAGES_URL_DIAGNOSTIC", JSON.stringify(results));
+  console.log("ORBIT_PAGES_URL_DIAGNOSTIC", JSON.stringify(results));
   expect(results.some(item => item.status === 200 && item.title.includes("IndiNext Orbit"))).toBeTruthy();
 });
