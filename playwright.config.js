@@ -8,7 +8,7 @@ module.exports = defineConfig({
   workers: 1,
   reporter: [["list"], ["html", { outputFolder: "playwright-report", open: "never" }]],
   use: {
-    baseURL: "https://nottybuddy.github.io/CTR/",
+    baseURL: "https://nottybuddy.github.io/Orbit/",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
