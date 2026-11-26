@@ -207,6 +207,7 @@ function openDirectConversation(id){
  if(!id||!user)return;
  const person=team.find(p=>String(p.user_id)===String(id));
  if(!person){status("This contact is not available in the team directory. Refresh and try again.");return}
+ if(selectedDirectRecipient!==String(person.user_id)&&pendingDmImage){pendingDmImage=null;$("dmImageInput").value="";$("dmImagePreview").classList.add("hidden");$("dmImagePreview").innerHTML=""}
  selectedDirectRecipient=String(person.user_id);
  selectedDirectKey=directPairKey(user.id,person.user_id);
  $("directRecipient").value=selectedDirectRecipient;
@@ -286,6 +287,7 @@ function renderDirect(){
   if(directHasMore)box.insertAdjacentHTML("afterbegin",'<button type="button" class="older-page-btn direct-older-page" data-load-older-direct>Load older messages</button>');
   if(near)requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);
   $("directInput").disabled=false;
+  $("dmImageInput").disabled=false;
   $("directForm").querySelector('button[type="submit"]').disabled=false;
   $("dmComposeHint").textContent="Private conversation";
  }else{
@@ -294,6 +296,7 @@ function renderDirect(){
   $("dmThreadHeader").innerHTML='<div class="dm-empty-avatar">✉</div><div><strong>CTR Messages</strong><small>Select a contact to view your conversation</small></div>';
   $("directNotes").innerHTML='<div class="dm-empty-thread"><div class="dm-empty-mark">✉</div><strong>Your conversations</strong><span>Select a team member from the contact list to open the chat.</span></div>';
   $("directInput").disabled=true;
+  $("dmImageInput").disabled=true;
   $("directForm").querySelector('button[type="submit"]').disabled=true;
   $("dmComposeHint").textContent="Choose a contact to start messaging.";
  }
