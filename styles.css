@@ -644,3 +644,57 @@ body:before{background-image:url("./Dark%20bg.png")!important;background-positio
 body.theme-light:before{background-image:url("./light%20bg.png")!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important;filter:none!important;}
 body:after{background:linear-gradient(180deg,rgba(7,7,15,.18),rgba(7,7,15,.34))!important;}
 body.theme-light:after{background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.30))!important;}
+
+
+/* Crisp theme wallpapers and the user's transparent logo asset. */
+body:before,
+body.theme-light:before{
+  filter:none!important;
+  -webkit-filter:none!important;
+  background-position:center center!important;
+  background-size:cover!important;
+  background-repeat:no-repeat!important;
+  opacity:1!important;
+}
+body:after,
+body.theme-light:after{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  opacity:1!important;
+}
+/* Keep the wallpaper sharp: translucent surfaces must not blur the image behind them. */
+.glass,.topbar,.chat,.right-panel,.auth-card,.notification-panel,.modal,.modal-card,
+body.theme-light .glass,body.theme-light .topbar,body.theme-light .chat,
+body.theme-light .right-panel,body.theme-light .auth-card,body.theme-light .notification-panel,
+body.theme-light .modal,body.theme-light .modal-card{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+/* Use the uploaded logo.png exactly as supplied, with no badge or background. */
+.brand-mark{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:48px!important;
+  height:48px!important;
+  flex:0 0 48px!important;
+  overflow:visible!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.brand-mark .ctr-emblem{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  filter:none!important;
+  box-shadow:none!important;
+}
+@media(max-width:700px){
+  .brand-mark{width:40px!important;height:40px!important;flex-basis:40px!important}
+}
