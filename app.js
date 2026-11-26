@@ -105,13 +105,15 @@ async function renderAgentDashboard(){
 }
 async function loadAdminAuditData(agentId){
  const request=++adminAuditRequest;
- const [directRows,groupRows,personalRows,followupRows]=await Promise.all([
-  fetchAllRows(()=>db.from("ctr_direct_messages").select("*").or("sender_id.eq."+agentId+",recipient_id.eq."+agentId).order("created_at",{ascending:true}).order("id",{ascending:true})),
+ const [sentRows,receivedRows,groupRows,personalRows,followupRows]=await Promise.all([
+  fetchAllRows(()=>db.from("ctr_direct_messages").select("*").eq("sender_id",agentId).order("created_at",{ascending:true}).order("id",{ascending:true})),
+  fetchAllRows(()=>db.from("ctr_direct_messages").select("*").eq("recipient_id",agentId).order("created_at",{ascending:true}).order("id",{ascending:true})),
   fetchAllRows(()=>db.from("ctr_group_notes").select("*").eq("user_id",agentId).order("created_at",{ascending:false})),
   fetchAllRows(()=>db.from("ctr_personal_notes").select("*").eq("user_id",agentId).order("created_at",{ascending:false})),
   fetchAllRows(()=>db.from("ctr_followups").select("*").eq("user_id",agentId).order("callback_at",{ascending:false}))
  ]);
  if(request!==adminAuditRequest)return;
+ const directRows=[...new Map([...sentRows,...receivedRows].map(m=>[m.id,m])).values()].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
  adminAuditData={agentId,direct:directRows,group:groupRows,personal:personalRows,followups:followupRows};
 }
 function renderAdminChatExplorer(){
