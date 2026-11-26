@@ -525,7 +525,7 @@ $("enableNotifications")?.addEventListener("click",enableNotifications);
 $("toggleNotificationPanel")?.addEventListener("click",async()=>{const panel=$("notificationPanel"),opening=panel.classList.contains("hidden");panel.classList.toggle("hidden",!opening);$("toggleNotificationPanel").setAttribute("aria-expanded",String(opening));if(opening)await loadNotifications()});
 $("markAllNotifications")?.addEventListener("click",markAllNotificationsRead);
 $("notificationList")?.addEventListener("click",e=>{const row=e.target.closest("[data-notification-id]");if(row){const item=notifications.find(n=>n.id===row.dataset.notificationId);openNotification(item)}});
-$("themeToggle")?.addEventListener("click",()=>setTheme(document.body.classList.contains("theme-light")?"dark":"light"));
+
 $("exportCrmData")?.addEventListener("click",()=>{if(isAdmin()&&confirm("Export all CRM records, including personal notes, direct messages and customer contact details, to a CSV file on this device? Keep the file private."))exportAllCrmData()});
 $("directRecipient").onchange=()=>{selectedDirectRecipient=$("directRecipient").value||"";selectedDirectKey=selectedDirectRecipient?directPairKey(user.id,selectedDirectRecipient):"";renderDirect()};
 $("dmNewRecipient").addEventListener("change",e=>{const id=e.target.value;if(!id)return;openDirectConversation(id);$("directInput").focus()});
