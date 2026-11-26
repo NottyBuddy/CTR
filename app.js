@@ -566,15 +566,15 @@ $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();ren
 function setPendingDmImage(file){if(!file)return;if(!/^image\/(jpeg|png|webp|gif)$/i.test(file.type)){status("Choose a JPG, PNG, WEBP or GIF image.");return}if(file.size>8*1024*1024){status("Image must be 8 MB or smaller.");return}pendingDmImage=file;$("dmImagePreview").innerHTML=`<span>${esc(file.name||"Pasted image")} · ${(file.size/1024/1024).toFixed(1)} MB</span><button type="button" id="dmImageRemove" aria-label="Remove selected image">×</button>`;$("dmImagePreview").classList.remove("hidden");status("Image ready to send.")};
 $("dmImageInput").onchange=e=>{setPendingDmImage(e.target.files?.[0]);e.target.value=""};
 async function imageFromClipboard(clipboard){
- let file=[...(clipboard?.files||[])].find(f=>/^image\\//i.test(f.type));
- if(!file){const item=[...(clipboard?.items||[])].find(i=>i.kind==="file"&&/^image\\//i.test(i.type));file=item?.getAsFile()||null}
+ let file=[...(clipboard?.files||[])].find(f=>/^image\//i.test(f.type));
+ if(!file){const item=[...(clipboard?.items||[])].find(i=>i.kind==="file"&&/^image\//i.test(i.type));file=item?.getAsFile()||null}
  if(file)return file;
  try{
   if(navigator.clipboard&&navigator.clipboard.read){
    const entries=await navigator.clipboard.read();
    for(const entry of entries){
     for(const type of entry.types){
-     if(/^image\\//i.test(type)){
+     if(/^image\//i.test(type)){
       const blob=await entry.getType(type);
       return new File([blob],"pasted-image-"+Date.now()+"."+(type.split("/")[1]||"png").replace("jpeg","jpg"),{type});
      }
