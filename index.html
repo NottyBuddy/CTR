@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#100d1b"><title>IndiNext Orbit — Sales Workspace</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=action-controls-footer-20261126a">
+<link rel="stylesheet" href="styles.css?v=group-notes-chat-layout-20261126b">
 <!-- Supabase is loaded asynchronously by app.js with CDN fallbacks. -->
 </head>
 <body>
@@ -44,7 +44,7 @@
 <div id="connectionBanner" class="connection-banner">Connecting to shared records…</div><div class="search-toolbar"><input id="groupSearch" type="search" placeholder="Search customer, phone, agent or note"><input id="groupDate" type="date"><button id="clearFilters" type="button" class="refresh-btn">Clear</button></div>
 <div id="notes" class="notes"></div>
 
-<form id="noteForm" class="composer"><textarea id="noteInput" rows="3" placeholder="Paste CRM notes here…" required></textarea><div class="composer-foot"><span>Only share information appropriate for the team.</span><button class="send-btn" type="submit">Send update <b>↗</b></button></div></form>
+<form id="noteForm" class="composer"><textarea id="noteInput" rows="1" placeholder="Paste CRM notes here…" required></textarea><div class="composer-foot"><button class="send-btn" type="submit" aria-label="Send update" title="Send update"><b>➤</b></button></div></form>
 
 </section>
 <section id="dashboardView" class="notes-view hidden"><div class="chat-head"><div><div class="eyebrow">TEAM PERFORMANCE</div><h2>Agent Dashboard</h2><p>Notes and callback activity by agent. Callback counts are based on the agent who created the follow-up.</p></div><button id="exportCrmData" class="message-action hidden" type="button">Export CRM data (Admin)</button></div><div class="dashboard-filters"><label for="dashboardFrom">From<input id="dashboardFrom" type="date"></label><label for="dashboardTo">To<input id="dashboardTo" type="date"></label><button id="dashboardReset" class="message-action" type="button">Reset range</button></div><div id="dashboardSummary" class="dashboard-summary" aria-live="polite"></div><div id="agentDashboard" class="agent-dashboard"><div class="empty-state">Loading agent activity…</div></div><section id="agentChatAudit" class="agent-chat-audit hidden"></section></section>
