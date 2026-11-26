@@ -176,8 +176,11 @@ test("Light Theme wallpaper is rendered behind the app surfaces", async ({ page,
   // The public sign-in page hides the theme control; apply the same theme class
   // that the app's setTheme() function applies after sign-in.
   await page.evaluate(() => {
-    document.body.classList.add("theme-light");
-    document.documentElement.style.colorScheme = "light";
+    if (typeof setTheme === "function") setTheme("light");
+    else {
+      document.body.classList.add("theme-light");
+      document.documentElement.style.colorScheme = "light";
+    }
   });
 
   const rendered = await page.evaluate(async () => {
