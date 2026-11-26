@@ -202,24 +202,23 @@ function cleanAvatarPng(img){
   const w=img.naturalWidth,h=img.naturalHeight,canvas=document.createElement("canvas"),ctx=canvas.getContext("2d",{willReadFrequently:true});
   canvas.width=w;canvas.height=h;ctx.drawImage(img,0,0);
   const frame=ctx.getImageData(0,0,w,h),px=frame.data,bins=new Map();
-  const addSample=(x,y)=>{const p=(y*w+x)*4,r=px[p],g=px[p+1],b=px[p+2],a=px[p+3];if(a<200||Math.max(r,g,b)-Math.min(r,g,b)>34||Math.min(r,g,b)<90)return;const key=[r>>4,g>>4,b>>4].join(",");const v=bins.get(key)||{n:0,r:0,g:0,b:0};v.n++;v.r+=r;v.g+=g;v.b+=b;bins.set(key,v)};
-  const band=Math.max(2,Math.min(10,Math.round(Math.min(w,h)*.035)));
-  for(let y=0;y<band;y++)for(let x=0;x<w;x++){addSample(x,y);addSample(x,h-1-y)}
-  for(let x=0;x<band;x++)for(let y=band;y<h-band;y++){addSample(x,y);addSample(w-1-x,y)}
+  const sample=(x,y)=>{const p=(y*w+x)*4,r=px[p],g=px[p+1],b=px[p+2],hi=Math.max(r,g,b),lo=Math.min(r,g,b);if(px[p+3]<200||hi-lo>22||lo<105||hi>248)return;const key=[r>>3,g>>3,b>>3].join(":");const v=bins.get(key)||{n:0,r:0,g:0,b:0};v.n++;v.r+=r;v.g+=g;v.b+=b;bins.set(key,v)};
+  const band=Math.max(3,Math.min(12,Math.round(Math.min(w,h)*.04)));
+  for(let y=0;y<band;y++)for(let x=0;x<w;x++){sample(x,y);sample(x,h-1-y)}
+  for(let x=0;x<band;x++)for(let y=band;y<h-band;y++){sample(x,y);sample(w-1-x,y)}
   const palette=[...bins.values()].sort((a,b)=>b.n-a.n).slice(0,2).map(v=>({r:v.r/v.n,g:v.g/v.n,b:v.b/v.n}));
-  if(!palette.length){img.dataset.avatarCleaned="1";delete img.dataset.avatarCleaning;return}
-  const matches=new Uint8Array(w*h),seen=new Uint8Array(w*h),queue=new Int32Array(w*h);
-  for(let n=0;n<w*h;n++){const p=n*4;if(px[p+3]<200)continue;const r=px[p],g=px[p+1],b=px[p+2];if(Math.max(r,g,b)-Math.min(r,g,b)>42)continue;if(palette.some(c=>Math.max(Math.abs(r-c.r),Math.abs(g-c.g),Math.abs(b-c.b))<=25))matches[n]=1}
-  let head=0,tail=0;
-  const seed=(x,y)=>{if(x<0||y<0||x>=w||y>=h)return;const n=y*w+x;if(matches[n]&&!seen[n]){seen[n]=1;queue[tail++]=n}};
-  for(let x=0;x<w;x++){seed(x,0);seed(x,h-1)}
-  for(let y=1;y<h-1;y++){seed(0,y);seed(w-1,y)}
-  while(head<tail){const n=queue[head++],x=n%w,y=(n/w)|0;px[n*4+3]=0;seed(x-1,y);seed(x+1,y);seed(x,y-1);seed(x,y+1)}
-  let minX=w,minY=h,maxX=-1,maxY=-1;
-  for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(px[(y*w+x)*4+3]>12){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y}
-  if(maxX<minX||maxY<minY){img.dataset.avatarCleaned="1";delete img.dataset.avatarCleaning;return}
+  if(!palette.length){delete img.dataset.avatarCleaning;img.dataset.avatarCleaned="1";return}
+  let minX=w,minY=h,maxX=-1,maxY=-1,removed=0;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+   const p=(y*w+x)*4;if(px[p+3]<10)continue;
+   const r=px[p],g=px[p+1],b=px[p+2],hi=Math.max(r,g,b),lo=Math.min(r,g,b);
+   const isBackdrop=hi-lo<=24&&palette.some(c=>Math.max(Math.abs(r-c.r),Math.abs(g-c.g),Math.abs(b-c.b))<=16);
+   if(isBackdrop){px[p+3]=0;removed++;continue}
+   if(px[p+3]>12){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y}
+  }
+  if(maxX<minX||maxY<minY||removed<w*h*.02){delete img.dataset.avatarCleaning;img.dataset.avatarCleaned="1";return}
   ctx.putImageData(frame,0,0);
-  const bw=maxX-minX+1,bh=maxY-minY+1,pad=Math.max(2,Math.round(Math.max(bw,bh)*.045)),side=Math.max(bw,bh)+pad*2;
+  const bw=maxX-minX+1,bh=maxY-minY+1,pad=Math.max(3,Math.round(Math.max(bw,bh)*.06)),side=Math.max(bw,bh)+pad*2;
   const output=document.createElement("canvas");output.width=side;output.height=side;
   output.getContext("2d").drawImage(canvas,minX,minY,bw,bh,pad+(side-2*pad-bw)/2,pad+(side-2*pad-bh)/2,bw,bh);
   img.dataset.avatarCleaned="1";delete img.dataset.avatarCleaning;img.src=output.toDataURL("image/png");
@@ -234,7 +233,7 @@ function setupAccountSettings(){
  if(!$("accountSettingsModal")){const modal=document.createElement("div");modal.id="accountSettingsModal";modal.className="account-settings-modal hidden";modal.innerHTML='<section class="account-settings-card" role="dialog" aria-modal="true" aria-labelledby="accountSettingsTitle"><button type="button" class="account-settings-close" aria-label="Close">×</button><div class="eyebrow">YOUR PROFILE</div><h3 id="accountSettingsTitle">Choose your avatar to continue</h3><p id="avatarGateMessage">Each avatar can belong to only one team member. You may select/change your avatar twice total.</p><div id="accountAvatarStatus" class="account-avatar-status"></div><div id="accountAvatarChoices" class="account-avatar-choices"></div><div class="account-settings-foot">Your avatar and name appear in your private conversations. Your choice is shared with the team.</div></section>';document.body.append(modal);modal.addEventListener("click",async e=>{if((e.target===modal||e.target.closest(".account-settings-close"))&&!avatarGateActive)modal.classList.add("hidden");const pick=e.target.closest("[data-avatar]");if(pick&&user){const avatar=pick.dataset.avatar;if(avatarUsedByOther(avatar)){status("That avatar is already in use by another team member.");return}pick.disabled=true;const {data,error}=await db.rpc("ctr_choose_avatar",{p_avatar:avatar});if(error){status(error.message||"Could not save avatar choice.");pick.disabled=false;return}try{await loadAvatarProfiles()}catch{}renderAccountAvatars();renderDirect();status("Avatar saved.");if(avatarFor(user.id)){avatarGateActive=false;modal.classList.add("hidden");$("appView").classList.remove("avatar-gated");}}})}
  renderAccountAvatars()
 }
-function renderAccountAvatars(){if(!user)return;const selected=avatarFor(user.id),used=avatarSelectionsUsed(),grid=$("accountAvatarChoices");if(grid)grid.innerHTML=CTR_AVATARS.map(a=>{const taken=avatarUsedByOther(a),isSelected=a===selected,disabled=taken||(!isSelected&&used>=2),src=CTR_AVATAR_IMAGES[a];return '<button type="button" class="account-avatar-choice '+(isSelected?"selected":"")+(taken?" taken":"")+'" data-avatar="'+esc(a)+'" '+(disabled?'disabled':'')+' aria-label="'+(taken?"Already taken":isSelected?"Selected avatar":"Choose avatar")+'" title="'+(taken?"Already selected by another member":isSelected?"Your current avatar":"Available")+'"><img class="avatar-art" src="./'+src+'" alt="" aria-hidden="true" loading="lazy">'+(taken?'<span class="avatar-taken-mark">×</span>':isSelected?'<span class="avatar-selected-mark">✓</span>':"")+'</button>'}).join("");const statusBox=$("accountAvatarStatus");if(statusBox)statusBox.innerHTML=selected?'<strong>Current avatar:</strong> <span>· '+used+'/2 selections used</span>': '<strong>No avatar selected yet.</strong> <span>Choose one available avatar to get started · '+used+'/2 selections used</span>';const current=document.querySelector(".account-current-avatar");if(current)current.innerHTML=directAvatar(displayName(user.email),user.id)}
+function renderAccountAvatars(){if(!user)return;const selected=avatarFor(user.id),used=avatarSelectionsUsed(),grid=$("accountAvatarChoices");if(grid)grid.innerHTML=CTR_AVATARS.map(a=>{const taken=avatarUsedByOther(a),isSelected=a===selected,disabled=taken||(!isSelected&&used>=2),src=CTR_AVATAR_IMAGES[a];return '<button type="button" class="account-avatar-choice '+(isSelected?"selected":"")+(taken?" taken":"")+'" data-avatar="'+esc(a)+'" '+(disabled?'disabled':'')+' aria-label="'+(taken?"Already taken":isSelected?"Selected avatar":"Choose avatar")+'" title="'+(taken?"Already selected by another member":isSelected?"Your current avatar":"Available")+'"><img class="avatar-art" src="./'+src+'" alt="" aria-hidden="true" loading="lazy" onload="window.cleanAvatarPng(this)">'+(taken?'<span class="avatar-taken-mark">×</span>':isSelected?'<span class="avatar-selected-mark">✓</span>':"")+'</button>'}).join("");const statusBox=$("accountAvatarStatus");if(statusBox)statusBox.innerHTML=selected?'<strong>Current avatar:</strong> <span>· '+used+'/2 selections used</span>': '<strong>No avatar selected yet.</strong> <span>Choose one available avatar to get started · '+used+'/2 selections used</span>';const current=document.querySelector(".account-current-avatar");if(current)current.innerHTML=directAvatar(displayName(user.email),user.id)}
 function openDirectConversation(id){
  if(!id||!user)return;
  const person=team.find(p=>String(p.user_id)===String(id));
