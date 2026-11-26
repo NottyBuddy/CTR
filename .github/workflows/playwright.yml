@@ -37,7 +37,7 @@ jobs:
           # AI panel was intentionally removed from the app; do not gate deployment on it.
           grep -q "dashboardFrom" app.js
           grep -q "toggleNotificationPanel" app.js
-          grep -q "themeToggle" index.html
+          grep -q "themePull" index.html
           grep -q "exportCrmData" app.js
           for attempt in $(seq 1 24); do
             status=$(curl --silent --show-error --output /tmp/ctr-home.html --write-out "%{http_code}" https://nottybuddy.github.io/Orbit/ 2>/dev/null || true)
