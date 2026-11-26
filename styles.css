@@ -539,5 +539,8 @@ select:focus-visible{
 #followupsView .followup-queue-panel{padding-top:8px!important}
 #followupsView #followupCount{display:inline-flex;align-items:center;justify-content:center;min-width:20px;min-height:20px}
 @media(max-width:700px){
- #groupView #noteForm #noteInput{height:64px!important;min-height:64px!important;max-height:120px!important}
+ #groupView #noteForm #noteInput{height:64px!important;min-height:64px!important;max-height:120px!important;overflow-y:auto!important;scrollbar-width:none!important;-ms-overflow-style:none!important}
 }
+/* Keep textarea scrolling functional without displaying a scrollbar */
+#groupView #noteForm #noteInput{overflow-y:auto!important;scrollbar-width:none!important;-ms-overflow-style:none!important}
+#groupView #noteForm #noteInput::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
