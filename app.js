@@ -474,7 +474,7 @@ async function ensureSupabaseLibrary(){
 }
 let authBootPromise=null;
 async function sessionIsActive(){
- try{const {data,error}=await db.rpc("ctr_session_is_active");if(error)throw error;return data===true}catch(e){console.warn("Session validation failed",e);return false}
+ try{const {data,error}=await db.rpc("ctr_session_is_active");if(error)throw error;if(data!==true)return false;const {data:member,error:memberError}=await db.from("ctr_team_directory").select("user_id").limit(1);if(memberError)throw memberError;return Array.isArray(member)&&member.length>0}catch(e){console.warn("Session/team validation failed",e);return false}
 }
 async function boot(){
  status("Connecting to sign-in service…",true);$("authRetry")?.classList.add("hidden");
