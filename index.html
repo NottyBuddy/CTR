@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#100d1b"><title>IndiNext Orbit — Sales Workspace</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=orbit-transparent-state-polish-20261126e">
+<link rel="stylesheet" href="styles.css?v=remove-redundant-headings-composer48-20261126f">
 <!-- Supabase is loaded asynchronously by app.js with CDN fallbacks. -->
 </head>
 <body>
@@ -40,21 +40,21 @@
 <div class="workspace">
 <section class="chat glass">
 <section id="groupView" class="notes-view">
-<div class="chat-head"><div><div class="eyebrow">SHARED CHANNEL</div><h2>Group Notes <span class="online-pill">● LIVE</span></h2><p>Updates shared with every signed-in team member.</p></div><div class="head-count">◉ <span id="noteCount">0</span> records</div></div>
+
 <div id="connectionBanner" class="connection-banner">Connecting to shared records…</div><div class="search-toolbar"><input id="groupSearch" type="search" placeholder="Search customer, phone, agent or note"><input id="groupDate" type="date"><button id="clearFilters" type="button" class="refresh-btn">Clear</button></div>
 <div id="notes" class="notes"></div>
 
 <form id="noteForm" class="composer"><textarea id="noteInput" rows="1" placeholder="Paste CRM notes here…" required></textarea><div class="composer-foot"><button class="send-btn" type="submit" aria-label="Send update" title="Send update"><b>➤</b></button></div></form>
 
 </section>
-<section id="dashboardView" class="notes-view hidden"><div class="chat-head"><div><div class="eyebrow">TEAM PERFORMANCE</div><h2>Agent Dashboard</h2><p>Notes and callback activity by agent. Callback counts are based on the agent who created the follow-up.</p></div><button id="exportCrmData" class="message-action hidden" type="button">Export CRM data (Admin)</button></div><div class="dashboard-filters"><label for="dashboardFrom">From<input id="dashboardFrom" type="date"></label><label for="dashboardTo">To<input id="dashboardTo" type="date"></label><button id="dashboardReset" class="message-action" type="button">Reset range</button></div><div id="dashboardSummary" class="dashboard-summary" aria-live="polite"></div><div id="agentDashboard" class="agent-dashboard"><div class="empty-state">Loading agent activity…</div></div><section id="agentChatAudit" class="agent-chat-audit hidden"></section></section>
-<section id="followupsView" class="notes-view hidden"><section class="followup-panel followup-queue-panel"><div class="eyebrow">CALLBACK QUEUE</div><h3>Pending Follow-ups <span id="followupCount" class="unread-badge">0</span></h3><p>Scheduled customer callbacks for the team.</p><button id="newFollowupBtn" class="send-btn followup-create-btn" type="button">＋ Create Follow-up</button><form id="followupForm" class="followup-form hidden"><input id="followupCustomer" placeholder="Customer name" required><input id="followupPhone" type="tel" placeholder="Phone number" required><input id="followupAt" type="datetime-local" required><input id="followupDetails" placeholder="Callback context (optional)"><button class="send-btn" type="submit">Schedule callback ↗</button></form><div id="followupList" class="followup-list">Loading follow-ups…</div></section></section><section id="personalView" class="notes-view hidden">
+<section id="dashboardView" class="notes-view hidden"><div class="dashboard-export"><button id="exportCrmData" class="message-action hidden" type="button">Export CRM data (Admin)</button></div><div class="dashboard-filters"><label for="dashboardFrom">From<input id="dashboardFrom" type="date"></label><label for="dashboardTo">To<input id="dashboardTo" type="date"></label><button id="dashboardReset" class="message-action" type="button">Reset range</button></div><div id="dashboardSummary" class="dashboard-summary" aria-live="polite"></div><div id="agentDashboard" class="agent-dashboard"><div class="empty-state">Loading agent activity…</div></div><section id="agentChatAudit" class="agent-chat-audit hidden"></section></section>
+<section id="followupsView" class="notes-view hidden"><section class="followup-panel followup-queue-panel"><span id="followupCount" class="unread-badge" aria-label="Pending follow-ups">0</span><button id="newFollowupBtn" class="send-btn followup-create-btn" type="button">＋ Create Follow-up</button><form id="followupForm" class="followup-form hidden"><input id="followupCustomer" placeholder="Customer name" required><input id="followupPhone" type="tel" placeholder="Phone number" required><input id="followupAt" type="datetime-local" required><input id="followupDetails" placeholder="Callback context (optional)"><button class="send-btn" type="submit">Schedule callback ↗</button></form><div id="followupList" class="followup-list">Loading follow-ups…</div></section></section><section id="personalView" class="notes-view hidden">
 <div class="chat-head"><div><div class="eyebrow">PRIVATE SPACE</div><h2>Personal Notes</h2><p>Your personal notes. team admin can review these for team oversight.</p></div><div class="head-count">◉ <span id="personalCount">0</span> notes</div></div>
 <div class="search-toolbar"><input id="personalSearch" type="search" placeholder="Search personal notes"></div><div id="personalNotes" class="notes"></div><section id="moderationPanel" class="moderation-panel hidden"><h3>Admin moderation history</h3><div id="moderationLog" class="notes"></div></section>
 <form id="personalForm" class="composer"><textarea id="personalInput" rows="3" placeholder="Add a private callback note…" required></textarea><div class="composer-foot"><span>Private to you; visible to team admin.</span><button class="send-btn" type="submit">Save note <b>↗</b></button></div></form>
 </section>
 <section id="directView" class="notes-view hidden direct-inbox-view">
-<div class="inbox-heading"><div><div class="eyebrow">PRIVATE CONVERSATIONS</div><h2>Messages</h2><p>Private team conversations · visible to participants and team admin</p></div><div class="head-count"><span id="directCount">0</span> messages</div></div>
+
 <div class="dm-inbox">
 <aside class="dm-list-pane">
 <div class="dm-list-tools"><select id="dmNewRecipient" class="dm-new-recipient" aria-label="Start a new conversation"><option value="">＋ New message</option></select><input id="directSearch" type="search" placeholder="Search conversations…" aria-label="Search conversations"><div class="dm-filter-row"><button class="dm-filter active" data-dm-filter="all" type="button">All</button><button class="dm-filter" data-dm-filter="unread" type="button">Unread</button></div></div>
