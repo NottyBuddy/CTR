@@ -603,3 +603,11 @@ body.theme-light:after{background:linear-gradient(180deg,rgba(248,248,255,.12),r
   .followup-info>span{grid-column:2;text-align:right}
   .followup-actions{width:100%}
 }
+
+/* FINAL wallpaper fix: use the selected architectural scene in both themes, with light mode brightened. */
+body:before{background-image:url("orbit-dark-wallpaper.svg")!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important;}
+body:after{background:rgba(7,7,15,.04)!important;}
+body.theme-light:before{background-image:url("orbit-dark-wallpaper.svg")!important;filter:brightness(1.58) saturate(.72) contrast(.86)!important;}
+body.theme-light:after{background:rgba(255,255,255,.04)!important;}
+.glass,.topbar,.chat,.right-panel,.auth-card,.notification-panel,.modal,.modal-card{background:rgba(17,15,28,.22)!important;border-color:rgba(205,190,255,.13)!important;backdrop-filter:blur(5px) saturate(120%)!important;-webkit-backdrop-filter:blur(5px) saturate(120%)!important;}
+body.theme-light .glass,body.theme-light .topbar,body.theme-light .chat,body.theme-light .right-panel,body.theme-light .auth-card,body.theme-light .notification-panel,body.theme-light .modal,body.theme-light .modal-card{background:rgba(248,249,255,.20)!important;border-color:rgba(89,112,150,.14)!important;backdrop-filter:blur(5px) saturate(130%)!important;-webkit-backdrop-filter:blur(5px) saturate(130%)!important;}
