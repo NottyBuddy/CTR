@@ -287,3 +287,61 @@ button{appearance:none!important;-webkit-appearance:none!important;font-family:i
 @media(max-width:700px){
  #directNotes .dm-message{max-width:94%!important}
 }
+
+
+/* Global visual reset requested: no card panels, fills, borders or boxed buttons */
+:root{--panel-transparent:transparent}
+.topbar,.chat,.workspace,.notes-view,.app-view,.right-panel,
+.dm-list-pane,.dm-thread-pane,.dm-thread-header,.dm-compose-wrap,
+.followup-panel,.followup-form,.followup-item,.agent-card,.agent-chat-audit,
+.dashboard-filters,.dashboard-summary,.dashboard-total-grid>div,.agent-metrics>div,
+.account-settings-card,.account-avatar-choices,.account-avatar-choice,
+.notification-panel,.global-search-results,.auth-card,.moderation-panel,
+.note,.dm-message,.message-card,.stat-card,.summary-card,.metric-card,
+.panel,.card,.glass,.glass-card,.content-card,.section-card,.widget-card{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+  outline:0!important;
+}
+.topbar,.chat,.dm-list-pane,.dm-thread-pane,.followup-panel,.agent-card,
+.agent-chat-audit,.dashboard-summary,.account-settings-card,.notification-panel,
+.global-search-results,.auth-card,.panel,.card,.glass,.glass-card,
+.content-card,.section-card,.widget-card,.note,.dm-message{
+  border:0!important;
+}
+button,.top-nav-btn,.header-icon-btn,.account-settings-btn,.dm-filter,
+.message-action,.delete-note,.refresh-btn,.dm-copy-btn,.reaction-btn,
+.note-actions button,.message-actions button,.note-tools button,
+.dm-message-actions button,.followup-actions button,.send-btn,.dm-send-btn,
+.followup-create-btn,.account-settings-close,.account-avatar-choice{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  outline:0!important;
+}
+button:hover,.top-nav-btn:hover,.header-icon-btn:hover,.account-settings-btn:hover,
+.dm-filter:hover,.message-action:hover,.delete-note:hover,.refresh-btn:hover,
+.dm-copy-btn:hover,.reaction-btn:hover,.note-actions button:hover,
+.message-actions button:hover,.note-tools button:hover,.dm-message-actions button:hover,
+.followup-actions button:hover,.send-btn:hover,.dm-send-btn:hover,
+.followup-create-btn:hover,.account-settings-close:hover,.account-avatar-choice:hover{
+  background:transparent!important;
+  background-color:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  transform:none!important;
+  filter:none!important;
+}
+.top-nav-btn.active,.dm-filter.active,.dm-conversation:hover,.dm-conversation.selected,
+.account-avatar-choice.selected,.agent-card-select.selected{
+  background:transparent!important;
+  box-shadow:none!important;
+  border-color:transparent!important;
+}
+.dm-conversation{border:0!important}
+.note,.dm-message,.agent-card,.followup-item{transition:none!important}
