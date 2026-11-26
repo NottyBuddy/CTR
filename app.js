@@ -487,7 +487,7 @@ async function boot(){
  }
  if(data.session){if(await sessionIsActive())await enter(data.session.user);else{await db.auth.signOut({scope:"local"});status("Your previous session has expired. Please sign in again.",true)}}
 }
-let authListenerReady=false;
+let authListenerReady=false,enteredUserId="";
 async function connectAuth(){
  if(db&&authListenerReady)return true;
  if(!authBootPromise)authBootPromise=boot().finally(()=>{authBootPromise=null});
