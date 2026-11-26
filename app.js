@@ -222,6 +222,8 @@ function openDirectConversation(id){
  renderDirect();
  markSeen("direct");
  $("directInput").disabled=false;
+ $("dmImageInput").disabled=false;
+ $("dmImageButton").classList.remove("disabled");
  $("directForm").querySelector('button[type="submit"]').disabled=false;
  $("dmComposeHint").textContent="Private conversation";
  $("directInput").focus();
