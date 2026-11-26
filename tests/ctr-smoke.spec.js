@@ -137,6 +137,7 @@ test("authenticated admin can inspect agent conversations and activity", async (
   await page.locator("#password").fill(password);
   await page.locator("#authSubmit").click();
   await expect(page.locator("#appView")).toBeVisible({ timeout: 30000 });
+  await completeAvatarGate(page);
   await page.locator('[data-view="dashboard"]').click();
   await expect(page.locator("#dashboardView")).toBeVisible();
   await expect(page.locator("#agentDashboard")).toBeVisible();
