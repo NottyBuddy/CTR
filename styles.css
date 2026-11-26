@@ -151,3 +151,27 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:.78}input:fo
 .avatar-taken-mark,.avatar-selected-mark{position:absolute;right:2px;bottom:2px;width:15px;height:15px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:900;background:var(--danger);color:#fff}
 .avatar-selected-mark{background:var(--success);color:#13231d}
 @media(max-width:700px){.dm-message{max-width:94%;padding:9px}.dm-message-person strong{font-size:10px}.dm-avatar-large{width:37px;height:37px;flex-basis:37px}}
+
+
+/* Consistent polished action controls across every module */
+button{appearance:none!important;-webkit-appearance:none!important;font-family:inherit!important;text-decoration:none!important}
+.message-action,.delete-note,.refresh-btn,.dm-copy-btn,.note-tools button,.note-actions button,.message-actions button,.followup-actions button{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;
+ min-height:29px!important;padding:6px 11px!important;border:1px solid var(--border)!important;border-radius:9px!important;
+ background:var(--surface-3)!important;color:var(--muted)!important;font-size:10px!important;font-weight:600!important;line-height:1.2!important;box-shadow:none!important
+}
+.message-action:hover,.delete-note:hover,.refresh-btn:hover,.dm-copy-btn:hover,.note-tools button:hover,.note-actions button:hover,.message-actions button:hover,.followup-actions button:hover{
+ background:var(--accent-soft)!important;border-color:var(--accent)!important;color:var(--accent-2)!important;transform:none!important
+}
+.delete-note{color:var(--danger)!important;border-color:rgba(255,130,156,.22)!important}
+.delete-note:hover{background:rgba(255,130,156,.10)!important;border-color:var(--danger)!important;color:var(--danger)!important}
+.note-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.note-top .note-time{margin-right:auto}
+.note-tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
+.reaction-row{display:flex;align-items:center;gap:7px;margin-top:9px}
+.reaction-btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;min-width:48px!important;min-height:27px!important;padding:4px 9px!important;border:1px solid var(--border)!important;border-radius:999px!important;background:var(--surface-3)!important;color:var(--muted)!important;font-size:11px!important;font-weight:600!important}
+.reaction-btn:hover,.reaction-btn.reacted{background:var(--accent-soft)!important;border-color:var(--accent)!important;color:var(--accent-2)!important;transform:none!important}
+.dm-message>.message-action,.dm-message>.delete-note{margin-top:9px;margin-right:5px}.dm-copy-btn{margin-top:7px!important;width:auto!important}
+.composer{flex:0 0 auto!important;margin-top:10px!important;padding:10px 0 0!important;border:0!important;border-top:1px solid var(--border)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.composer textarea{min-height:70px!important;padding:9px 11px!important;border:1px solid var(--border)!important;border-radius:11px!important;background:var(--surface-2)!important}
+.composer-foot{border-top:0!important;padding-top:8px!important}
+@media(max-width:700px){.note-top{gap:5px}.message-action,.delete-note,.refresh-btn,.dm-copy-btn,.note-tools button{min-height:28px!important;padding:5px 9px!important}.composer{padding-top:8px!important}}
