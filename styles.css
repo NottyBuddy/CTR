@@ -4,10 +4,10 @@
 *{box-sizing:border-box}
 html{min-height:100%;scroll-behavior:smooth}
 body{margin:0;min-height:100svh;overflow-x:hidden;background:transparent;color:var(--text);font:14px/1.5 "DM Sans",system-ui,sans-serif;letter-spacing:.01em}
-body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:url("orbit-dark-wallpaper.svg") center/cover no-repeat}
+body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:none center/cover no-repeat}
 body:after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(8,8,15,.03),rgba(8,8,15,.08))}
 body.theme-light{color-scheme:light;--bg:#f7f6fc;--text:#27243c;--muted:#77748f;--surface:rgba(255,255,255,.76);--surface-2:rgba(255,255,255,.9);--surface-3:rgba(250,248,255,.96);--border:rgba(107,91,157,.14);--shadow:0 16px 48px rgba(65,49,111,.09);--accent:#8c75d9;--accent-2:#a18ae9;--accent-soft:rgba(145,122,218,.13)}
-body.theme-light:before{background:url("orbit-light-wallpaper.svg") center/cover no-repeat}
+body.theme-light:before{background:none center/cover no-repeat}
 body.theme-light:after{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.05))}
 button,input,textarea,select{font:inherit}button{color:inherit;cursor:pointer;border:0;-webkit-tap-highlight-color:transparent;transition:transform .18s var(--ease),background .18s,border-color .18s,color .18s,box-shadow .18s}button:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
 :focus-visible{outline:2px solid var(--accent-2)!important;outline-offset:2px}
@@ -569,9 +569,9 @@ select:focus-visible{
 @media(max-width:520px){.agent-activity-cards{grid-template-columns:1fr 1fr;gap:8px}.agent-activity-card{min-height:128px;padding:12px 8px!important;grid-template-columns:24px 1fr auto;gap:6px}.agent-activity-card strong{font-size:12px}.agent-activity-card small{font-size:10px}.agent-record-meta{align-items:flex-start;flex-direction:column;gap:4px}}
 
 /* Orbit facade scene + logo concept test: keep the original CTR emblem file untouched. */
-body:before{background-image:url("orbit-dark-wallpaper.svg");background-position:center center;background-size:cover;}
+body:before{background-image:none;background-position:center center;background-size:cover;}
 body:after{background:linear-gradient(180deg,rgba(8,7,17,.12),rgba(8,7,17,.28));}
-body.theme-light:before{background-image:url("orbit-light-wallpaper.svg");background-position:center center;background-size:cover;}
+body.theme-light:before{background-image:none;background-position:center center;background-size:cover;}
 body.theme-light:after{background:linear-gradient(180deg,rgba(248,248,255,.12),rgba(248,248,255,.2));}
 .glass,.topbar,.chat,.right-panel,.auth-card,.notification-panel,.modal,.modal-card{backdrop-filter:blur(18px) saturate(125%);-webkit-backdrop-filter:blur(18px) saturate(125%);}
 .brand-mark{width:clamp(48px,4vw,64px);height:clamp(48px,4vw,64px);flex-basis:clamp(48px,4vw,64px);border-radius:0;}
@@ -605,9 +605,9 @@ body.theme-light:after{background:linear-gradient(180deg,rgba(248,248,255,.12),r
 }
 
 /* FINAL wallpaper fix: use the selected architectural scene in both themes, with light mode brightened. */
-body:before{background-image:url("orbit-dark-wallpaper.svg")!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important;}
+body:before{background-image:none!important;background-position:center center!important;background-size:cover!important;background-repeat:no-repeat!important;}
 body:after{background:rgba(7,7,15,.04)!important;}
-body.theme-light:before{background-image:url("orbit-dark-wallpaper.svg")!important;filter:brightness(1.58) saturate(.72) contrast(.86)!important;}
+body.theme-light:before{background-image:none!important;filter:brightness(1.58) saturate(.72) contrast(.86)!important;}
 body.theme-light:after{background:rgba(255,255,255,.04)!important;}
 .glass,.topbar,.chat,.right-panel,.auth-card,.notification-panel,.modal,.modal-card{background:rgba(17,15,28,.22)!important;border-color:rgba(205,190,255,.13)!important;backdrop-filter:blur(5px) saturate(120%)!important;-webkit-backdrop-filter:blur(5px) saturate(120%)!important;}
 body.theme-light .glass,body.theme-light .topbar,body.theme-light .chat,body.theme-light .right-panel,body.theme-light .auth-card,body.theme-light .notification-panel,body.theme-light .modal,body.theme-light .modal-card{background:rgba(248,249,255,.20)!important;border-color:rgba(89,112,150,.14)!important;backdrop-filter:blur(5px) saturate(130%)!important;-webkit-backdrop-filter:blur(5px) saturate(130%)!important;}
