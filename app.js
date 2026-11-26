@@ -566,7 +566,7 @@ $("dashboardTo")?.addEventListener("change",e=>{dashboardTo=e.target.value||"";i
 $("dashboardReset")?.addEventListener("click",()=>{dashboardFrom=dashboardTo="";$("dashboardFrom").value="";$("dashboardTo").value="";renderAgentDashboard()});
 $("globalSearch")?.addEventListener("input",e=>globalSearch(e.target.value));
 $("groupSearch").oninput=e=>{groupFilter=e.target.value.toLowerCase().trim();renderGroup()};$("groupDate").onchange=e=>{dateFilter=e.target.value;renderGroup()};$("personalSearch").oninput=e=>{personalFilter=e.target.value.toLowerCase().trim();renderPersonal()};$("directSearch").oninput=e=>{directFilter=e.target.value||"";renderDirect()};$("clearFilters").onclick=()=>{$("groupSearch").value="";$("groupDate").value="";groupFilter=dateFilter="";renderGroup()};
-function setPendingDmImage(file){if(!file)return;if(!/^image\/(jpeg|png|webp|gif)$/i.test(file.type)){status("Choose a JPG, PNG, WEBP or GIF image.");return}if(file.size>8*1024*1024){status("Image must be 8 MB or smaller.");return}pendingDmImage=file;$("dmImagePreview").innerHTML=`<span>${esc(file.name||"Pasted image")} · ${(file.size/1024/1024).toFixed(1)} MB</span><button type="button" id="dmImageRemove" aria-label="Remove selected image">×</button>`;$("dmImagePreview").classList.remove("hidden");status("Image ready to send.")};
+let pendingDmImageUrl=null;function setPendingDmImage(file){if(!file)return;if(!/^image\/(jpeg|png|webp|gif)$/i.test(file.type)){status("Choose a JPG, PNG, WEBP or GIF image.");return}if(file.size>8*1024*1024){status("Image must be 8 MB or smaller.");return}if(pendingDmImageUrl)URL.revokeObjectURL(pendingDmImageUrl);pendingDmImage=file;pendingDmImageUrl=URL.createObjectURL(file);$("dmImagePreview").innerHTML=`<img src="${pendingDmImageUrl}" alt="Image to send"><span>${esc(file.name||"Pasted image")} · ${(file.size/1024/1024).toFixed(1)} MB</span><button type="button" id="dmImageRemove" aria-label="Remove selected image">×</button>`;$("dmImagePreview").classList.remove("hidden");status("Image ready to send. Press Send to share it.")};
 $("dmImageInput").onchange=e=>{setPendingDmImage(e.target.files?.[0]);e.target.value=""};
 async function imageFromClipboard(clipboard){
  let file=[...(clipboard?.files||[])].find(f=>/^image\//i.test(f.type));
@@ -590,7 +590,7 @@ async function imageFromClipboard(clipboard){
 document.addEventListener("paste",async e=>{
  const input=$("directInput"),view=$("directView"),target=e.target;
  const inDirectChat=view&&!view.classList.contains("hidden")&&!!selectedDirectRecipient;
- const pasteTarget=target===input||target.closest?.("#directNotes")||target===view||target===document.body||target===document.documentElement;
+ const pasteTarget=target===input||target.closest?.("#directNotes")||target.closest?.(".dm-compose-wrap")||target===view||target===document.body||target===document.documentElement;
  if(!inDirectChat||input.disabled||(!pasteTarget&&document.activeElement!==input))return;
  const file=await imageFromClipboard(e.clipboardData);
  if(!file)return;
@@ -607,7 +607,7 @@ $("directForm").onsubmit=async e=>{
  if(!body&&!image)return;
  const send=$("directForm").querySelector('button[type="submit"]');
  const imageBtn=$("dmImageButton");
- send.disabled=true;if(imageBtn)imageBtn.disabled=true;
+ send.disabled=true;if(imageBtn)imageBtn.classList.add("is-uploading");
  let attachmentPath=null;
  try{
   if(image){
@@ -618,7 +618,7 @@ $("directForm").onsubmit=async e=>{
   }
   const {error}=await db.from("ctr_direct_messages").insert({sender_id:user.id,recipient_id:recipient,sender_email:user.email,body,attachment_path:attachmentPath,attachment_name:image?.name||null,attachment_type:image?.type||null,attachment_size:image?.size||null});
   if(error){if(attachmentPath)await db.storage.from("orbit-dm-images").remove([attachmentPath]);status("Message could not be sent: "+error.message);return}
-  $("directInput").value="";pendingDmImage=null;$("dmImageInput").value="";$("dmImagePreview").classList.add("hidden");$("dmImagePreview").innerHTML="";
+  $("directInput").value="";pendingDmImage=null;if(pendingDmImageUrl)URL.revokeObjectURL(pendingDmImageUrl);pendingDmImageUrl=null;$("dmImageInput").value="";$("dmImagePreview").classList.add("hidden");$("dmImagePreview").innerHTML="";
   selectedDirectRecipient=String(recipient);
   selectedDirectKey=directPairKey(user.id,recipient);
   $("directRecipient").value=recipient;
@@ -627,7 +627,7 @@ $("directForm").onsubmit=async e=>{
   markSeen("direct");
   status("Message sent.");
  }catch(err){status("Message failed: "+(err?.message||"Please try again."))}
- finally{send.disabled=false;if(imageBtn)imageBtn.disabled=false}
+ finally{send.disabled=false;if(imageBtn)imageBtn.classList.remove("is-uploading")}
 };
 let dmImageContextMenuAt=0; $("directNotes").addEventListener("contextmenu",e=>{if(e.target.closest(".dm-image-attachment img"))dmImageContextMenuAt=Date.now()}); $("directNotes").addEventListener("click",e=>{const image=e.target.closest(".dm-image-attachment img");if(image?.src){if(Date.now()-dmImageContextMenuAt<1200)return;openDmImage(image.src,image.alt);return}if(e.target.closest("[data-load-older-direct]")){loadOlderDirect();return}});
 $("notes").addEventListener("click",e=>{if(e.target.closest("[data-load-older-group]"))loadOlderGroup()});
