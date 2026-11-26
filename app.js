@@ -77,6 +77,7 @@ async function loadFollowups(){const box=$("followupList");try{followups=await f
 
 async function renderAgentDashboard(){
  const box=$("agentDashboard");if(!box||!user)return;
+ $("dashboardView")?.classList.toggle("admin-agent-page",isAdmin());
  const auditPanel=$("agentChatAudit"),summaryPanel=$("dashboardSummary");
  if(isAdmin()&&adminAuditAgentId){
   box.classList.add("hidden");
