@@ -746,3 +746,52 @@ body.theme-light .avatar-selected-mark,
 body.theme-light .avatar-taken-mark{
   /* Preserve status indicators' semantic fills; text and interface icons remain dark. */
 }
+
+
+/* FINAL THEME CONTRAST: every label and icon follows the active theme. */
+body.theme-light {
+  --text:#17171B;
+  --muted:#29292F;
+}
+body.theme-light :is(h1,h2,h3,h4,h5,h6,p,span,strong,b,small,label,a,button,
+input,textarea,select,option,summary,li,dt,dd,time,em,i,code,
+.top-meta,.live-label,.top-nav-btn,.header-icon-btn,.brand-name,.brand-sub,
+.chat-head,.inbox-heading,.note-meta,.dm-message-meta,.muted,.eyebrow,
+.app-footer,.connection-banner,.head-count,.dashboard-filters,
+.followup-info,.notification-panel,.search-toolbar,.empty-state) {
+  color:#17171B!important;
+}
+body.theme-light :is(svg,svg *,[class*="icon"],[data-lucide]) {
+  color:#17171B!important;
+  stroke:#17171B!important;
+}
+body.theme-light svg [fill]:not([fill="none"]) { fill:#17171B!important; }
+
+body:not(.theme-light) {
+  --text:#F5F3FB;
+  --muted:#E2DFEA;
+}
+body:not(.theme-light) :is(h1,h2,h3,h4,h5,h6,p,span,strong,b,small,label,a,button,
+input,textarea,select,option,summary,li,dt,dd,time,em,i,code,
+.top-meta,.live-label,.top-nav-btn,.header-icon-btn,.brand-name,.brand-sub,
+.chat-head,.inbox-heading,.note-meta,.dm-message-meta,.muted,.eyebrow,
+.app-footer,.connection-banner,.head-count,.dashboard-filters,
+.followup-info,.notification-panel,.search-toolbar,.empty-state) {
+  color:#F5F3FB;
+}
+body:not(.theme-light) :is(svg,svg *,[class*="icon"],[data-lucide]) {
+  color:#F5F3FB;
+  stroke:#F5F3FB;
+}
+body:not(.theme-light) svg [fill]:not([fill="none"]) { fill:#F5F3FB; }
+
+/* Slightly larger, clearer navigation and utility icons. */
+.top-nav-btn svg { width:20px!important;height:20px!important; }
+.header-icon-btn svg { width:21px!important;height:21px!important; }
+.header-icon-btn { width:39px!important;height:39px!important; }
+.top-nav-btn { gap:8px; }
+@media(max-width:700px) {
+  .top-nav-btn svg { width:19px!important;height:19px!important; }
+  .header-icon-btn { width:36px!important;height:36px!important; }
+  .header-icon-btn svg { width:20px!important;height:20px!important; }
+}
