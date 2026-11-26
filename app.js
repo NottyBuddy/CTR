@@ -6,7 +6,7 @@ async function fetchAllRows(queryFactory,pageSize=500){const rows=[];for(let fro
 const PAGE_SIZE=50;let groupOffset=0,groupHasMore=false,personalOffset=0,personalHasMore=false,directOffset=0,directHasMore=false;let notifications=[],notificationUnread=0,notificationLoading=false,notificationRefreshPending=false;
 function csvCell(v){const value=v&&typeof v==="object"?JSON.stringify(v):String(v??"");return '"'+value.replace(/"/g,'""')+'"'}
 function downloadCsv(name,rows){if(!rows.length){status("No records available to export.");return}const keys=[...new Set(rows.flatMap(r=>Object.keys(r)))],csv=[keys.map(csvCell).join(","),...rows.map(r=>keys.map(k=>csvCell(r[k])).join(","))].join("\r\n"),blob=new Blob(["\uFEFF",csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-function setTheme(theme){const light=theme==="light";document.body.classList.toggle("theme-light",light);document.documentElement.style.colorScheme=light?"light":"dark";const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=light?"#f7f6fc":"#100d1b";const b=$("themeToggle");if(b){b.setAttribute("aria-pressed",String(light));b.title=light?"Switch to dark theme":"Switch to light theme";b.setAttribute("aria-label",b.title);b.textContent=light?"☾":"☼"}try{if(user)localStorage.setItem("ctr_theme_"+user.id,light?"light":"dark");localStorage.setItem("ctr_theme_preference",light?"light":"dark")}catch{}}
+function setTheme(theme){const light=theme==="light";document.body.classList.toggle("theme-light",light);document.documentElement.style.colorScheme=light?"light":"dark";const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=light?"#f7f6fc":"#100d1b";const b=$("themePull");if(b){b.setAttribute("aria-pressed",String(light));b.classList.toggle("is-light",light);b.title=light?"Pull down to switch to dark theme":"Pull down to switch to light theme";b.setAttribute("aria-label",b.title)}try{if(user)localStorage.setItem("ctr_theme_"+user.id,light?"light":"dark");localStorage.setItem("ctr_theme_preference",light?"light":"dark")}catch{}}
 async function loadGroupPage(reset=false){if(reset){groupOffset=0;group=[]}const {data,error}=await db.from("ctr_group_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false}).range(groupOffset,groupOffset+PAGE_SIZE-1);if(error)throw error;const page=data||[];groupOffset+=page.length;groupHasMore=page.length===PAGE_SIZE;const mapped=page.map(n=>({...n,chat_color:n.chat_color||"#8E7CFF"})).reverse();group=reset?mapped:[...mapped,...group];return page.length}
 async function loadPersonalPage(reset=false){if(reset){personalOffset=0;personal=[]}const {data,error}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false}).range(personalOffset,personalOffset+PAGE_SIZE-1);if(error)throw error;const page=data||[];personalOffset+=page.length;personalHasMore=page.length===PAGE_SIZE;personal=reset?page:[...personal,...page];return page.length}
 
@@ -670,4 +670,13 @@ document.addEventListener("touchstart",e=>{const c=e.target.closest(".note[data-
   localStorage.setItem(key,collapsed?"1":"0");
   apply(collapsed);
  });
+})();
+
+// Pull-cord light switch: drag the hanging handle down to toggle themes.
+(()=>{const sw=$("themePull");if(!sw)return;let startY=null,moved=false;
+ const cord=sw.querySelector(".pull-cord");
+ cord?.addEventListener("pointerdown",e=>{startY=e.clientY;moved=false;cord.setPointerCapture?.(e.pointerId);e.preventDefault();});
+ cord?.addEventListener("pointerup",e=>{if(startY===null)return;const distance=e.clientY-startY;startY=null;if(distance>12){moved=true;sw.classList.add("is-pulled");setTheme(document.body.classList.contains("theme-light")?"dark":"light");setTimeout(()=>sw.classList.remove("is-pulled"),260);}});
+ cord?.addEventListener("pointercancel",()=>{startY=null;});
+ sw.addEventListener("click",e=>{if(e.detail===0){setTheme(document.body.classList.contains("theme-light")?"dark":"light");}});
 })();
