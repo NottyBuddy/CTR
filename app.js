@@ -195,7 +195,31 @@ function avatarFor(userId){return avatarProfiles.find(p=>String(p.user_id)===Str
 function avatarUsedByOther(avatar){return avatarProfiles.some(p=>p.avatar===avatar&&String(p.user_id)!==String(user?.id))}
 function avatarSelectionsUsed(){return Number(avatarProfiles.find(p=>String(p.user_id)===String(user?.id))?.selection_count||0)}
 const CTR_AVATAR_IMAGES={"⚔️":"01_crossed_swords.png","🛡️":"02_shield_lion.png","🐉":"03_green_snake.png","🐺":"04_wolf.png","🦊":"05_fox.png","🐯":"06_bear.png","🦅":"07_eagle.png","🐼":"08_panda.png","🦁":"09_tiger.png","🐲":"10_dragon.png","🌙":"11_gold_moon.png","🔥":"12_fire.png","🎭":"13_theatre_masks.png","👑":"14_crown.png","🌸":"15_lotus.png","☯️":"16_yin_yang.png"};
-function directAvatar(name,userId=""){const chosen=userId?avatarFor(userId):"",src=CTR_AVATAR_IMAGES[chosen];if(src)return '<img class="avatar-art" src="./'+src+'" alt="" aria-hidden="true" loading="lazy">';const parts=String(name||"CTR Member").trim().split(/\s+/);return '<span class="avatar-initials">'+esc((parts[0]?.[0]||"C")+(parts.length>1?parts[parts.length-1][0]:""))+'</span>'}
+function cleanAvatarPng(img){
+ if(!img||img.dataset.avatarCleaned||img.dataset.avatarCleaning||!img.naturalWidth)return;
+ img.dataset.avatarCleaning="1";
+ try{
+  const w=img.naturalWidth,h=img.naturalHeight,canvas=document.createElement("canvas"),ctx=canvas.getContext("2d",{willReadFrequently:true});
+  canvas.width=w;canvas.height=h;ctx.drawImage(img,0,0);
+  const frame=ctx.getImageData(0,0,w,h),px=frame.data,seen=new Uint8Array(w*h),queue=new Int32Array(w*h);
+  const isBackdrop=(p)=>{const r=px[p],g=px[p+1],b=px[p+2],hi=Math.max(r,g,b),lo=Math.min(r,g,b);return px[p+3]>0&&lo>148&&(hi-lo)<68};
+  let head=0,tail=0;
+  const add=(x,y)=>{if(x<0||y<0||x>=w||y>=h)return;const n=y*w+x;if(!seen[n]&&isBackdrop(n*4)){seen[n]=1;queue[tail++]=n}};
+  for(let x=0;x<w;x++){add(x,0);add(x,h-1)}
+  for(let y=1;y<h-1;y++){add(0,y);add(w-1,y)}
+  while(head<tail){const n=queue[head++],x=n%w,y=(n/w)|0,p=n*4;px[p+3]=0;add(x-1,y);add(x+1,y);add(x,y-1);add(x,y+1)}
+  let minX=w,minY=h,maxX=-1,maxY=-1;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(px[(y*w+x)*4+3]>12){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y}
+  if(maxX<minX||maxY<minY){delete img.dataset.avatarCleaning;img.dataset.avatarCleaned="1";return}
+  const bw=maxX-minX+1,bh=maxY-minY+1,pad=Math.max(2,Math.round(Math.max(bw,bh)*.055)),side=Math.max(bw,bh)+pad*2;
+  const cropped=document.createElement("canvas");cropped.width=side;cropped.height=side;
+  cropped.getContext("2d").putImageData(frame,0,0);
+  const finalCanvas=document.createElement("canvas");finalCanvas.width=side;finalCanvas.height=side;
+  finalCanvas.getContext("2d").drawImage(canvas,minX,minY,bw,bh,pad+(side-2*pad-bw)/2,pad+(side-2*pad-bh)/2,bw,bh);
+  img.dataset.avatarCleaned="1";delete img.dataset.avatarCleaning;img.src=finalCanvas.toDataURL("image/png");
+ }catch(e){delete img.dataset.avatarCleaning;img.dataset.avatarCleaned="1";console.warn("Avatar transparency cleanup skipped",e)}
+}
+function directAvatar(name,userId=""){const chosen=userId?avatarFor(userId):"",src=CTR_AVATAR_IMAGES[chosen];if(src)return '<img class="avatar-art" src="./'+src+'" alt="" aria-hidden="true" loading="lazy" onload="cleanAvatarPng(this)">';const parts=String(name||"CTR Member").trim().split(/\s+/);return '<span class="avatar-initials">'+esc((parts[0]?.[0]||"C")+(parts.length>1?parts[parts.length-1][0]:""))+'</span>'}
 const CTR_AVATARS=["⚔️","🛡️","🐉","🐺","🦊","🐯","🦅","🐼","🦁","🐲","🌙","🔥","🎭","👑","🌸","☯️"];
 async function loadAvatarProfiles(){const {data,error}=await db.from("ctr_user_avatars").select("user_id,avatar,selection_count");if(error)throw error;avatarProfiles=data||[]}
 function setupAccountSettings(){
