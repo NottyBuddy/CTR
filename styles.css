@@ -719,3 +719,30 @@ body.theme-light .modal,body.theme-light .modal-card{
   box-shadow:none!important;
   mix-blend-mode:normal!important;
 }
+
+
+/* Light theme: keep all interface text and iconography dark for clear contrast. */
+body.theme-light,
+body.theme-light :is(h1,h2,h3,h4,h5,h6,p,span,strong,b,small,label, a, button,
+input,textarea,select,option,summary,li,dt,dd,time,em,i,code,
+.nav-item,.top-nav-btn,.dm-filter,.tab-btn,.agent-activity-card,
+.agent-record-row,.followup-info,.brand-name){
+  color:#17171B!important;
+}
+body.theme-light :is(svg,svg *, .icon, [class*="icon"], [data-lucide]){
+  color:#17171B!important;
+  stroke:#17171B!important;
+}
+body.theme-light svg [fill]:not([fill="none"]){
+  fill:#17171B!important;
+}
+body.theme-light input::placeholder,
+body.theme-light textarea::placeholder{
+  color:#4B4B52!important;
+  opacity:1!important;
+}
+body.theme-light .dm-online-dot,
+body.theme-light .avatar-selected-mark,
+body.theme-light .avatar-taken-mark{
+  /* Preserve status indicators' semantic fills; text and interface icons remain dark. */
+}
