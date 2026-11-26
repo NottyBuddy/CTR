@@ -948,3 +948,46 @@ body.theme-light .agent-profile-avatar,body.theme-light .dm-avatar,body.theme-li
 }
 body.theme-light .account-avatar-choice{color:#fff!important}
 @media(max-width:700px){.account-avatar-choices{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:9px!important}.account-avatar-choice{min-height:54px}}
+
+
+/* Keep the original 16 symbolic avatars; elevate their presentation with premium glass-metal finish */
+.account-avatar-choices{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:13px!important;padding:14px!important}
+.account-avatar-choice{
+ position:relative;aspect-ratio:1;min-height:66px;border-radius:18px!important;
+ display:grid!important;place-items:center!important;
+ font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif!important;
+ font-size:30px!important;line-height:1!important;
+ color:#fff!important;
+ background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.045) 45%,rgba(8,10,20,.58))!important;
+ border:1px solid rgba(226,220,255,.30)!important;
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.34),inset 0 -8px 16px rgba(0,0,0,.18),0 7px 18px rgba(0,0,0,.24)!important;
+ text-shadow:0 2px 3px rgba(0,0,0,.35),0 0 10px rgba(255,255,255,.18);
+ transition:none!important;transform:none!important;filter:none!important
+}
+.account-avatar-choice.selected{
+ border:1.5px solid rgba(255,255,255,.88)!important;
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.4),0 0 0 2px rgba(205,185,255,.22),0 8px 22px rgba(0,0,0,.3)!important
+}
+.account-avatar-choice.taken{opacity:.38;filter:grayscale(.6)!important}
+.account-avatar-choice:hover,.account-avatar-choice:focus-visible{transform:none!important;filter:none!important}
+.account-current-avatar{
+ width:26px!important;height:26px!important;flex:0 0 26px!important;
+ border-radius:9px!important;display:inline-grid!important;place-items:center!important;
+ font-size:15px!important;line-height:1!important;
+ background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(20,20,35,.55))!important;
+ border:1px solid rgba(255,255,255,.28)!important;
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.35),0 3px 8px rgba(0,0,0,.2)!important
+}
+.dm-avatar,.note-avatar{
+ font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif!important;
+ text-shadow:0 2px 3px rgba(0,0,0,.35),0 0 8px rgba(255,255,255,.15);
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.35),inset 0 -5px 10px rgba(0,0,0,.18),0 4px 12px rgba(0,0,0,.2)!important
+}
+body.theme-light .account-avatar-choice{
+ background:linear-gradient(145deg,rgba(255,255,255,.92),rgba(224,218,226,.78) 55%,rgba(185,177,190,.82))!important;
+ border-color:rgba(73,55,73,.24)!important;
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -7px 14px rgba(75,57,76,.10),0 6px 15px rgba(50,38,55,.14)!important
+}
+body.theme-light .account-avatar-choice.selected{border-color:rgba(65,39,62,.72)!important;box-shadow:0 0 0 2px rgba(100,67,97,.16),0 7px 18px rgba(50,38,55,.16)!important}
+body.theme-light .account-current-avatar{background:linear-gradient(145deg,#fff,#d9d0d9)!important;border-color:rgba(65,39,62,.2)!important}
+@media(max-width:700px){.account-avatar-choices{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:9px!important}.account-avatar-choice{min-height:56px;font-size:26px!important;border-radius:15px!important}}
