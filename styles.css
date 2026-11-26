@@ -544,3 +544,6 @@ select:focus-visible{
 /* Keep textarea scrolling functional without displaying a scrollbar */
 #groupView #noteForm #noteInput{overflow-y:auto!important;scrollbar-width:none!important;-ms-overflow-style:none!important}
 #groupView #noteForm #noteInput::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+
+/* Render chosen emoji avatars cleanly in shared Group Chat */
+#groupView .note-avatar{display:flex!important;align-items:center!important;justify-content:center!important;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif!important;font-size:22px!important;line-height:1!important;flex-shrink:0!important;}
