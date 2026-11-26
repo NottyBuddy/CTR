@@ -77,6 +77,17 @@ async function loadFollowups(){const box=$("followupList");try{followups=await f
 
 async function renderAgentDashboard(){
  const box=$("agentDashboard");if(!box||!user)return;
+ const auditPanel=$("agentChatAudit"),summaryPanel=$("dashboardSummary");
+ if(isAdmin()&&adminAuditAgentId){
+  box.classList.add("hidden");
+  summaryPanel?.classList.add("hidden");
+  auditPanel?.classList.remove("hidden");
+  renderAdminChatExplorer();
+  return;
+ }
+ box.classList.remove("hidden");
+ summaryPanel?.classList.remove("hidden");
+ auditPanel?.classList.add("hidden");
  const agents=(isAdmin()?team.filter(t=>String(t.email||"").toLowerCase()!==ADMIN_EMAIL):team.filter(t=>t.user_id===user.id));
  if(!isAdmin()&&!agents.length)agents.push({user_id:user.id,email:user.email,display_name:displayName(user.email)});
  if(!agents.length){box.innerHTML='<div class="empty-state">No agent activity available yet.</div>';return}
@@ -101,7 +112,7 @@ async function renderAgentDashboard(){
   const max=Math.max(1,...rows.map(r=>r.groupCount+r.personalCount+r.messageCount));
   summary.innerHTML='<div class="dashboard-summary-head"><strong>'+(isAdmin()?"Team overview":"Your activity")+'</strong><small>'+(dashboardFrom||dashboardTo?esc(dashboardFrom||"Start")+" – "+esc(dashboardTo||"Today"):"All available records")+'</small></div><div class="dashboard-total-grid"><div><strong>'+totals.group+'</strong><span>Group notes</span></div><div><strong>'+totals.personal+'</strong><span>Personal notes</span></div><div><strong>'+totals.messages+'</strong><span>Direct messages</span></div><div><strong>'+totals.pending+'</strong><span>Pending</span></div><div><strong>'+totals.completed+'</strong><span>Completed</span></div></div><div class="dashboard-chart-title">Activity by agent</div>'+rows.map(r=>'<div class="dashboard-bar-row"><span>'+esc(r.name)+'</span><div class="dashboard-bar-track" role="img" aria-label="'+esc(r.name)+' activity"><i style="width:'+Math.round((r.groupCount+r.personalCount+r.messageCount)/max*100)+'%"></i></div><b>'+(r.groupCount+r.personalCount+r.messageCount)+'</b></div>').join("");
  }
- if(isAdmin())renderAdminChatExplorer();else $("agentChatAudit")?.classList.add("hidden");
+ $("agentChatAudit")?.classList.add("hidden");
 }
 async function loadAdminAuditData(agentId){
  const request=++adminAuditRequest;
