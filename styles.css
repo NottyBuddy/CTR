@@ -1093,3 +1093,24 @@ body.theme-light .account-avatar-choice.selected{
 .account-avatar-choice{display:grid!important;place-items:center!important;align-content:center!important;background:transparent!important;background-image:none!important;box-shadow:none!important;padding:0!important;overflow:hidden!important}
 .account-avatar-choice .avatar-art{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important;object-fit:contain!important;object-position:center!important}
 .avatar-taken-mark,.avatar-selected-mark{line-height:1!important}
+
+
+/* Larger, more comfortable message-writing text in Group Chat and Direct Chat */
+#groupView #noteForm textarea,
+#groupView .composer textarea,
+#directView .dm-composer textarea{
+ font-size:15px!important;
+ line-height:1.65!important;
+ min-height:88px!important;
+ padding:12px 13px!important;
+ letter-spacing:.01em!important;
+}
+#directView .dm-composer textarea{min-height:68px!important;max-height:150px!important}
+#groupView #noteForm textarea::placeholder,
+#directView .dm-composer textarea::placeholder{font-size:14px!important;opacity:.82}
+@media(max-width:700px){
+ #groupView #noteForm textarea,
+ #groupView .composer textarea,
+ #directView .dm-composer textarea{font-size:14px!important;line-height:1.6!important;min-height:76px!important;padding:11px 12px!important}
+ #directView .dm-composer textarea{min-height:58px!important;max-height:130px!important}
+}
