@@ -248,3 +248,42 @@ button{appearance:none!important;-webkit-appearance:none!important;font-family:i
 .dm-message-actions .delete-note:hover{background:rgba(255,130,156,.10)!important}
 .dm-message>.dm-copy-btn{margin-top:6px!important}
 @media(max-width:700px){.dm-message{max-width:96%!important;padding:7px 6px!important}.dm-message-actions{gap:5px!important}}
+
+
+/* Direct Messages alignment: compact content-width actions and consistent bubble edges */
+#directNotes .dm-message{
+  display:flex!important;flex-direction:column!important;
+  align-items:flex-start!important;
+  align-self:flex-start!important;
+  width:fit-content!important;
+  max-width:min(84%,760px)!important;
+  box-sizing:border-box!important;
+}
+#directNotes .dm-message.mine{
+  align-items:flex-end!important;
+  align-self:flex-end!important;
+}
+#directNotes .dm-message-person,
+#directNotes .dm-message-body,
+#directNotes .dm-message time{
+  max-width:100%!important;
+  align-self:stretch!important;
+}
+#directNotes .dm-message-actions{
+  display:flex!important;align-self:flex-start!important;
+  width:auto!important;max-width:100%!important;
+  flex-direction:row!important;justify-content:flex-start!important;
+  align-items:center!important;flex-wrap:wrap!important;
+}
+#directNotes .dm-message.mine .dm-message-actions{align-self:flex-end!important;justify-content:flex-end!important}
+#directNotes .dm-message>.dm-copy-btn{
+  display:inline-flex!important;align-self:flex-start!important;
+  width:auto!important;min-width:0!important;max-width:max-content!important;
+  flex:0 0 auto!important;
+}
+#directNotes .dm-message.mine>.dm-copy-btn{align-self:flex-end!important}
+#directNotes .dm-date-separator{align-self:stretch!important;width:100%!important;box-sizing:border-box!important}
+#directNotes .dm-message time{display:block!important;text-align:inherit!important}
+@media(max-width:700px){
+ #directNotes .dm-message{max-width:94%!important}
+}
