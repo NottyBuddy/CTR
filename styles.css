@@ -406,3 +406,48 @@ html:has(body.theme-light) #groupView #notes .reaction-btn:hover,
 body.theme-light #groupView #notes .reaction-btn:hover{
   background:transparent!important;border:0!important;box-shadow:none!important;
 }
+
+
+/* Hard override: transparent notes and controls in Light Theme (actual body.theme-light state) */
+body.theme-light #groupView #notes > article.note,
+body.theme-light #groupView #notes > article.note.mine,
+body.theme-light #groupView #notes > article.note[data-note-id]{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  border-color:transparent!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  outline:0!important;
+  filter:none!important;
+}
+body.theme-light #groupView #notes > article.note .note-top,
+body.theme-light #groupView #notes > article.note .note-body,
+body.theme-light #groupView #notes > article.note .reaction-row,
+body.theme-light #groupView #notes > article.note .note-tools{
+  background:transparent!important;
+  background-color:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+body.theme-light #groupView #notes > article.note button,
+body.theme-light #groupView #noteForm button,
+body.theme-light #groupView #noteForm textarea{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+  outline:0!important;
+}
+body.theme-light #groupView #notes > article.note button:hover,
+body.theme-light #groupView #noteForm button:hover{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+body.theme-light #groupView #notes{background:transparent!important}
+body.theme-light #groupView #noteForm{background:transparent!important;border:0!important;box-shadow:none!important}
