@@ -10,7 +10,7 @@ function setTheme(theme){const light=theme==="light";document.body.classList.tog
 async function loadGroupPage(reset=false){if(reset){groupOffset=0;group=[]}const {data,error}=await db.from("ctr_group_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false}).range(groupOffset,groupOffset+PAGE_SIZE-1);if(error)throw error;const page=data||[];groupOffset+=page.length;groupHasMore=page.length===PAGE_SIZE;const mapped=page.map(n=>({...n,chat_color:n.chat_color||"#8E7CFF"})).reverse();group=reset?mapped:[...mapped,...group];return page.length}
 async function loadPersonalPage(reset=false){if(reset){personalOffset=0;personal=[]}const {data,error}=await db.from("ctr_personal_notes").select("*").order("created_at",{ascending:false}).order("id",{ascending:false}).range(personalOffset,personalOffset+PAGE_SIZE-1);if(error)throw error;const page=data||[];personalOffset+=page.length;personalHasMore=page.length===PAGE_SIZE;personal=reset?page:[...personal,...page];return page.length}
 
-let db,user,group=[],personal=[],direct=[],team=[],channel,avatarProfiles=[],avatarGateActive=false;
+let db,user,group=[],personal=[],direct=[],team=[],channel,presenceChannel,onlineUserIds=new Set(),avatarProfiles=[],avatarGateActive=false;
 let groupFilter="",dateFilter="",personalFilter="",directFilter="",followupSearchFilter="";
 let selectedDirectKey="",selectedDirectRecipient="",directInboxFilter="all",mobileThreadOpen=false;
 let adminAuditAgentId="",adminAuditPairKey="",adminAuditSearch="",adminAuditDate="";
@@ -241,7 +241,7 @@ function renderDirect(){
  });
  $("directInboxList").innerHTML=visible.length?visible.map(c=>{
   const preview=c.last?(c.last.sender_id===user.id?"You: ":"")+(c.last.body||""):"Start a conversation";
-  return `<button type="button" class="dm-conversation ${selectedId===c.otherId?"selected":""}" data-dm-key="${esc(c.key)}" data-dm-other="${esc(c.otherId)}"><span class="dm-avatar">${directAvatar(c.name,c.otherId)}</span><span class="dm-convo-copy"><strong>${esc(c.name)}</strong><span>${esc(preview)}</span></span><span class="dm-convo-meta"><time>${c.last?esc(time(c.last.created_at)):""}</time>${c.unread?`<b class="dm-unread-count">${c.unread}</b>`:""}</span></button>`;
+  return `<button type="button" class="dm-conversation ${selectedId===c.otherId?"selected":""}" data-dm-key="${esc(c.key)}" data-dm-other="${esc(c.otherId)}"><span class="dm-avatar">${directAvatar(c.name,c.otherId)}</span><span class="dm-convo-copy"><strong>${esc(c.name)}</strong><span>${esc(preview)}</span></span><span class="dm-convo-meta">${onlineUserIds.has(c.otherId)?'<span class="dm-online-dot" title="Online"></span>':""}<time>${c.last?esc(time(c.last.created_at)):""}</time>${c.unread?`<b class="dm-unread-count">${c.unread}</b>`:""}</span></button>`;
  }).join(""):'<div class="empty-state"><h3>No matching contacts</h3><p>Try another name or message keyword.</p></div>';
  // Conversation selection is handled by one stable delegated listener below.
  let active=allConversations.find(c=>c.otherId===selectedId);
@@ -249,7 +249,7 @@ function renderDirect(){
   selectedDirectKey=active.key;
   $("directRecipient").value=active.otherId;
   $("dmNewRecipient").value="";
-  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name,active.otherId)}</span><div><strong>${esc(active.name)}</strong><small>Private conversation · CTR team member</small></div><div class="dm-thread-actions">${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}</div>`;
+  $("dmThreadHeader").innerHTML=`<span class="dm-avatar dm-avatar-large">${directAvatar(active.name,active.otherId)}</span><div><strong>${esc(active.name)}</strong><small><span class="dm-presence-status ${onlineUserIds.has(active.otherId)?"online":"offline"}">${onlineUserIds.has(active.otherId)?"Online":"Offline"}</span> · Private conversation</small></div><div class="dm-thread-actions">${admin?'<span class="dm-admin-tag">ADMIN VIEW</span>':""}</div>`;
   const box=$("directNotes"),near=box.scrollHeight-box.scrollTop-box.clientHeight<120;
   box.innerHTML=active.messages.map(m=>{
    const mine=m.sender_id===user.id,from=team.find(p=>p.user_id===m.sender_id)?.display_name||"CTR Member";
@@ -384,8 +384,8 @@ function renderNotificationCentre(){
 }
 async function loadNotifications(){
  if(!user||notificationLoading)return;notificationLoading=true;
- try{const {data,error}=await db.from("ctr_notifications").select("*").order("created_at",{ascending:false}).limit(50);if(error)throw error;notifications=data||[];notificationUnread=notifications.filter(n=>!n.read_at).length;renderNotificationCentre()}
- catch(e){const list=$("notificationList");if(list)list.innerHTML='<div class="empty-state">Notification centre needs its database migration. '+esc(e.message)+'</div>';console.warn("CTR notification centre unavailable",e)}
+ try{const [list,count]=await Promise.all([db.from("ctr_notifications").select("*").order("created_at",{ascending:false}).limit(50),db.from("ctr_notifications").select("id",{count:"exact",head:true}).eq("recipient_id",user.id).is("read_at",null)]);if(list.error)throw list.error;if(count.error)throw count.error;notifications=list.data||[];notificationUnread=count.count||0;renderNotificationCentre()}
+ catch(e){const list=$("notificationList");if(list)list.innerHTML='<div class="empty-state">Notifications unavailable. '+esc(e.message)+'</div>';console.warn("CTR notification centre unavailable",e)}
  finally{notificationLoading=false}
 }
 async function markAllNotificationsRead(){
@@ -432,13 +432,20 @@ function realtime(){
  .on("postgres_changes",{event:"UPDATE",schema:"public",table:"ctr_notifications",filter:"recipient_id=eq."+user.id},loadNotifications)
  .subscribe(s=>{if(s==="SUBSCRIBED")status("Live sync connected · group updates appear automatically.");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")status("Live sync interrupted. Refresh to reconnect.")});
 }
+function setupPresence(){
+ if(presenceChannel)db.removeChannel(presenceChannel);
+ onlineUserIds=new Set();
+ presenceChannel=db.channel("ctr-presence",{config:{presence:{key:user.id}}})
+ .on("presence",{event:"sync"},()=>{const state=presenceChannel.presenceState();onlineUserIds=new Set(Object.keys(state).filter(id=>id!==user.id));renderDirect()})
+ .subscribe(async state=>{if(state==="SUBSCRIBED"){await presenceChannel.track({user_id:user.id,display_name:displayName(user.email),online_at:new Date().toISOString()})}});
+}
 function timeoutTask(promise,ms,label){return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+" timed out. Check your connection and retry.")),ms))])}
 async function enter(u){
  user=u;setupAccountSettings();$("authView").classList.add("hidden");$("appView").classList.remove("hidden");
  setTheme(localStorage.getItem("ctr_theme_"+u.id)||"dark");
  $("exportCrmData")?.classList.toggle("hidden",!isAdmin());
  const name=displayName(u.email);$("userEmail").textContent=name;updateNotificationButton();
- try{await timeoutTask(loadAvatarProfiles(),12000,"Avatar profile");const chosen=avatarFor(u.id);avatarGateActive=!chosen;const modal=$("accountSettingsModal");if(avatarGateActive){modal.classList.remove("hidden");modal.querySelector(".accountSettings-close")?.setAttribute("hidden","");modal.querySelector(".account-settings-close").hidden=true;$("accountSettingsTitle").textContent="Choose your avatar to continue";$("avatarGateMessage").textContent="Avatar selection is mandatory. Each avatar is unique, and you can choose/change it twice total.";renderAccountAvatars();status("Select an avatar before entering the workspace.");}else{modal.classList.add("hidden");modal.querySelector(".account-settings-close").hidden=false;$("accountSettingsTitle").textContent="Your chat avatar";$("avatarGateMessage").textContent="Each avatar can belong to only one team member. You may select/change your avatar twice total.";}await timeoutTask(loadAll(),18000,"Initial records");realtime();await Promise.all([timeoutTask(loadDirect(),18000,"Chats"),timeoutTask(loadNotifications(),12000,"Notifications")])}catch(e){status("Database load issue: "+(e.message||"Unable to load records.")+" — tap Refresh to retry.")}
+ try{await timeoutTask(loadAvatarProfiles(),12000,"Avatar profile");const chosen=avatarFor(u.id);avatarGateActive=!chosen;const modal=$("accountSettingsModal");if(avatarGateActive){modal.classList.remove("hidden");modal.querySelector(".accountSettings-close")?.setAttribute("hidden","");modal.querySelector(".account-settings-close").hidden=true;$("accountSettingsTitle").textContent="Choose your avatar to continue";$("avatarGateMessage").textContent="Avatar selection is mandatory. Each avatar is unique, and you can choose/change it twice total.";renderAccountAvatars();status("Select an avatar before entering the workspace.");}else{modal.classList.add("hidden");modal.querySelector(".account-settings-close").hidden=false;$("accountSettingsTitle").textContent="Your chat avatar";$("avatarGateMessage").textContent="Each avatar can belong to only one team member. You may select/change your avatar twice total.";}await timeoutTask(loadAll(),18000,"Initial records");realtime();setupPresence();await Promise.all([timeoutTask(loadDirect(),18000,"Chats"),timeoutTask(loadNotifications(),12000,"Notifications")])}catch(e){status("Database load issue: "+(e.message||"Unable to load records.")+" — tap Refresh to retry.")}
 }
 async function ensureSupabaseLibrary(){
  if(window.supabase?.createClient)return true;
@@ -621,7 +628,7 @@ if(pedit){const n=personal.find(x=>x.id===pedit);if(n){const body=prompt("Edit p
 if(pin&&isAdmin()){const n=group.find(x=>x.id===pin);if(n){target.disabled=true;const {error}=await db.rpc("ctr_toggle_group_pin",{p_note_id:pin});target.disabled=false;if(error){status("Pin update failed: "+error.message)}else{try{await loadGroupPage(true)}catch(readError){status("Pin saved, refresh failed: "+readError.message);return}renderGroup();status(n.is_pinned?"Message unpinned.":"Message pinned.")}}}
 if(rid&&emoji){target.disabled=true;const {error}=await db.rpc("ctr_toggle_group_reaction",{p_note_id:rid,p_emoji:emoji});target.disabled=false;if(error){status("Reaction failed: "+error.message)}else{try{await loadGroupPage(true)}catch(readError){status("Reaction saved, refresh failed: "+readError.message);return}renderGroup();status("Reaction updated.")}}
 if(g){const note=group.find(x=>x.id===g);if(!note||(!isAdmin()&&note.user_id!==user.id))return;if(!confirm("Permanently delete this group message?"))return;const {error}=await db.from("ctr_group_notes").delete().eq("id",g);if(error)status("Delete failed: "+error.message);else{await loadGroupPage(true);renderGroup();status("Group message deleted.")}}if(p){const note=personal.find(x=>x.id===p);if(!note||(!isAdmin()&&note.user_id!==user.id))return;if(!confirm("Permanently delete this personal note?"))return;const {error}=await db.from("ctr_personal_notes").delete().eq("id",p);if(error)status("Delete failed: "+error.message);else{await loadPersonalPage(true);renderPersonal();status("Personal note deleted.")}}if(d){const msg=direct.find(x=>String(x.id)===String(d));if(!msg||(!isAdmin()&&msg.sender_id!==user.id))return;if(!confirm("Permanently delete this direct message?"))return;const {error}=await db.from("ctr_direct_messages").delete().eq("id",d);if(error)status("Delete failed: "+error.message);else{await loadDirect();renderDirect();status("Direct message deleted.")}}});
-$("signOut").onclick=async()=>{if(channel)await db.removeChannel(channel);await db.auth.signOut({scope:"local"})};
+$("signOut").onclick=async()=>{if(channel)await db.removeChannel(channel);if(presenceChannel)await db.removeChannel(presenceChannel);await db.auth.signOut({scope:"local"})};
 connectAuth().catch(err=>{console.error("CTR startup failed",err);status("App startup failed: "+(err?.message||"Please refresh the page."),true)});
 function syncVisualViewport(){const height=window.visualViewport?.height||window.innerHeight;document.documentElement.style.setProperty("--app-viewport-height",height+"px")}
 syncVisualViewport();window.addEventListener("resize",syncVisualViewport);window.visualViewport?.addEventListener("resize",syncVisualViewport);
