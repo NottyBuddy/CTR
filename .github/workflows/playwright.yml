@@ -33,7 +33,7 @@ jobs:
         run: |
           # App functions live in app.js, not index.html. Check each file in
           # the correct place so this health check does not reject a valid page.
-          grep -q "CTR — Calling Team Records" index.html
+          grep -q "INDINEXT ORBIT" index.html
           # AI panel was intentionally removed from the app; do not gate deployment on it.
           grep -q "dashboardFrom" app.js
           grep -q "toggleNotificationPanel" app.js
@@ -41,7 +41,7 @@ jobs:
           grep -q "exportCrmData" app.js
           for attempt in $(seq 1 24); do
             status=$(curl --silent --show-error --output /tmp/ctr-home.html --write-out "%{http_code}" https://nottybuddy.github.io/CTR/ 2>/dev/null || true)
-            if [ "$status" = "200" ] && grep -q "CTR — Calling Team Records" /tmp/ctr-home.html; then
+            if [ "$status" = "200" ] && grep -q "INDINEXT ORBIT" /tmp/ctr-home.html; then
               echo "CTR page is live (HTTP $status)."
               exit 0
             fi
