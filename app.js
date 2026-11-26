@@ -201,24 +201,32 @@ function cleanAvatarPng(img){
  try{
   const w=img.naturalWidth,h=img.naturalHeight,canvas=document.createElement("canvas"),ctx=canvas.getContext("2d",{willReadFrequently:true});
   canvas.width=w;canvas.height=h;ctx.drawImage(img,0,0);
-  const frame=ctx.getImageData(0,0,w,h),px=frame.data,seen=new Uint8Array(w*h),queue=new Int32Array(w*h);
-  const isBackdrop=(p)=>{const r=px[p],g=px[p+1],b=px[p+2],hi=Math.max(r,g,b),lo=Math.min(r,g,b);return px[p+3]>0&&lo>148&&(hi-lo)<68};
+  const frame=ctx.getImageData(0,0,w,h),px=frame.data,bins=new Map();
+  const addSample=(x,y)=>{const p=(y*w+x)*4,r=px[p],g=px[p+1],b=px[p+2],a=px[p+3];if(a<200||Math.max(r,g,b)-Math.min(r,g,b)>34||Math.min(r,g,b)<90)return;const key=[r>>4,g>>4,b>>4].join(",");const v=bins.get(key)||{n:0,r:0,g:0,b:0};v.n++;v.r+=r;v.g+=g;v.b+=b;bins.set(key,v)};
+  const band=Math.max(2,Math.min(10,Math.round(Math.min(w,h)*.035)));
+  for(let y=0;y<band;y++)for(let x=0;x<w;x++){addSample(x,y);addSample(x,h-1-y)}
+  for(let x=0;x<band;x++)for(let y=band;y<h-band;y++){addSample(x,y);addSample(w-1-x,y)}
+  const palette=[...bins.values()].sort((a,b)=>b.n-a.n).slice(0,2).map(v=>({r:v.r/v.n,g:v.g/v.n,b:v.b/v.n}));
+  if(!palette.length){img.dataset.avatarCleaned="1";delete img.dataset.avatarCleaning;return}
+  const matches=new Uint8Array(w*h),seen=new Uint8Array(w*h),queue=new Int32Array(w*h);
+  for(let n=0;n<w*h;n++){const p=n*4;if(px[p+3]<200)continue;const r=px[p],g=px[p+1],b=px[p+2];if(Math.max(r,g,b)-Math.min(r,g,b)>42)continue;if(palette.some(c=>Math.max(Math.abs(r-c.r),Math.abs(g-c.g),Math.abs(b-c.b))<=25))matches[n]=1}
   let head=0,tail=0;
-  const add=(x,y)=>{if(x<0||y<0||x>=w||y>=h)return;const n=y*w+x;if(!seen[n]&&isBackdrop(n*4)){seen[n]=1;queue[tail++]=n}};
-  for(let x=0;x<w;x++){add(x,0);add(x,h-1)}
-  for(let y=1;y<h-1;y++){add(0,y);add(w-1,y)}
-  while(head<tail){const n=queue[head++],x=n%w,y=(n/w)|0,p=n*4;px[p+3]=0;add(x-1,y);add(x+1,y);add(x,y-1);add(x,y+1)}
+  const seed=(x,y)=>{if(x<0||y<0||x>=w||y>=h)return;const n=y*w+x;if(matches[n]&&!seen[n]){seen[n]=1;queue[tail++]=n}};
+  for(let x=0;x<w;x++){seed(x,0);seed(x,h-1)}
+  for(let y=1;y<h-1;y++){seed(0,y);seed(w-1,y)}
+  while(head<tail){const n=queue[head++],x=n%w,y=(n/w)|0;px[n*4+3]=0;seed(x-1,y);seed(x+1,y);seed(x,y-1);seed(x,y+1)}
   let minX=w,minY=h,maxX=-1,maxY=-1;
   for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(px[(y*w+x)*4+3]>12){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y}
-  if(maxX<minX||maxY<minY){delete img.dataset.avatarCleaning;img.dataset.avatarCleaned="1";return}
-  const bw=maxX-minX+1,bh=maxY-minY+1,pad=Math.max(2,Math.round(Math.max(bw,bh)*.055)),side=Math.max(bw,bh)+pad*2;
+  if(maxX<minX||maxY<minY){img.dataset.avatarCleaned="1";delete img.dataset.avatarCleaning;return}
   ctx.putImageData(frame,0,0);
-  const finalCanvas=document.createElement("canvas");finalCanvas.width=side;finalCanvas.height=side;
-  finalCanvas.getContext("2d").drawImage(canvas,minX,minY,bw,bh,pad+(side-2*pad-bw)/2,pad+(side-2*pad-bh)/2,bw,bh);
-  img.dataset.avatarCleaned="1";delete img.dataset.avatarCleaning;img.src=finalCanvas.toDataURL("image/png");
- }catch(e){delete img.dataset.avatarCleaning;img.dataset.avatarCleaned="1";console.warn("Avatar transparency cleanup skipped",e)}
+  const bw=maxX-minX+1,bh=maxY-minY+1,pad=Math.max(2,Math.round(Math.max(bw,bh)*.045)),side=Math.max(bw,bh)+pad*2;
+  const output=document.createElement("canvas");output.width=side;output.height=side;
+  output.getContext("2d").drawImage(canvas,minX,minY,bw,bh,pad+(side-2*pad-bw)/2,pad+(side-2*pad-bh)/2,bw,bh);
+  img.dataset.avatarCleaned="1";delete img.dataset.avatarCleaning;img.src=output.toDataURL("image/png");
+ }catch(e){delete img.dataset.avatarCleaning;img.dataset.avatarCleaned="1";console.warn("Avatar background removal skipped",e)}
 }
-function directAvatar(name,userId=""){const chosen=userId?avatarFor(userId):"",src=CTR_AVATAR_IMAGES[chosen];if(src)return '<img class="avatar-art" src="./'+src+'" alt="" aria-hidden="true" loading="lazy" onload="cleanAvatarPng(this)">';const parts=String(name||"CTR Member").trim().split(/\s+/);return '<span class="avatar-initials">'+esc((parts[0]?.[0]||"C")+(parts.length>1?parts[parts.length-1][0]:""))+'</span>'}
+window.cleanAvatarPng=cleanAvatarPng;
+function directAvatar(name,userId=""){const chosen=userId?avatarFor(userId):"",src=CTR_AVATAR_IMAGES[chosen];if(src)return '<img class="avatar-art" src="./'+src+'" alt="" aria-hidden="true" loading="lazy" onload="window.cleanAvatarPng(this)">';const parts=String(name||"CTR Member").trim().split(/\s+/);return '<span class="avatar-initials">'+esc((parts[0]?.[0]||"C")+(parts.length>1?parts[parts.length-1][0]:""))+'</span>'}
 const CTR_AVATARS=["⚔️","🛡️","🐉","🐺","🦊","🐯","🦅","🐼","🦁","🐲","🌙","🔥","🎭","👑","🌸","☯️"];
 async function loadAvatarProfiles(){const {data,error}=await db.from("ctr_user_avatars").select("user_id,avatar,selection_count");if(error)throw error;avatarProfiles=data||[]}
 function setupAccountSettings(){
