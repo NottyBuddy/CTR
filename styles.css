@@ -1074,3 +1074,22 @@ body.theme-light .account-avatar-choice.selected{
 .dm-image-button.is-uploading{opacity:.5;pointer-events:none}
 .dm-image-button.disabled{opacity:.45;pointer-events:none}
 .dm-composer textarea{min-width:0}
+
+/* Final avatar alignment: centered artwork only, no oval/photo tile backgrounds */
+.note-top .note-avatar,.note-avatar,.agent-profile-avatar,.dm-avatar,.dm-message-avatar,.account-current-avatar{
+ display:grid!important;place-items:center!important;align-content:center!important;justify-content:center!important;
+ background:transparent!important;background-image:none!important;border:0!important;box-shadow:none!important;
+ padding:0!important;overflow:hidden!important;line-height:0!important
+}
+.note-top .note-avatar,.note-avatar{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;flex:0 0 38px!important;border-radius:50%!important}
+.agent-profile-avatar{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;flex:0 0 38px!important;border-radius:50%!important}
+.dm-avatar{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;flex:0 0 38px!important;border-radius:50%!important}
+.dm-message-avatar{width:23px!important;height:23px!important;min-width:23px!important;min-height:23px!important;flex:0 0 23px!important}
+.account-current-avatar{width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;flex:0 0 22px!important}
+.avatar-art{display:block!important;position:static!important;object-fit:contain!important;object-position:center center!important;width:32px!important;height:32px!important;max-width:32px!important;max-height:32px!important;min-width:0!important;min-height:0!important;margin:auto!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;filter:none!important;flex:none!important}
+.agent-profile-avatar .avatar-art,.dm-avatar .avatar-art{width:32px!important;height:32px!important;max-width:32px!important;max-height:32px!important}
+.dm-message-avatar .avatar-art,.account-current-avatar .avatar-art{width:19px!important;height:19px!important;max-width:19px!important;max-height:19px!important}
+.note-avatar .avatar-art{width:32px!important;height:32px!important;max-width:32px!important;max-height:32px!important}
+.account-avatar-choice{display:grid!important;place-items:center!important;align-content:center!important;background:transparent!important;background-image:none!important;box-shadow:none!important;padding:0!important;overflow:hidden!important}
+.account-avatar-choice .avatar-art{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important;object-fit:contain!important;object-position:center!important}
+.avatar-taken-mark,.avatar-selected-mark{line-height:1!important}
