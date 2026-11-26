@@ -212,8 +212,7 @@ function cleanAvatarPng(img){
   for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(px[(y*w+x)*4+3]>12){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y}
   if(maxX<minX||maxY<minY){delete img.dataset.avatarCleaning;img.dataset.avatarCleaned="1";return}
   const bw=maxX-minX+1,bh=maxY-minY+1,pad=Math.max(2,Math.round(Math.max(bw,bh)*.055)),side=Math.max(bw,bh)+pad*2;
-  const cropped=document.createElement("canvas");cropped.width=side;cropped.height=side;
-  cropped.getContext("2d").putImageData(frame,0,0);
+  ctx.putImageData(frame,0,0);
   const finalCanvas=document.createElement("canvas");finalCanvas.width=side;finalCanvas.height=side;
   finalCanvas.getContext("2d").drawImage(canvas,minX,minY,bw,bh,pad+(side-2*pad-bw)/2,pad+(side-2*pad-bh)/2,bw,bh);
   img.dataset.avatarCleaned="1";delete img.dataset.avatarCleaning;img.src=finalCanvas.toDataURL("image/png");
