@@ -893,3 +893,15 @@ body.theme-light .account-settings-card{
  #dashboardView.admin-agent-page #agentChatAudit{overflow:visible!important;max-height:none!important}
  #dashboardView.admin-agent-page #agentChatAudit .agent-record-list{overflow:visible!important}
 }
+
+/* Agent monitoring refinements */
+.agent-profile-avatar{width:42px;height:42px;flex:0 0 42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--surface-3);color:var(--text);font:700 13px Manrope,sans-serif}
+.agent-profile-name{display:flex;flex-direction:column;gap:3px;min-width:0}.agent-profile-name small{font-size:10px;color:var(--muted)}
+.agent-metrics{grid-template-columns:repeat(4,minmax(0,1fr))}
+.agent-audit-head{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 14px}
+.agent-audit-controls{display:grid;grid-template-columns:minmax(180px,1fr) repeat(2,minmax(130px,170px));gap:8px;position:sticky;top:70px;z-index:4;background:var(--bg);padding:8px 0}
+.agent-record-list{display:flex;flex-direction:column;min-width:0;overflow-wrap:anywhere;word-break:break-word}
+.agent-record-row,.agent-record-row p,.agent-record-meta,.agent-record-meta strong{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}.agent-record-row p{white-space:pre-wrap;overflow-x:hidden}
+@media(max-width:700px){.agent-audit-controls{grid-template-columns:1fr 1fr;top:65px}.agent-audit-controls input[type=search]{grid-column:1/-1}.agent-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Remove both theme wallpaper images entirely; use clean solid theme surfaces. */
+body:before,body.theme-light:before{background-image:none!important;background-color:var(--bg)!important;filter:none!important}body:after,body.theme-light:after{background:none!important}body{background:var(--bg)!important}
