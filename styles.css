@@ -576,3 +576,30 @@ body.theme-light:after{background:linear-gradient(180deg,rgba(248,248,255,.12),r
 .glass,.topbar,.chat,.right-panel,.auth-card,.notification-panel,.modal,.modal-card{backdrop-filter:blur(18px) saturate(125%);-webkit-backdrop-filter:blur(18px) saturate(125%);}
 .brand-mark{width:clamp(48px,4vw,64px);height:clamp(48px,4vw,64px);flex-basis:clamp(48px,4vw,64px);border-radius:0;}
 .brand-mark .ctr-emblem{filter:drop-shadow(0 3px 10px rgba(139,102,255,.32));}
+
+
+/* Follow-up records: keep customer identity together and stack callback details clearly */
+.followup-info{
+  display:grid;
+  grid-template-columns:max-content minmax(0,1fr);
+  align-items:baseline;
+  column-gap:9px;
+  row-gap:4px;
+  min-width:0;
+  flex:1;
+}
+.followup-info>strong{grid-column:1;display:block;min-width:0;font-size:12px;overflow-wrap:anywhere}
+.followup-info>span{grid-column:2;display:block;min-width:0;font-size:11px;overflow-wrap:anywhere}
+.followup-info>time,
+.followup-info>p,
+.followup-info>.followup-status{grid-column:1/-1;display:block;min-width:0}
+.followup-info>time{font-size:10px;color:var(--muted);line-height:1.45}
+.followup-info>p{margin:1px 0 2px;font-size:11px;line-height:1.5;overflow-wrap:anywhere;white-space:pre-wrap}
+.followup-info>.followup-status{font-size:10px;line-height:1.4}
+.followup-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:0 0 auto}
+@media(max-width:700px){
+  .followup-info{grid-template-columns:minmax(0,1fr) auto;column-gap:8px;width:100%}
+  .followup-info>strong{grid-column:1}
+  .followup-info>span{grid-column:2;text-align:right}
+  .followup-actions{width:100%}
+}
