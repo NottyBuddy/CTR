@@ -27,6 +27,9 @@ test("CTR public page, assets and sign-in form load without JavaScript errors", 
   const assets = await Promise.all(["./styles.css?v=orbit-theme-bg-fix-20261126a", "./app.js?v=orbit-edit-refresh-fix-20261126a", "./crm-local-ai.js?v=ctr-local-qwen-clarify-3", "./file_000000003bf88208a1f705b3f6395db2.png", "./file_000000005f188208adc8f107a4f7bc8b.png", "./assets/ctr-samurai-icons.png", "./orbit-dark-bg.webp", "./orbit-light-bg.webp"].map(url => request.get(new URL(url, "https://nottybuddy.github.io/Orbit/").toString())));
   console.log("ORBIT_ASSET_STATUS", JSON.stringify(assets.map(x => x.status())));
   expect(assets.map(x => x.status())).toEqual([200, 200, 200, 200, 200, 200, 200, 200]);
+  const cssSource=await (await request.get(new URL("./styles.css?v=orbit-theme-bg-fix-20261126a","https://nottybuddy.github.io/Orbit/").toString())).text();
+  expect(cssSource).toContain("orbit-dark-bg.webp");
+  expect(cssSource).toContain("orbit-light-bg.webp");
   expect(pageErrors, "Uncaught JavaScript errors").toEqual([]);
   const appSource = await (await request.get(new URL("./app.js?v=orbit-edit-refresh-fix-20261126a", "https://nottybuddy.github.io/Orbit/").toString())).text();
   expect(appSource).toContain("data-dm-edit");
