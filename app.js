@@ -483,7 +483,7 @@ async function boot(){
  const {data,error}=await db.auth.getSession();if(error){status("Session error: "+error.message,true);$("authRetry")?.classList.remove("hidden");return}
  if(!authListenerReady){
   authListenerReady=true;
-  db.auth.onAuthStateChange((_e,s)=>{setTimeout(async()=>{if(s?.user){if(await sessionIsActive()){if(!user||user.id!==s.user.id)await enter(s.user)}else{await db.auth.signOut({scope:"local"});status("Your previous session has expired. Please sign in again.",true)}}else{user=null;avatarGateActive=false;$("appView").classList.add("hidden");$("authView").classList.remove("hidden")}},0)});
+  db.auth.onAuthStateChange((_e,s)=>{setTimeout(async()=>{if(s?.user){if(await sessionIsActive()){if(!user||user.id!==s.user.id)await enter(s.user)}else{await db.auth.signOut({scope:"local"});status("Your previous session has expired. Please sign in again.",true)}}else{user=null;enteredUserId="";avatarGateActive=false;$("appView").classList.add("hidden");$("authView").classList.remove("hidden")}},0)});
  }
  if(data.session){if(await sessionIsActive())await enter(data.session.user);else{await db.auth.signOut({scope:"local"});status("Your previous session has expired. Please sign in again.",true)}}
 }
