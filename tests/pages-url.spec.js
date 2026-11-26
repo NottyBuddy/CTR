@@ -19,5 +19,5 @@ test("GitHub Pages project URL responds on the canonical path", async ({ request
     }
   }
   console.log("CTR_PAGES_URL_DIAGNOSTIC", JSON.stringify(results));
-  expect(results.some(item => item.status === 200 && item.title.includes("CTR"))).toBeTruthy();
+  expect(results.some(item => item.status === 200 && item.title.includes("IndiNext Orbit"))).toBeTruthy();
 });
