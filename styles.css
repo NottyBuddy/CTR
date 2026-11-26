@@ -175,3 +175,49 @@ button{appearance:none!important;-webkit-appearance:none!important;font-family:i
 .composer textarea{min-height:70px!important;padding:9px 11px!important;border:1px solid var(--border)!important;border-radius:11px!important;background:var(--surface-2)!important}
 .composer-foot{border-top:0!important;padding-top:8px!important}
 @media(max-width:700px){.note-top{gap:5px}.message-action,.delete-note,.refresh-btn,.dm-copy-btn,.note-tools button{min-height:28px!important;padding:5px 9px!important}.composer{padding-top:8px!important}}
+
+
+/* Group Notes: continuous conversation feed, not a stack of floating cards */
+#groupView #notes{gap:0!important;padding:10px 4px!important}
+#groupView #notes>.note{
+  max-width:min(900px,94%)!important;
+  padding:12px 14px!important;margin:0 0 7px!important;
+  border:0!important;border-radius:12px!important;
+  background:rgba(29,27,43,.68)!important;
+  box-shadow:none!important;
+}
+#groupView #notes>.note.mine{align-self:flex-end;background:rgba(63,53,91,.48)!important}
+#groupView #notes>.note.message-group-continued{margin-top:-5px!important;border-top-left-radius:5px!important}
+#groupView #notes>.note.message-group-start{margin-top:7px!important}
+#groupView #notes>.note .note-top{gap:7px!important}
+#groupView #notes>.note .note-body{margin-top:5px!important}
+#groupView #notes>.note .note-tools{margin-top:7px!important}
+#groupView #notes>.note .note-tools button{width:auto!important;min-width:0!important}
+#groupView #noteForm.composer{
+  display:flex!important;align-items:flex-end!important;gap:8px!important;
+  margin:8px 0 0!important;padding:9px 0 0!important;
+  border-top:1px solid var(--border)!important;
+  background:transparent!important;
+}
+#groupView #noteForm #noteInput{
+  flex:1 1 auto!important;min-width:0!important;min-height:42px!important;max-height:130px!important;
+  resize:vertical!important;padding:10px 12px!important;
+  border:1px solid var(--border)!important;border-radius:12px!important;
+  background:var(--surface-2)!important;
+}
+#groupView #noteForm .composer-foot{display:contents!important}
+#groupView #noteForm .composer-foot>span{display:none!important}
+#groupView #noteForm .send-btn{
+  width:40px!important;height:40px!important;min-width:40px!important;flex:0 0 40px!important;
+  margin:0 0 1px!important;padding:0!important;border-radius:11px!important;
+  display:grid!important;place-items:center!important;
+  background:linear-gradient(120deg,#b9a6ff,#9380df)!important;color:#201b32!important;
+  box-shadow:none!important;font-size:0!important;
+}
+#groupView #noteForm .send-btn b{font-size:0!important}
+#groupView #noteForm .send-btn b:after{content:"➤";font-size:17px!important}
+#groupView #noteForm .send-btn:hover{transform:none!important;filter:brightness(1.06)}
+@media(max-width:700px){
+ #groupView #notes>.note{max-width:98%!important;padding:10px!important}
+ #groupView #noteForm #noteInput{min-height:40px!important}
+}
