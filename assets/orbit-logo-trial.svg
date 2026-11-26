@@ -1,15 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 160">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
 <defs>
- <linearGradient id="word" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".58" stop-color="#ded5ff"/><stop offset="1" stop-color="#a98aff"/></linearGradient>
- <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e5d8ff"/><stop offset=".38" stop-color="#a98aff"/><stop offset=".72" stop-color="#7139f5"/><stop offset="1" stop-color="#d8b7ff"/></linearGradient>
- <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <radialGradient id="planet" cx="35%" cy="28%" r="75%"><stop stop-color="#f5eaff"/><stop offset=".35" stop-color="#b9a0ff"/><stop offset=".72" stop-color="#7137d8"/><stop offset="1" stop-color="#27104e"/></radialGradient>
+ <linearGradient id="orbit" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".35" stop-color="#cbb2ff"/><stop offset=".7" stop-color="#8b43ff"/><stop offset="1" stop-color="#f2d7ff"/></linearGradient>
+ <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
 </defs>
-<g transform="translate(12 4)">
- <path d="M15 94 C72 15 286 1 365 36 C401 53 396 89 344 119 C257 167 77 154 33 125" fill="none" stroke="url(#ring)" stroke-width="8" stroke-linecap="round" filter="url(#glow)" opacity=".94"/>
- <path d="M31 118 C89 140 229 131 312 93" fill="none" stroke="#a888ff" stroke-width="2" opacity=".7"/>
- <text x="42" y="68" font-family="Manrope,Arial,sans-serif" font-size="56" font-weight="800" letter-spacing="-2" fill="url(#word)">INDINEXT</text>
- <text x="42" y="121" font-family="Manrope,Arial,sans-serif" font-size="57" font-weight="900" letter-spacing="-3" fill="url(#word)">ORBIT</text>
- <path d="M373 12 l6 16 16 6-16 6-6 16-6-16-16-6 16-6z" fill="#d9c2ff"/>
- <path d="M26 8 l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#a98aff"/>
- <circle cx="333" cy="138" r="4" fill="#d8baff"/><circle cx="63" cy="143" r="3" fill="#b9a0ff"/>
-</g></svg>
+<circle cx="60" cy="60" r="24" fill="url(#planet)"/>
+<ellipse cx="60" cy="60" rx="51" ry="22" transform="rotate(-48 60 60)" fill="none" stroke="url(#orbit)" stroke-width="5.5" filter="url(#glow)"/>
+<path d="M20 91C37 76 75 43 99 25" fill="none" stroke="#e7d4ff" stroke-width="1.6" opacity=".72"/>
+<circle cx="60" cy="60" r="5" fill="#fff" opacity=".75"/>
+</svg>
